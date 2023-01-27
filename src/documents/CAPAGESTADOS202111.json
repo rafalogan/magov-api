@@ -1,0 +1,387 @@
+{
+    "Nova CAPAG": [
+        {
+            "UF": "AC",
+            "CAPAG": "B",
+            "Indicador1": 0.7647,
+            "Indicador2": 0.9139,
+            "Indicador3": 0.1897
+        },
+        {
+            "UF": "AL",
+            "CAPAG": "B",
+            "Indicador1": 1.0607,
+            "Indicador2": 0.8578,
+            "Indicador3": 0.2073
+        },
+        {
+            "UF": "AM",
+            "CAPAG": "B",
+            "Indicador1": 0.4796,
+            "Indicador2": 0.9077,
+            "Indicador3": 0.0356
+        },
+        {
+            "UF": "AP",
+            "CAPAG": "C",
+            "Indicador1": 0.6179,
+            "Indicador2": 0.7853,
+            "Indicador3": 2.0583
+        },
+        {
+            "UF": "BA",
+            "CAPAG": "B",
+            "Indicador1": 0.7555,
+            "Indicador2": 0.9283,
+            "Indicador3": 0.0944
+        },
+        {
+            "UF": "CE",
+            "CAPAG": "B",
+            "Indicador1": 0.8065,
+            "Indicador2": 0.9074,
+            "Indicador3": 0.0597
+        },
+        {
+            "UF": "DF",
+            "CAPAG": "B",
+            "Indicador1": 0.4682,
+            "Indicador2": 0.9398,
+            "Indicador3": 0.5969
+        },
+        {
+            "UF": "ES",
+            "CAPAG": "A",
+            "Indicador1": 0.4725,
+            "Indicador2": 0.8383,
+            "Indicador3": 0.0325
+        },
+        {
+            "UF": "GO",
+            "CAPAG": "C",
+            "Indicador1": 0.8611,
+            "Indicador2": 0.9596,
+            "Indicador3": 2.4873
+        },
+        {
+            "UF": "MA",
+            "CAPAG": "B",
+            "Indicador1": 0.5778,
+            "Indicador2": 0.94,
+            "Indicador3": 0.6737
+        },
+        {
+            "UF": "MG",
+            "CAPAG": "D",
+            "Indicador1": 1.9963,
+            "Indicador2": 1.0104,
+            "Indicador3": 9.8975
+        },
+        {
+            "UF": "MS",
+            "CAPAG": "B",
+            "Indicador1": 0.6647,
+            "Indicador2": 0.8926,
+            "Indicador3": 0.4587
+        },
+        {
+            "UF": "MT",
+            "CAPAG": "A",
+            "Indicador1": 0.328,
+            "Indicador2": 0.869,
+            "Indicador3": 0.206
+        },
+        {
+            "UF": "PA",
+            "CAPAG": "B",
+            "Indicador1": 0.2243,
+            "Indicador2": 0.9029,
+            "Indicador3": 0.2392
+        },
+        {
+            "UF": "PB",
+            "CAPAG": "A",
+            "Indicador1": 0.4206,
+            "Indicador2": 0.8947,
+            "Indicador3": 0.0511
+        },
+        {
+            "UF": "PE",
+            "CAPAG": "B",
+            "Indicador1": 0.632,
+            "Indicador2": 0.942,
+            "Indicador3": 0.86
+        },
+        {
+            "UF": "PI",
+            "CAPAG": "B",
+            "Indicador1": 0.5625,
+            "Indicador2": 0.9122,
+            "Indicador3": 0.5366
+        },
+        {
+            "UF": "PR",
+            "CAPAG": "B",
+            "Indicador1": 0.7259,
+            "Indicador2": 0.923,
+            "Indicador3": 0.1433
+        },
+        {
+            "UF": "RJ",
+            "CAPAG": "D",
+            "Indicador1": 3.2442,
+            "Indicador2": 0.9597,
+            "Indicador3": 6.2506
+        },
+        {
+            "UF": "RN",
+            "CAPAG": "C",
+            "Indicador1": 0.3706,
+            "Indicador2": 0.9593,
+            "Indicador3": 61.801
+        },
+        {
+            "UF": "RO",
+            "CAPAG": "A",
+            "Indicador1": 0.5861,
+            "Indicador2": 0.8452,
+            "Indicador3": 0.0611
+        },
+        {
+            "UF": "RR",
+            "CAPAG": "A",
+            "Indicador1": 0.4298,
+            "Indicador2": 0.8098,
+            "Indicador3": 0.7144
+        },
+        {
+            "UF": "RS",
+            "CAPAG": "D",
+            "Indicador1": 2.2327,
+            "Indicador2": 1.0106,
+            "Indicador3": -5.52
+        },
+        {
+            "UF": "SC",
+            "CAPAG": "B",
+            "Indicador1": 0.8984,
+            "Indicador2": 0.924,
+            "Indicador3": 0.0545
+        },
+        {
+            "UF": "SE",
+            "CAPAG": "B",
+            "Indicador1": 0.5283,
+            "Indicador2": 0.9481,
+            "Indicador3": 0.1593
+        },
+        {
+            "UF": "SP",
+            "CAPAG": "B",
+            "Indicador1": 1.9832,
+            "Indicador2": 0.9252,
+            "Indicador3": 0.4168
+        },
+        {
+            "UF": "TO",
+            "CAPAG": "C",
+            "Indicador1": 0.5926,
+            "Indicador2": 0.946,
+            "Indicador3": 1.5379
+        }
+    ],
+    "Planilha1": [
+        {
+            "UF": "AC",
+            "CAPAG": "B",
+            "Indicador1": 0.7647,
+            "Indicador2": 0.9139,
+            "Indicador3": 0.1897
+        },
+        {
+            "UF": "AL",
+            "CAPAG": "B",
+            "Indicador1": 1.0607,
+            "Indicador2": 0.8578,
+            "Indicador3": 0.2073
+        },
+        {
+            "UF": "AM",
+            "CAPAG": "B",
+            "Indicador1": 0.4796,
+            "Indicador2": 0.9077,
+            "Indicador3": 0.0356
+        },
+        {
+            "UF": "AP",
+            "CAPAG": "C",
+            "Indicador1": 0.6179,
+            "Indicador2": 0.7814,
+            "Indicador3": 2.0583
+        },
+        {
+            "UF": "BA",
+            "CAPAG": "B",
+            "Indicador1": 0.7555,
+            "Indicador2": 0.9283,
+            "Indicador3": 0.0944
+        },
+        {
+            "UF": "CE",
+            "CAPAG": "B",
+            "Indicador1": 0.8065,
+            "Indicador2": 0.9074,
+            "Indicador3": 0.0597
+        },
+        {
+            "UF": "DF",
+            "CAPAG": "B",
+            "Indicador1": 0.4682,
+            "Indicador2": 0.9398,
+            "Indicador3": 0.5969
+        },
+        {
+            "UF": "ES",
+            "CAPAG": "A",
+            "Indicador1": 0.4725,
+            "Indicador2": 0.8383,
+            "Indicador3": 0.0325
+        },
+        {
+            "UF": "GO",
+            "CAPAG": "C",
+            "Indicador1": 0.8611,
+            "Indicador2": 0.9596,
+            "Indicador3": 2.4873
+        },
+        {
+            "UF": "MA",
+            "CAPAG": "B",
+            "Indicador1": 0.5778,
+            "Indicador2": 0.94,
+            "Indicador3": 0.6737
+        },
+        {
+            "UF": "MG",
+            "CAPAG": "D",
+            "Indicador1": 1.9963,
+            "Indicador2": 1.0104,
+            "Indicador3": 9.8975
+        },
+        {
+            "UF": "MS",
+            "CAPAG": "B",
+            "Indicador1": 0.6647,
+            "Indicador2": 0.8926,
+            "Indicador3": 0.4587
+        },
+        {
+            "UF": "MT",
+            "CAPAG": "A",
+            "Indicador1": 0.328,
+            "Indicador2": 0.869,
+            "Indicador3": 0.206
+        },
+        {
+            "UF": "PA",
+            "CAPAG": "B",
+            "Indicador1": 0.2243,
+            "Indicador2": 0.9029,
+            "Indicador3": 0.2392
+        },
+        {
+            "UF": "PB",
+            "CAPAG": "A",
+            "Indicador1": 0.4206,
+            "Indicador2": 0.8947,
+            "Indicador3": 0.0511
+        },
+        {
+            "UF": "PE",
+            "CAPAG": "B",
+            "Indicador1": 0.632,
+            "Indicador2": 0.942,
+            "Indicador3": 0.86
+        },
+        {
+            "UF": "PI",
+            "CAPAG": "B",
+            "Indicador1": 0.5625,
+            "Indicador2": 0.9122,
+            "Indicador3": 0.5366
+        },
+        {
+            "UF": "PR",
+            "CAPAG": "B",
+            "Indicador1": 0.7259,
+            "Indicador2": 0.923,
+            "Indicador3": 0.1433
+        },
+        {
+            "UF": "RJ",
+            "CAPAG": "D",
+            "Indicador1": 3.2442,
+            "Indicador2": 0.9597,
+            "Indicador3": 6.2506
+        },
+        {
+            "UF": "RN",
+            "CAPAG": "C",
+            "Indicador1": 0.3706,
+            "Indicador2": 0.9593,
+            "Indicador3": 61.801
+        },
+        {
+            "UF": "RO",
+            "CAPAG": "A",
+            "Indicador1": 0.5861,
+            "Indicador2": 0.8452,
+            "Indicador3": 0.0611
+        },
+        {
+            "UF": "RR",
+            "CAPAG": "A",
+            "Indicador1": 0.4298,
+            "Indicador2": 0.8098,
+            "Indicador3": 0.7144
+        },
+        {
+            "UF": "RS",
+            "CAPAG": "D",
+            "Indicador1": 2.2327,
+            "Indicador2": 1.0106,
+            "Indicador3": -5.52
+        },
+        {
+            "UF": "SC",
+            "CAPAG": "B",
+            "Indicador1": 0.8984,
+            "Indicador2": 0.924,
+            "Indicador3": 0.0545
+        },
+        {
+            "UF": "SE",
+            "CAPAG": "B",
+            "Indicador1": 0.5283,
+            "Indicador2": 0.9481,
+            "Indicador3": 0.1593
+        },
+        {
+            "UF": "SP",
+            "CAPAG": "B",
+            "Indicador1": 1.9832,
+            "Indicador2": 0.9252,
+            "Indicador3": 0.4168
+        },
+        {
+            "UF": "TO",
+            "CAPAG": "C",
+            "Indicador1": 0.5926,
+            "Indicador2": 0.946,
+            "Indicador3": 1.5379
+        },
+        {
+            "Indicador3": "Posição 18/11/20201"
+        }
+    ]
+}
