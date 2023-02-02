@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: 'mysql'
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: roo@100
+      MYSQL_DATABASE: project_dev_db
+      MYSQL_USER: graphql_user
+      MYSQL_PASSWORD: user@graphql
+    volumes:
+      - './database/mysql:/var/lib/mysql'
+    ports:
+      - 3306:3306
+  redis:
+    image: redis
+    restart: always
+    volumes:
+      - ./database/redis:/usr/local/etc/redis/
+      - ./database/redis/data:/var/lib/postgresql/data
+    ports:
+      - 6379:6379
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 9090:8080
