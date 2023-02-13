@@ -7,9 +7,9 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: roo@100
-      MYSQL_DATABASE: project_dev_db
-      MYSQL_USER: graphql_user
-      MYSQL_PASSWORD: user@graphql
+      MYSQL_DATABASE: magovernance
+#      MYSQL_USER: graphql_user
+#      MYSQL_PASSWORD: user@graphql
     volumes:
       - './database/mysql:/var/lib/mysql'
     ports:
