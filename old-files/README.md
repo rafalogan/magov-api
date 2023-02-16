@@ -5,11 +5,11 @@
 ### 📋 Tabela de Conteúdos
 
 * [Status do Projeto](#Status-do-Projeto)
-	* [Features](#features)
-	* [Pre Requisitos](#pré-requisitos)
-	* [Como usar](#back)
-		* [Rodando o Back end](#Rodando-o-Back-End-(servidor))
-	* [Tecnologias](#🛠-Tecnologias)
+   * [Features](#features)
+   * [Pre Requisitos](#pré-requisitos)
+   * [Como usar](#back)
+      * [Rodando o Back end](#Rodando-o-Back-End-(servidor))
+   * [Tecnologias](#🛠-Tecnologias)
 
 ### ⚒️ Status-do-Projeto
 	🚧  Em construção...  🚧
@@ -39,37 +39,37 @@
 ### ❗ Pré-requisitos
 
 Antes de começar, você vai precisar ter instalado em sua máquina as seguintes ferramentas:
-[Git](https://git-scm.com), [Node.js](https://nodejs.org/en/).
+[Git](https://git-scm.com), [Node.js](https://nodejs.org/en/). 
 Além disto é bom ter um editor para trabalhar com o código como [VSCode](https://code.visualstudio.com/)
 
 
 ### 🚩 Clone este repositório
-$ git clone <https://GuilhermeBraganholo@bitbucket.org/danilomendes/ma-governance-api.git>
+   $ git clone <https://GuilhermeBraganholo@bitbucket.org/danilomendes/ma-governance-api.git>
 
 ### 👉 Configure o .env
-DB_HOST=128.199.5.141<br />
-DB_USER="root"<br />
-DB_PASS="cleanDEV123456!@#"<br />
-DB_NAME="magovernance"<br />
-DB_PORT="3306"<br />
-APP_SECRET="20clean-farm-app20-devops"<br />
-BASE_URL_FRONT="https://treineaqui.cleandev.com.br/" <br />
-EMAIL_USER="cleandev.contato@gmail.com"<br />
-EMAIL_PASS="facilita#2020"<br />
-CRON_TIMER="0 0 6 * * 1-5"<br />
-EMAIL_NOTIFICA="danilocesarmendes@gmail.com; breno14mota@gmail.com"<br />
+   DB_HOST=128.199.5.141<br />
+   DB_USER="root"<br />
+   DB_PASS="cleanDEV123456!@#"<br />
+   DB_NAME="magovernance"<br />
+   DB_PORT="3306"<br />
+   APP_SECRET="20clean-farm-app20-devops"<br />
+   BASE_URL_FRONT="https://treineaqui.cleandev.com.br/" <br />
+   EMAIL_USER="cleandev.contato@gmail.com"<br />
+   EMAIL_PASS="facilita#2020"<br />
+   CRON_TIMER="0 0 6 * * 1-5"<br />
+   EMAIL_NOTIFICA="danilocesarmendes@gmail.com; breno14mota@gmail.com"<br />
 
 <hr />
 
 ### ❗ Instale as dependências
-$ yarn
+   $ yarn
 
 ### 🚩 Execute a aplicação em modo de desenvolvimento
-$ yarn dev
+   $ yarn dev
 
 <hr />
 
-### 🖥️ O servidor inciará na porta:6001 - acesse <http://localhost:6001>
+### 🖥️ O servidor inciará na porta:6001 - acesse <http://localhost:6001> 
 
 <br />
 <hr />
