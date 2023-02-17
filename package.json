@@ -18,7 +18,9 @@
 		"add:patch": "npm version patch && git status && git add --all  &&  git commit -m  \" Add new Patch in Version\" && git push",
 		"add:minor": "npm version minor && git status && git add --all  &&  git commit -m  \" Add new Minor in Version\" && git push",
 		"add:major": "npm version major && git status && git add --all  &&  git commit -m  \" Add new Major in Version\" && git push",
-		"up:tags": "git push --follow-tags"
+		"up:tags": "git push --follow-tags",
+		"deps": "npm i -g typescript knex",
+		"dev": "npm run start:dev"
 	},
 	"keywords": [
 		"API",
