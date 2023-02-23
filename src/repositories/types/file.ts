@@ -17,10 +17,14 @@ export interface IFile extends File, IID {
 	filename: string;
 	type: string;
 	url: string;
-	location: string;
-	eventId?: number;
-	categoryId?: number;
+	location?: string;
 	userId?: number;
+	demandId?: number;
+	expanseId?: number;
+	propositionId?: number;
+	revenueId?: number;
+	plaintiffId?: number;
+	documentId?: number;
 }
 
 export interface FileEntityOptions {

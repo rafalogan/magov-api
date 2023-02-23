@@ -7,14 +7,12 @@ import { TERMINAL_COLORS } from 'src/utils';
 import { HttpsModel } from 'src/repositories/models';
 import { IHttps } from 'src/repositories/types';
 
-const { green, reset } = TERMINAL_COLORS;
-
 export class ServerController {
 	private host = process.env.HOST || 'localhost';
 	private port = Number(process.env.PORT) || 3000;
 	private httpsEnable = process.env.ENABLE_HTTPS?.toLowerCase() === 'true';
 
-	constructor(private express: Application) {}
+	constructor(private express: Application) { }
 
 	exec() {
 		return this.httpsEnable ? this.createHttpsServer() : this.createHttpServer();
@@ -44,7 +42,7 @@ export class ServerController {
 	private onServerUp() {
 		const prefix = this.httpsEnable ? 'https' : 'http';
 
-		return onHttp('Server is up and running on:', `${green}${prefix}://${this.host}:${this.port}${reset}`);
+		return onHttp('Server is up and running on:', `${TERMINAL_COLORS.green}${prefix}://${this.host}:${this.port}${TERMINAL_COLORS.reset}`);
 	}
 
 	private onServerError(error: NodeJS.ErrnoException) {

@@ -13,6 +13,7 @@ import { ErrorResponseParams } from 'src/repositories/types';
 const isValid = !process.env.NODE_ENV || process.env.NODE_ENV !== 'production';
 
 export const execDotenv = () => (isValid ? dotenv.config({ path: process.env.NODE_ENV === 'test' ? './.env.testing' : './.env' }) : null);
+
 export const createUploadsDir = () => {
 	const path = resolve(__dirname, '..', '..', 'tmp', 'uploads');
 	const exists = existsSync(path);

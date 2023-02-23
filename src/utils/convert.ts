@@ -22,18 +22,19 @@ export const camelToSnake = (field: string): string => {
 		.toLowerCase();
 };
 
-export const convertDataValues = (data: any) => {
+export const convertDataValues = (data: any, to?: string) => {
 	const keys = Object.keys(data);
-	const values = Object.values(data);
-	const convertKeysToSnake = keys.map(camelToSnake);
-	const result: any = {};
+	const keysCamel = to === 'camel' ? keys.map(snakeToCamel) : keys.map(camelToSnake);
+	const res: any = {};
 
-	convertKeysToSnake.forEach((key, i) => (result[key] = values[i]));
+	keysCamel.forEach((key, i) => (res[key] = data[key[i]]));
 
-	return result;
+	return res;
 };
 
-export const hashString = (field: string, salt: number) => bcrypt.hashSync(field, salt);
+export const convertBlobToString = (value: Blob | string): string => (typeof value === 'string' ? value : value.toString());
+
+export const hashString = (field: string, salt = Number(process.env.SALT_ROUNDS)) => bcrypt.hashSync(field, salt);
 
 export const stringify = (...data: any[]) => data.map(item => item.toString()).join(' ');
 export const stringifyObject = (data: any) => JSON.stringify(data);

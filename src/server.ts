@@ -1,7 +1,7 @@
-import { CacheConfig, DatabaseConfig, KnexConfig, LoggerConfig, MailerConfig, MulterConfig, AppConfig, AuthConfig } from './config';
-import { createUploadsDir, execDotenv } from './utils';
-import { ServicesFactory } from './factories';
-import { AppModule } from './core/app.module';
+import { CacheConfig, DatabaseConfig, KnexConfig, LoggerConfig, MailerConfig, MulterConfig, AppConfig, AuthConfig } from 'src/config';
+import { createUploadsDir, execDotenv } from 'src/utils';
+import { ServicesFactory } from 'src/factories';
+import { AppModule } from 'src/core/app.module';
 
 execDotenv();
 createUploadsDir();

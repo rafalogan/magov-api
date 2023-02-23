@@ -1,8 +1,8 @@
-import { Credentials, UserModel } from 'src/repositories/models';
-import { Profile, User } from '../entities';
-import { IProfile } from 'src/repositories/types/profile';
+import { Credentials, UserModel, UserViewModel } from 'src/repositories/models';
+import { User } from 'src/repositories/entities';
 import { RouteOptions } from 'src/repositories/types/route';
-import { AuthService } from 'src/services';
+// import { AuthService } from 'src/services';
+import { IUserRule, IUserUnit } from './user';
 
 export interface ICredentials {
 	email: string;
@@ -11,7 +11,7 @@ export interface ICredentials {
 
 export interface IsMachValidateOptions {
 	credentials: Credentials;
-	user: User | UserModel;
+	user: User | UserViewModel;
 	message: string;
 }
 
@@ -24,11 +24,13 @@ export interface IPayload {
 	firstName: string;
 	lastName: string;
 	email: string;
-	profile: IProfile | Profile;
+	userRules: IUserRule[];
+	tenancyId?: number;
+	unit: IUserUnit;
 	iat: number;
 	exp: number;
 }
 
-export interface AuthModuleOptions extends RouteOptions {
-	service: AuthService;
-}
+// export interface AuthModuleOptions extends RouteOptions {
+// 	service: AuthService;
+// }

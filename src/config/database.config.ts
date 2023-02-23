@@ -4,8 +4,6 @@ import { KnexConfig } from 'src/config';
 import { onError, onInfo } from 'src/core/handlers';
 import { TERMINAL_COLORS } from 'src/utils';
 
-const { greenBg, black, reset, red, cyan } = TERMINAL_COLORS;
-
 export class DatabaseConfig {
 	private readonly _connection: Knex;
 
@@ -20,7 +18,12 @@ export class DatabaseConfig {
 	async isConnected() {
 		return this.connection
 			.raw('SELECT 1+1 AS result')
-			.then(result => onInfo(`${greenBg + black}SUCCESS:${reset} Database is Connected Active: ${result ? cyan : red}${!!result}${reset}`))
+			.then(result =>
+				onInfo(
+					`${TERMINAL_COLORS.greenBg + TERMINAL_COLORS.black}SUCCESS:${TERMINAL_COLORS.reset} Database is Connected Active: ${result ? TERMINAL_COLORS.cyan : TERMINAL_COLORS.red
+					}${!!result}${TERMINAL_COLORS.reset}`
+				)
+			)
 			.catch((err: Error) => onError('FAIL Database is not Connected', err));
 	}
 
