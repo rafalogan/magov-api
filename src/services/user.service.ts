@@ -1,7 +1,7 @@
 import { type } from 'os';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { ReadOptionsModel, UserModel, UserViewModel } from 'src/repositories/models';
-import { IServiceOptions, ITenacy, IUser, IUserViewModel } from 'src/repositories/types';
+import { IAddress, IServiceOptions, ITenacy, IUser, IUserViewModel } from 'src/repositories/types';
 import { convertDataValues, deleteField } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 
@@ -13,7 +13,7 @@ export class UserService extends DatabaseService {
 	async create(data: UserModel): Promise<any> {
 		try {
 			const tenancyId = data.planId ? await this.createTenancy(data.planId) : data.tenancyId;
-			const [userId] = await this.db('users').insert({ ...new User({ ...data, tenancyId } as IUser) });
+			const [userId] = await this.db('users').insert(convertDataValues({ ...new User({ ...data, tenancyId } as IUser) }));
 
 			if (data.userRules?.length) await this.saveUserRules(data.userRules, userId);
 			if (data.image) await this.setUserImage(data.image, userId);
@@ -34,9 +34,9 @@ export class UserService extends DatabaseService {
 			if (userFromDb) {
 				if (data.userRules) await this.userRulesUpdate(data.userRules, id);
 				if (data.image) await this.setUserImage(data.image, id);
+				if (data.address) await this.saveAddress(data.address, id);
 
-				const user = new User(data as IUser);
-				deleteField(user, 'password');
+				const user = new User({ ...userFromDb, ...data } as IUser);
 
 				await this.db('users')
 					.where({ id })
@@ -114,12 +114,21 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async saveAddress(data: Address, userId: number) {
-		return this.db('adresses')
-			.insert({ ...convertDataValues({ ...data, userId }) })
-			.first()
-			.then((res: any) => res)
-			.catch((err: any) => err);
+	private async saveAddress(address: Address, userId: number) {
+		try {
+			const fromDb = (await this.db('adresses').where({ user_id: userId }).first()) as IAddress;
+
+			if (fromDb) {
+				const data = new Address({ ...fromDb, ...address } as IAddress);
+				await this.db('adresses').where({ user_id: userId }).update(convertDataValues(data));
+				return data;
+			}
+
+			await this.db('adresses').insert(convertDataValues({ address, userId }));
+			return address;
+		} catch (err) {
+			return err;
+		}
 	}
 
 	private async saveUserRules(data: number[], userId: number) {

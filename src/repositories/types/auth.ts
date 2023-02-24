@@ -1,8 +1,10 @@
+import { Multer } from 'multer';
+
 import { Credentials, UserModel, UserViewModel } from 'src/repositories/models';
 import { User } from 'src/repositories/entities';
 import { RouteOptions } from 'src/repositories/types/route';
-// import { AuthService } from 'src/services';
 import { IUserRule, IUserUnit } from './user';
+import { ModuleOptions } from './module';
 
 export interface ICredentials {
 	email: string;
@@ -31,6 +33,6 @@ export interface IPayload {
 	exp: number;
 }
 
-// export interface AuthModuleOptions extends RouteOptions {
-// 	service: AuthService;
-// }
+export interface AuthModuleOptions<T> extends ModuleOptions<T> {
+	upload: Multer;
+}

@@ -40,3 +40,9 @@ export interface IUserViewModel extends IUser {
 	unit: IUserUnit;
 	image?: IFile;
 }
+
+export interface IUserRecovery {
+	email: string;
+	password: string;
+	confirmPassword: string;
+}

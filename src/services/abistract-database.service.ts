@@ -7,13 +7,11 @@ import { CacheService } from './abistract-cache.service';
 
 export abstract class DatabaseService extends CacheService {
 	protected db: Knex;
-	protected fields: string[];
 
 	constructor(options: IServiceOptions) {
 		super(options.cacheClient);
 
 		this.db = options.conn;
-		this.fields = options.fields;
 	}
 
 	save(data: any) {

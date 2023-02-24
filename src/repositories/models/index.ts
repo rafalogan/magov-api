@@ -6,3 +6,4 @@ export * from './user.model';
 export * from './user-view.model';
 export * from './payload.model';
 export * from './credentials.model';
+export * from './recovery.model';

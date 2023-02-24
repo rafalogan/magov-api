@@ -21,7 +21,7 @@ export interface IHttps {
 export interface IServiceOptions {
 	conn: Knex;
 	cacheClient: RedisClientType;
-	fields: string[];
+	fields?: string[];
 }
 
 export interface IPaginationOptions {
@@ -40,4 +40,9 @@ export interface IPagination extends IPaginationOptions {
 	page: number;
 	limit: number;
 	total: number;
+}
+
+export interface INotificationOption {
+	field: any;
+	message: string;
 }

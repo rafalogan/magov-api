@@ -3,8 +3,9 @@ import bcrypt from 'bcrypt';
 
 import { DatabaseException, PaymentException, ResponseException } from 'src/utils/exceptions';
 import { Credentials, UserModel } from 'src/repositories/models';
-import { IsMachValidateOptions } from 'src/repositories/types';
+import { INotificationOption, IsMachValidateOptions } from 'src/repositories/types';
 import { User } from 'src/repositories/entities';
+import { NotificationContext } from 'src/core/handlers/notification-context.handle';
 
 export const storage = process.env.STORAGE_TYPE;
 export const baseUrl = () => {
@@ -52,4 +53,27 @@ export const saleVerify = (data: any): void | DatabaseException => {
 	if (data instanceof DatabaseException) throw data;
 	if (data instanceof ResponseException) throw data;
 	if (data instanceof PaymentException) throw data;
+};
+
+export const requiredFields = (options: INotificationOption[]) => {
+	const context = new NotificationContext();
+
+	options.forEach(option => {
+		const message = existsOrNotficate(option);
+		if (message) return context.addNotification(message);
+	});
+
+	if (context.hasNotifications()) return context.notifications;
+};
+
+const existsOrNotficate = (option: INotificationOption) => {
+	const { field: value, message } = option;
+
+	if (isEmpty(value)) return message;
+	if (!value) return message;
+	if (Array.isArray(value) && value.length === 0) return message;
+	if (typeof value === 'string' && !value.trim()) return message;
+	if (typeof value === 'number' && !Number(value)) return message;
+
+	return undefined;
 };

@@ -1,14 +1,19 @@
 import jwt from 'jwt-simple';
+import { Request } from 'express';
+import httpStatus from 'http-status';
 
-import { Credentials, Payload, UserViewModel } from 'src/repositories/models';
-import { ICredentials } from 'src/repositories/types';
-import { existsOrError, isMatch } from 'src/utils';
+import { decodeToken, extractToken, getPayload, onLog } from 'src/core/handlers';
+
+import { Credentials, Payload, RecoveryModel, UserModel, UserViewModel } from 'src/repositories/models';
+import { ICredentials, IUserModel, SendEmailOptions } from 'src/repositories/types';
+import { existsOrError, isMatch, isRequired, requiredFields } from 'src/utils';
 import { UserService } from './user.service';
+import { MailService } from './mail.service';
 
 export class AuthService {
-	private authSicret = process.env.AUTHSECRET;
+	private authsecret = process.env.AUTHSECRET as string;
 
-	constructor(private userService: UserService) {}
+	constructor(private userService: UserService, private mailsService: MailService) {}
 
 	validateCredentials(credentials: ICredentials) {
 		try {
@@ -19,8 +24,27 @@ export class AuthService {
 		}
 	}
 
-	setCredentials(credentials: ICredentials) {
-		return new Credentials(credentials);
+	validateSignupData(data: IUserModel) {
+		const requiredEmpty = requiredFields([
+			{ field: data.firstName, message: isRequired('Fist Name') },
+			{ field: data.lastName, message: isRequired('last Name') },
+			{ field: data.email, message: isRequired('E-mail') },
+			{ field: data.password, message: isRequired('Password') },
+			{ field: data.confirmPassword, message: isRequired('Confirm Password') },
+			{ field: data.cpf, message: isRequired('CPF') },
+			{ field: data.phone, message: isRequired('Phone') },
+			{ field: data.office, message: isRequired('Office') },
+			{ field: data.level, message: isRequired('Level') },
+			{ field: data.tenancyId, message: '' },
+			{ field: data.address.cep, message: isRequired('CEP') },
+			{ field: data.address.street, message: isRequired('Street') },
+			{ field: data.address.district, message: isRequired('District') },
+			{ field: data.address.city, message: isRequired('City') },
+			{ field: data.address.uf, message: isRequired('Uf') },
+			{ field: data.planId, message: isRequired('Plan') },
+		]);
+
+		if (requiredEmpty?.length !== 0) throw requiredEmpty?.join('\n');
 	}
 
 	async verifyCredentials(credentials: Credentials) {
@@ -34,51 +58,67 @@ export class AuthService {
 		}
 	}
 
-	async signupOnApp(user: IUser, profile?: string) {
+	async signupOnApp(user: UserModel) {
 		try {
-			const profileToId = await this.profileService.findProfileByName(profile?.toLowerCase() || 'cliente');
+			existsOrError(user.planId, 'Plan not found!');
 
-			onLog('perfil', profileToId);
-			existsOrError(profileToId, messages.profile.error.notFound(profile?.toLowerCase() || 'cliente'));
-			await this.userService.validateNewUser(user);
-
-			user.profileId = profileToId.id;
+			onLog('User to save:', user);
+			return this.userService.save(user);
 		} catch (err) {
 			return err;
 		}
-
-		const userToSave = this.userService.set(user);
-		onLog('User to save:', user);
-
-		return this.userService
-			.save(userToSave)
-			.then(result => result)
-			.catch(err => err);
 	}
 
 	getPayload(req: Request) {
 		return getPayload(req);
 	}
 
-	async tokenIsValid(req: Request): Promise<ValidateTokenResponse> {
+	async tokenIsValid(req: Request) {
 		const token = this.extractToken(req);
 		const payload = token ? this.decodeToken(token) : undefined;
 		const valid = payload?.exp ? new Date(payload.exp * 1000) > new Date() : false;
 		const status = valid ? httpStatus.OK : httpStatus.UNAUTHORIZED;
 
-		existsOrError(token, messages.auth.error.notFoundToken);
-		existsOrError(payload, messages.auth.error.notFoundPayload);
+		existsOrError(token, 'Token not found!');
+		existsOrError(payload, 'Payload not found!');
 
-		return valid
-			? { valid, status, message: messages.auth.success.tokenIsValid, token }
-			: { valid, status, message: messages.auth.error.tokenNoValid, token };
+		return valid ? { valid, status, message: 'Token valid to use.', token } : { valid, status, message: 'Invalid token!', token };
 	}
 
-	private extractToken(req: Request) {
-		return extractToken(req);
+	async verifyEmailUser(email: string, options: SendEmailOptions) {
+		try {
+			const user = (await this.userService.getUser(email)) as UserViewModel;
+
+			if (user) return this.mailsService.send({ ...options, to: user.email });
+
+			throw { status: httpStatus.NOT_FOUND, messsage: 'Email not found!' };
+		} catch (err) {
+			return err;
+		}
 	}
 
-	private decodeToken(token: string): Payload {
-		return decodeToken(token);
+	async recoveryPassword(data: RecoveryModel) {
+		try {
+			const user = (await this.userService.getUser(data.email)) as UserViewModel;
+
+			if (user) {
+				const toSave = new UserModel({
+					...user,
+					confirmPassword: data.confirmPassword,
+					password: data.password,
+					userRules: user.userRules.map(r => Number(r.id)),
+				} as IUserModel);
+
+				return this.userService.update(toSave, user.id);
+			}
+
+			throw { status: httpStatus.NOT_FOUND, message: 'User not found.' };
+		} catch (err) {
+			return err;
+		}
 	}
+
+	private extractToken = (req: Request) => extractToken(req);
+
+	private decodeToken = (token: string): Payload => decodeToken(token);
 }

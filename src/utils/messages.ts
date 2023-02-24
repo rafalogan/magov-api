@@ -1,8 +1,7 @@
-import { Contact, User } from 'src/repositories/entities';
 import { upperCaseFirstLetter } from 'src/utils/convert-date';
 
 const alreadyExists = 'já existe';
-const requires = (field: string) => `${field} é um campo obrigatório.`;
+export const isRequired = (field: string) => `${field} is required field.`;
 const noSave = `Não foi possivel criar novo registro.`;
 const noEdit = `Não foi possivel editar registro.`;
 const noRead = `Não foi possivel encontar registro(s).`;
@@ -20,11 +19,6 @@ const canceledSaleSuccess = `Venda cancelada com sucesso!`;
 
 const user = {
 	alreadyExists: (email: string) => `${upperCaseFirstLetter(alreadyExists)} usuário resistrado com eses e-mail: ${email}`,
-	success: {
-		save: (user: User) => `Usuário ${user.email} salvo com sucesso`,
-		update: (user: User) => `Usuário ${user.email} atualizado com sucesso`,
-		cancel: (user: User) => `Usuário ${user.email} cancelado com sucesso`,
-	},
 
 	error: {
 		notFoundById: (id: number) => `Usuário nº:${id} não encontrado!`,
@@ -91,7 +85,6 @@ export const messages = {
 	successSave,
 	successEdit,
 	successDel,
-	requires,
 	user,
 	profile,
 	auth,

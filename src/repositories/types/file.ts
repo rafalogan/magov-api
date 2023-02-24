@@ -12,7 +12,7 @@ export interface IAWS {
 
 export interface IFile extends File, IID {
 	title?: string;
-	alt?: string;
+	alt?: string | Blob;
 	name: string;
 	filename: string;
 	type: string;
