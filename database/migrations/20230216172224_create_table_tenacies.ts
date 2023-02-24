@@ -1,8 +1,7 @@
 import { Knex } from 'knex';
-import TableBuilder = Knex.TableBuilder;
 
 export async function up(knex: Knex): Promise<void> {
-	return knex.schema.createTable('tenancies', (table: TableBuilder) => {
+	return knex.schema.createTable('tenancies', (table: Knex.TableBuilder) => {
 		table.increments('id').primary();
 		table.string('tenancy_key', 100).nullable();
 		table.integer('total_users').nullable();

@@ -6,9 +6,9 @@
 	"scripts": {
 		"start": "npx pm2-runtime start ecosystem.config.yml",
 		"start:dev": "npx tsx watch index.ts",
-		"start:db": "docker-compose down && docker-compose up",
+		"start:dev:db": "docker-compose down && docker-compose up",
 		"stop": "npx pm2 kill",
-		"stop:db": "docker-compose down",
+		"stop:dev:db": "docker-compose down",
 		"build": "rm -rf ./dist && npx tsc",
 		"test": "npx vitest --config vite.config.ts",
 		"test:cov": "npx vitest --coverage --config vite.config.ts",

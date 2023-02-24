@@ -107,7 +107,7 @@ export class UserService extends DatabaseService {
 			const tenacy = new Tenancy({ totalUsers: 1, active: true } as ITenacy);
 			const [tenancyId] = await this.db('tenancies').insert({ ...tenacy });
 
-			await this.db('tenacies_plans').insert({ plan_id: planId, tenacy_id: tenancyId });
+			await this.db('tenancies_plans').insert({ plan_id: planId, tenacy_id: tenancyId });
 			return tenancyId;
 		} catch (err) {
 			return err;

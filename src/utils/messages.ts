@@ -65,17 +65,6 @@ const auth = {
 	},
 };
 
-const mailTemplate = (data: Contact) => `
-<div>
-	<p>
-		<strong>E-mail de:</strong> ${data.email} <strong>Telefone:</strong> ${data.phone || ''}<br />
-		<strong>Assunto:</strong> ${data.subject}
-	</p>
-</div>
-<div>
-	${data.message}
-</div>`;
-
 export const messages = {
 	alreadyExists,
 	noSave,
@@ -94,5 +83,4 @@ export const messages = {
 	ticketSoldOut,
 	saleNoCancel,
 	canceledSaleSuccess,
-	mailTemplate,
 };
