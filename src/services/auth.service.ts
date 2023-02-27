@@ -35,7 +35,6 @@ export class AuthService {
 			{ field: data.phone, message: isRequired('Phone') },
 			{ field: data.office, message: isRequired('Office') },
 			{ field: data.level, message: isRequired('Level') },
-			{ field: data.tenancyId, message: '' },
 			{ field: data.address.cep, message: isRequired('CEP') },
 			{ field: data.address.street, message: isRequired('Street') },
 			{ field: data.address.district, message: isRequired('District') },
