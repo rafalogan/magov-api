@@ -89,8 +89,13 @@ export class AuthService {
 	async verifyEmailUser(email: string, options: SendEmailOptions) {
 		try {
 			const user = (await this.userService.getUser(email)) as UserViewModel;
+			onLog('user', user);
 
-			if (user) return this.mailsService.send({ ...options, to: user.email });
+			if (user?.email) {
+				await this.mailsService.send({ ...options, to: user.email });
+
+				return { status: httpStatus.OK, message: 'E-mail send to user with success' };
+			}
 
 			throw { status: httpStatus.NOT_FOUND, messsage: 'Email not found!' };
 		} catch (err) {

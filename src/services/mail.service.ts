@@ -8,8 +8,10 @@ import { ResponseException } from 'src/utils';
 export class MailService {
 	constructor(private config: MailerConfig) {}
 
-	send(options: SendEmailOptions) {
+	async send(options: SendEmailOptions) {
 		const from = (options.to !== process.env.EMAIL_DEFAULT ? options.from : 'no-replay@my-ticket.com') as string;
+
+		if (process.env.NODE_ENV?.toLowerCase().includes('dev')) options.to = process.env.MAIL_TO_REDIRECT || options.to;
 
 		const mailOptions = {
 			from,

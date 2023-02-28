@@ -17,11 +17,11 @@ export const baseUrl = () => {
 };
 
 export const existsOrError = (value: any, message: string): void | ResponseException => {
-	if (isEmpty(value)) throw new ResponseException(message);
-	if (!value) throw new ResponseException(message);
-	if (Array.isArray(value) && value.length === 0) throw new ResponseException(message);
-	if (typeof value === 'string' && !value.trim()) throw new ResponseException(message);
-	if (typeof value === 'number' && !Number(value)) throw new ResponseException(message);
+	if (isEmpty(value)) throw message;
+	if (!value) throw message;
+	if (Array.isArray(value) && value.length === 0) throw message;
+	if (typeof value === 'string' && !value.trim()) throw message;
+	if (typeof value === 'number' && !Number(value)) throw message;
 	if (value instanceof ResponseException || value instanceof DatabaseException) throw value;
 };
 
@@ -32,15 +32,15 @@ export const notExistisOrError = (value: any, message: string) => {
 		return;
 	}
 
-	throw new ResponseException(message);
+	throw message;
 };
 
 export const equalsOrError = (valueA: any, valueB: any, message: string) => {
-	if (valueA !== valueB) throw new ResponseException(message);
+	if (valueA !== valueB) throw message;
 };
 
 export const isMatchOrError = (data: IsMachValidateOptions) => {
-	if (!isMatch(data.credentials, data.user)) throw new ResponseException(data.message);
+	if (!isMatch(data.credentials, data.user)) throw data.message;
 };
 
 export const isMatch = (credentials: Credentials, user: UserViewModel | User) => bcrypt.compareSync(credentials.password, user.password);

@@ -84,7 +84,7 @@ export class AuthController {
 
 		this.authService
 			.verifyEmailUser(email, { subject, message })
-			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
 	}
 
