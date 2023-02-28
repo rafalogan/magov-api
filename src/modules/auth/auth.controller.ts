@@ -1,19 +1,7 @@
-import httpStatus, { BAD_GATEWAY, BAD_REQUEST } from 'http-status';
+import httpStatus, { BAD_REQUEST } from 'http-status';
 import { Request, Response } from 'express';
 
-import {
-	baseUrl,
-	equalsOrError,
-	existsOrError,
-	isRequired,
-	notExistisOrError,
-	requiredFields,
-	responseApi,
-	responseApiError,
-	ResponseException,
-	setAddress,
-	setReadOptions,
-} from 'src/utils';
+import { baseUrl, equalsOrError, isRequired, notExistisOrError, requiredFields, setAddress } from 'src/utils';
 import { AuthService } from 'src/services';
 import { onLog, ResponseHandle } from 'src/core/handlers';
 import { Credentials, RecoveryModel, UserModel } from 'src/repositories/models';
