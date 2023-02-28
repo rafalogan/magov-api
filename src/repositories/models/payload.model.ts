@@ -7,7 +7,7 @@ export class Payload {
 	lastName: string;
 	email: string;
 	userRules: IUserRule[];
-	tenancyId?: number;
+	tenancyId?: number | null;
 	unit: IUserUnit;
 	iat: number;
 	exp: number;
@@ -18,7 +18,7 @@ export class Payload {
 		this.lastName = data.lastName;
 		this.email = data.email;
 		this.userRules = data.userRules;
-		this.tenancyId = data.tenancyId;
+		this.tenancyId = data.tenancyId || null;
 		this.unit = data.unit;
 		this.iat = 'iat' in data ? data.iat : this.now();
 		this.exp = 'exp' in data ? data.exp : this.expires();

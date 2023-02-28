@@ -2,7 +2,7 @@ import isEmpty from 'is-empty';
 import bcrypt from 'bcrypt';
 
 import { DatabaseException, PaymentException, ResponseException } from 'src/utils/exceptions';
-import { Credentials, UserModel } from 'src/repositories/models';
+import { Credentials, UserModel, UserViewModel } from 'src/repositories/models';
 import { INotificationOption, IsMachValidateOptions } from 'src/repositories/types';
 import { User } from 'src/repositories/entities';
 import { NotificationContext } from 'src/core/handlers/notification-context.handle';
@@ -43,7 +43,7 @@ export const isMatchOrError = (data: IsMachValidateOptions) => {
 	if (!isMatch(data.credentials, data.user)) throw new ResponseException(data.message);
 };
 
-export const isMatch = (credentials: Credentials, user: UserModel | User) => bcrypt.compareSync(credentials.password, user.password);
+export const isMatch = (credentials: Credentials, user: UserViewModel | User) => bcrypt.compareSync(credentials.password, user.password);
 
 export const verifyData = (data: any) => {
 	if (data instanceof DatabaseException || data instanceof ResponseException) throw data;

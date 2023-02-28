@@ -22,6 +22,7 @@ export class UserViewModel {
 		this.id = Number(data.id);
 		this.firstName = data.firstName;
 		this.lastName = data.lastName;
+		this.email = data.email;
 		this.password = data.password;
 		this.cpf = data.cpf;
 		this.phone = data.phone;

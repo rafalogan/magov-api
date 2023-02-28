@@ -13,7 +13,7 @@ import { MailService } from './mail.service';
 export class AuthService {
 	private authsecret = process.env.AUTHSECRET as string;
 
-	constructor(private userService: UserService, private mailsService: MailService) {}
+	constructor(private userService: UserService, private mailsService: MailService) { }
 
 	validateCredentials(credentials: ICredentials) {
 		try {
@@ -50,9 +50,11 @@ export class AuthService {
 		const userFromDb = (await this.userService.getUser(credentials.email)) as UserViewModel;
 
 		existsOrError(userFromDb, 'User not found');
+		onLog('user from DB', userFromDb);
 
 		if (isMatch(credentials, userFromDb)) {
 			const payload = new Payload(userFromDb);
+			onLog('payload', payload);
 			return { ...payload, token: jwt.encode(payload, this.authsecret) };
 		}
 	}

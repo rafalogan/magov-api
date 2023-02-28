@@ -1,3 +1,4 @@
+import { onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { ReadOptionsModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { IAddress, IServiceOptions, ITenacy, IUser, IUserViewModel } from 'src/repositories/types';
@@ -62,22 +63,30 @@ export class UserService extends DatabaseService {
 		try {
 			const user =
 				typeof filter === 'number'
-					? convertDataValues(await this.db('user').where({ id: filter }).first(), 'camel')
-					: convertDataValues(await this.db('user').where({ email: filter }).first(), 'camel');
+					? convertDataValues(await this.db('users').where({ id: filter }).first(), 'camel')
+					: convertDataValues(await this.db('users').where({ email: filter }).first(), 'camel');
+
+			onLog('user', user);
 
 			if (!user) return {};
 
 			const { id } = user;
-			const unit = await this.db('units').select('id', 'name').where({ id: user.unitId }).first();
-			const rulesIds = await this.db('users_rules').select('rule_id as ruleId').where({ user_id: id });
+			const unit = user.unitId ? await this.db('units').select('id', 'name').where({ id: user.unitId }).first() : {};
+			onLog('unit', unit);
+			const rulesIds = (await this.db('users_rules').select('rule_id as ruleId').where({ user_id: id })) || [];
+			onLog('rules ids', rulesIds);
 			const rules = rulesIds?.length ? rulesIds.map(id => this.db('rules').select('id', 'name').where({ id }).first()) : [];
-			const address = convertDataValues(await this.db('adresses').where({ user_id: id }).first(), 'camel');
+			onLog('rules', rules);
+			const address = convertDataValues(await this.db('adresses').where({ user_id: id }).first(), 'camel') || {};
+			onLog('address', address);
 			const image = convertDataValues(await this.db('files').where({ user_id: id }).first(), 'camel');
+			onLog('image', image);
 
 			deleteField(user, 'unitId');
-			deleteField(user, 'password');
+			const userToView = new UserViewModel({ ...user, unit, rules, address, image } as IUserViewModel);
 
-			return new UserViewModel({ ...user, unit, rules, address, image } as IUserViewModel);
+			onLog('response', userToView);
+			return userToView;
 		} catch (err) {
 			return err;
 		}

@@ -1,8 +1,7 @@
 import bcrypt from 'bcrypt';
 import { Request } from 'express';
 import { CustomFile } from 'src/repositories/types';
-import { baseUrl, storage } from 'src/utils/validate';
-import { onLog } from 'src/core/handlers';
+import { baseUrl } from 'src/utils/validate';
 
 export const snakeToCamel = (field: string): string => {
 	let toArray = field.split('_');
@@ -23,11 +22,12 @@ export const camelToSnake = (field: string): string => {
 };
 
 export const convertDataValues = (data: any, to?: string) => {
+	if (!data) return;
 	const keys = Object.keys(data);
 	const keysCamel = to === 'camel' ? keys.map(snakeToCamel) : keys.map(camelToSnake);
 	const res: any = {};
 
-	keysCamel.forEach((key, i) => (res[key] = data[key[i]]));
+	keysCamel.forEach((key, i) => (res[key] = data[keys[i]]));
 
 	return res;
 };
