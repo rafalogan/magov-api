@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 
 import {
 	baseUrl,
+	equalsOrError,
 	existsOrError,
 	isRequired,
 	notExistisOrError,
@@ -99,6 +100,7 @@ export class AuthController {
 			]);
 
 			notExistisOrError(requireds, requireds?.join('\n') as string);
+			equalsOrError(password, confirmPassword, 'Confirm Password shuld be equal to password.');
 		} catch (message: any) {
 			return ResponseHandle.onError({ res, message, status: BAD_REQUEST });
 		}
@@ -107,7 +109,7 @@ export class AuthController {
 
 		this.authService
 			.recoveryPassword(data)
-			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
 	}
 

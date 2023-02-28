@@ -107,7 +107,7 @@ export class AuthService {
 		try {
 			const user = (await this.userService.getUser(data.email)) as UserViewModel;
 
-			if (user) {
+			if (user?.email) {
 				const toSave = new UserModel({
 					...user,
 					confirmPassword: data.confirmPassword,
