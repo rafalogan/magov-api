@@ -86,79 +86,12 @@ const setUrlToFile = (req: Request, file: CustomFile): string => {
 	return process.env.STORAGE_TYPE === 's3' ? file.location : `${baseUrl()}/media/${req.file?.filename}`;
 };
 
-export const filterCategoryModelInterface = (value: any): ICategoryModel => ({
-	id: Number(value.id),
-	name: value.name,
-	description: value.description,
-	url: value.url,
-	active: value.active,
-	parentId: Number(value.parentId || value.parentid) || undefined,
-	userId: Number(value.userId || value.userid) || undefined,
-});
+export const setAddress = (req: Request) => {
+	if (req.body.address) return req.body;
+	const { cep, street, number, complement, district, city, uf } = req.body;
 
-export const filterUpdatePasswordOptions = (value: any): UpdatePasswordOptions => ({
-	email: value.email,
-	oldPassword: value.oldPassword,
-	password: value.password,
-	confirmPassword: value.confirmPassword,
-});
-
-export const setCard = (data: IPayment | Payment): IPayCard => ({
-	numero: data.numero,
-	expiracao: data.expiracao,
-	codigoSeguranca: data.codigoSeguranca,
-	portador: setPortador(data),
-});
-
-export const filterEventToList = (item: EventRaw): IEvent => ({
-	id: item.id,
-	title: item.title,
-	subtitle: item.subtitle || undefined,
-	content: item.content.toString(),
-	popularity: item.popularity,
-	releaseDate: item.releasedate,
-	voteAverage: item.voteaverage,
-	voteCount: item.votecount,
-	type: item.type,
-	categoryId: item.categoryid,
-	userId: item.userid || undefined,
-	files: {
-		poster: setFileEvent(item),
-	},
-});
-
-export const filterEventComplete = (items: EventRaw[]) => ({
-	id: items[0].id,
-	title: items[0].title,
-	subtitle: items[0].subtitle || undefined,
-	content: items[0].content.toString(),
-	popularity: items[0].popularity,
-	releaseDate: items[0].releasedate,
-	voteAverage: items[0].voteaverage,
-	voteCount: items[0].votecount,
-	type: items[0].type,
-	files: setFilesToEvent(items),
-	categoryId: items[0].categoryid,
-	userId: items[0].userid || undefined,
-});
-
-const setFilesToEvent = (items: EventRaw[]): EventFiles => ({
-	poster: setFileEvent(items.find(item => item.filelocation === 'poster') as EventRaw),
-	cover: setFileEvent(items.find(item => item.filelocation === 'cover') as EventRaw),
-	videos: items.filter(item => item.filetype.includes('video')).map(setFileEvent),
-	gallery: items.filter(i => i.filetype.includes('image')).map(setFileEvent),
-});
-
-const setFileEvent = (item: EventRaw) => ({
-	title: item.filetitle,
-	alt: item.filealt ? item.filealt.toString() : undefined,
-	name: item.filename,
-	type: item.filetype,
-	url: item.fileulr,
-	location: item.filelocation,
-});
-
-const setPortador = (data: IPayment | Payment): IPayPortador => ({
-	nome: data.nome,
-	cpf: data.cpf,
-});
+	return {
+		...req.body,
+		address: { cep, street, number, complement, district, city, uf },
+	};
+};

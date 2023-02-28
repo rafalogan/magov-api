@@ -10,10 +10,11 @@ import {
 	responseApi,
 	responseApiError,
 	ResponseException,
+	setAddress,
 	setReadOptions,
 } from 'src/utils';
 import { AuthService } from 'src/services';
-import { ResponseHandle } from 'src/core/handlers';
+import { onLog, ResponseHandle } from 'src/core/handlers';
 import { Credentials, RecoveryModel, UserModel } from 'src/repositories/models';
 import { CustomFile, IFile } from 'src/repositories/types';
 
@@ -43,14 +44,16 @@ export class AuthController {
 	}
 
 	signup(req: Request, res: Response) {
+		onLog('body', setAddress(req));
 		try {
-			this.authService.validateSignupData(req.body);
+			this.authService.validateSignupData(setAddress(req));
 		} catch (message: any) {
 			return ResponseHandle.onError({ res, message, status: httpStatus.BAD_REQUEST });
 		}
 
 		const image = this.setUserImage(req);
-		const user = new UserModel({ ...req.body, image });
+		const rawData = setAddress(req);
+		const user = new UserModel({ ...rawData, image });
 
 		this.authService
 			.signupOnApp(user)
@@ -109,7 +112,8 @@ export class AuthController {
 	}
 
 	private setUserImage(req: Request) {
-		const { title, alt } = req.body.image;
+		const image = req.body.image ?? { title: req.body.imageTitle, alt: req.body.imageAlt };
+		const { title, alt } = image;
 		const file = req.file as CustomFile;
 
 		return {

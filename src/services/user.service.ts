@@ -13,6 +13,7 @@ export class UserService extends DatabaseService {
 	async create(data: UserModel): Promise<any> {
 		try {
 			const tenancyId = data.planId ? await this.createTenancy(data.planId) : data.tenancyId;
+			onLog('tenancyId', tenancyId);
 			const [userId] = await this.db('users').insert(convertDataValues({ ...new User({ ...data, tenancyId } as IUser) }));
 
 			if (data.userRules?.length) await this.saveUserRules(data.userRules, userId);
@@ -21,7 +22,7 @@ export class UserService extends DatabaseService {
 			await this.saveAddress(data.address, userId);
 			deleteField(data, 'password');
 
-			return { message: 'User save with success', user: data };
+			return { message: 'User save with success', user: { ...data, tenancyId } };
 		} catch (err) {
 			return err;
 		}
@@ -105,9 +106,9 @@ export class UserService extends DatabaseService {
 	private async createTenancy(planId: number) {
 		try {
 			const tenacy = new Tenancy({ totalUsers: 1, active: true } as ITenacy);
-			const [tenancyId] = await this.db('tenancies').insert({ ...tenacy });
+			const [tenancyId] = await this.db('tenancies').insert(convertDataValues(tenacy));
 
-			await this.db('tenancies_plans').insert({ plan_id: planId, tenacy_id: tenancyId });
+			await this.db('tenancies_plans').insert({ plan_id: planId, tenancy_id: tenancyId });
 			return tenancyId;
 		} catch (err) {
 			return err;

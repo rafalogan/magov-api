@@ -6,14 +6,14 @@ import { decodeToken, extractToken, getPayload, onLog } from 'src/core/handlers'
 
 import { Credentials, Payload, RecoveryModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { ICredentials, IUserModel, SendEmailOptions } from 'src/repositories/types';
-import { existsOrError, isMatch, isRequired, requiredFields } from 'src/utils';
+import { existsOrError, isMatch, isRequired, notExistisOrError, requiredFields } from 'src/utils';
 import { UserService } from './user.service';
 import { MailService } from './mail.service';
 
 export class AuthService {
 	private authsecret = process.env.AUTHSECRET as string;
 
-	constructor(private userService: UserService, private mailsService: MailService) { }
+	constructor(private userService: UserService, private mailsService: MailService) {}
 
 	validateCredentials(credentials: ICredentials) {
 		try {
@@ -43,7 +43,7 @@ export class AuthService {
 			{ field: data.planId, message: isRequired('Plan') },
 		]);
 
-		if (requiredEmpty?.length !== 0) throw requiredEmpty?.join('\n');
+		notExistisOrError(requiredEmpty, requiredEmpty?.join('\n') as string);
 	}
 
 	async verifyCredentials(credentials: Credentials) {

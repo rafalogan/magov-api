@@ -30,11 +30,11 @@ export class UserModel {
 		this.cpf = data.cpf;
 		this.phone = data.phone;
 		this.office = data.office;
-		this.active = data.active;
+		this.active = data.active || true;
 		this.level = Number(data.level);
 		this.unitId = Number(data.unitId) || undefined;
 		this.tenancyId = Number(data.tenancyId) || undefined;
-		this.userRules = data.userRules.map(Number) || [];
+		this.userRules = data.userRules?.map(Number) || [];
 		this.address = new Address(data.address);
 		this.planId = Number(data.planId) || undefined;
 		this.image = data.image ? new FileEntity(data.image) : undefined;
