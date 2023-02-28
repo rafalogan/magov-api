@@ -1,4 +1,3 @@
-import { type } from 'os';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { ReadOptionsModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { IAddress, IServiceOptions, ITenacy, IUser, IUserViewModel } from 'src/repositories/types';
