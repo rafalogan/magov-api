@@ -16,10 +16,10 @@ export class UserService extends DatabaseService {
 			onLog('tenancyId', tenancyId);
 			const [userId] = await this.db('users').insert(convertDataValues({ ...new User({ ...data, tenancyId } as IUser) }));
 
+			if (data.address) await this.saveAddress(data.address, userId);
 			if (data.userRules?.length) await this.saveUserRules(data.userRules, userId);
 			if (data.image) await this.setUserImage(data.image, userId);
 
-			await this.saveAddress(data.address, userId);
 			deleteField(data, 'password');
 
 			return { message: 'User save with success', user: { ...data, tenancyId } };
@@ -117,16 +117,19 @@ export class UserService extends DatabaseService {
 
 	private async saveAddress(address: Address, userId: number) {
 		try {
-			const fromDb = (await this.db('adresses').where({ user_id: userId }).first()) as IAddress;
+			const fromDb = await this.db('adresses').where({ user_id: userId }).first();
+			onLog('adress from db', fromDb);
 
-			if (fromDb) {
-				const data = new Address({ ...fromDb, ...address } as IAddress);
-				await this.db('adresses').where({ user_id: userId }).update(convertDataValues(data));
-				return data;
+			const data = fromDb ? new Address({ ...fromDb, ...address } as IAddress) : new Address({ ...address, userId } as IAddress);
+			onLog('data to save', data);
+
+			if (!fromDb) {
+				const [id] = await this.db('adresses').insert(convertDataValues(data));
+				const res = { ...data, id };
+				return res;
 			}
-
-			await this.db('adresses').insert(convertDataValues({ address, userId }));
-			return address;
+			await this.db('adresses').where({ user_id: userId }).update(convertDataValues(data));
+			return data;
 		} catch (err) {
 			return err;
 		}

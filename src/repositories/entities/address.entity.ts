@@ -5,7 +5,7 @@ export class Address {
 	cep: string;
 	street: string;
 	number?: number;
-	component?: string;
+	complement?: string;
 	district: string;
 	city: string;
 	uf: string;
