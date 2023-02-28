@@ -32,6 +32,10 @@ ssl/
 **/database/mongo
 **/database/redis
 **/database/mysql
+**/upload
+**/uploads
+\upload
+\uploads
 # COVERAGE DIRECTORY USED BY TOOLS LIKE ISTANBUL
 \coverage
 # NYC TEST COVERAGE
