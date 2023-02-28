@@ -1,7 +1,7 @@
 import httpStatus, { BAD_REQUEST } from 'http-status';
 import { Request, Response } from 'express';
 
-import { baseUrl, equalsOrError, isRequired, notExistisOrError, requiredFields, setAddress } from 'src/utils';
+import { baseUrl, equalsOrError, isRequired, notExistisOrError, requiredFields, setAddress, setUserImage } from 'src/utils';
 import { AuthService } from 'src/services';
 import { onLog, ResponseHandle } from 'src/core/handlers';
 import { Credentials, RecoveryModel, UserModel } from 'src/repositories/models';
@@ -101,18 +101,5 @@ export class AuthController {
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
 	}
 
-	private setUserImage(req: Request) {
-		const image = req.body.image ?? { title: req.body.imageTitle, alt: req.body.imageAlt };
-		const { title, alt } = image;
-		const file = req.file as CustomFile;
-
-		return {
-			title,
-			alt,
-			name: file.originalname,
-			filename: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file.key : file.filename,
-			type: file.mimetype,
-			url: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file.location : `${baseUrl()}/media/${file.filename}`,
-		} as IFile;
-	}
+	private setUserImage = (req: Request) => setUserImage(req);
 }

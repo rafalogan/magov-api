@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt';
 import { Request } from 'express';
-import { CustomFile } from 'src/repositories/types';
+import { CustomFile, IFile } from 'src/repositories/types';
 import { baseUrl } from 'src/utils/validate';
+import { upperCaseFirstLetter } from './convert-date';
 
 export const snakeToCamel = (field: string): string => {
 	let toArray = field.split('_');
@@ -50,6 +51,19 @@ export const setParamsOrder = (req: Request) => {
 	return { where, value: value };
 };
 
+export const extractFieldName = (value: string) => {
+	const toSnakeCase = camelToSnake(value);
+	const [first, ...last] = toSnakeCase.split('_');
+
+	return `${upperCaseFirstLetter(first)} ${last.join(' ')}`;
+};
+
+export const uppercaseFirstLetter = (value: string) => {
+	const [first, ...last] = value.split('');
+
+	return `${first.toUpperCase()}${last.join('')}`;
+};
+
 export const setReadOptions = (req: Request, cacheTime?: number, fields?: string[]): ReadOptions => {
 	const id = Number(req.params.id);
 	const page = Number(req.query.page);
@@ -84,6 +98,21 @@ export const filterRawFile = (req: Request) => {
 const setUrlToFile = (req: Request, file: CustomFile): string => {
 	if (req.body.videoId) return `https://www.youtube.com/watch?v=${req.body.videoId}`;
 	return process.env.STORAGE_TYPE === 's3' ? file.location : `${baseUrl()}/media/${req.file?.filename}`;
+};
+
+export const setUserImage = (req: Request) => {
+	const image = req.body.image ?? { title: req.body.imageTitle, alt: req.body.imageAlt };
+	const { title, alt } = image;
+	const file = req.file as CustomFile;
+
+	return {
+		title,
+		alt,
+		name: file.originalname,
+		filename: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file.key : file.filename,
+		type: file.mimetype,
+		url: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file.location : `${baseUrl()}/media/${file.filename}`,
+	} as IFile;
 };
 
 export const setAddress = (req: Request) => {
