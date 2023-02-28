@@ -72,21 +72,13 @@ export class UserService extends DatabaseService {
 
 			const { id } = user;
 			const unit = user.unitId ? await this.db('units').select('id', 'name').where({ id: user.unitId }).first() : {};
-			onLog('unit', unit);
 			const rulesIds = (await this.db('users_rules').select('rule_id as ruleId').where({ user_id: id })) || [];
-			onLog('rules ids', rulesIds);
 			const rules = rulesIds?.length ? rulesIds.map(id => this.db('rules').select('id', 'name').where({ id }).first()) : [];
-			onLog('rules', rules);
 			const address = convertDataValues(await this.db('adresses').where({ user_id: id }).first(), 'camel') || {};
-			onLog('address', address);
 			const image = convertDataValues(await this.db('files').where({ user_id: id }).first(), 'camel');
-			onLog('image', image);
 
 			deleteField(user, 'unitId');
-			const userToView = new UserViewModel({ ...user, unit, rules, address, image } as IUserViewModel);
-
-			onLog('response', userToView);
-			return userToView;
+			return new UserViewModel({ ...user, unit, rules, address, image } as IUserViewModel);
 		} catch (err) {
 			return err;
 		}
