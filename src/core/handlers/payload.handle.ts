@@ -24,6 +24,6 @@ export const decodeToken = (token: string) => {
 
 export const getUserIdByToken = (req: Request) => getPayload(req)?.id as number;
 
-export const getTenacityByToken = (req: Request) => getPayload(req)?.tenancyId as number;
+export const getTenancyByToken = (req: Request) => getPayload(req)?.tenancyId as number;
 
 export const getIdByReq = (req: Request) => Number(req.params.id);
