@@ -1,9 +1,11 @@
 import { Knex } from 'knex';
+import { onLog } from 'src/core/handlers';
 import { PaginationModel, ReadOptionsModel } from 'src/repositories/models';
 
-import { IServiceOptions } from 'src/repositories/types';
+import { IAddress, IServiceOptions } from 'src/repositories/types';
 import { convertDataValues } from 'src/utils';
 import { CacheService } from './abistract-cache.service';
+import { Address } from 'src/repositories/entities';
 
 export abstract class DatabaseService extends CacheService {
 	protected db: Knex;
@@ -64,5 +66,24 @@ export abstract class DatabaseService extends CacheService {
 			.orderBy(orderBy, order)
 			.then(data => (!data ? {} : { data: data.map(i => convertDataValues(i, 'camel')), pagination }))
 			.catch(err => err);
+	}
+
+	async setAddress(address: Address, where: string, value: any) {
+		try {
+			const fromDb = await this.db('adresses').where(convertDataValues(where), value).first();
+			onLog('adress from db', fromDb);
+
+			if (!fromDb) {
+				address[where] = value;
+				const [id] = await this.db('adresses').insert(convertDataValues(address));
+				return { ...address, id };
+			}
+			const data = new Address({ ...fromDb, ...address } as IAddress);
+
+			await this.db('adresses').where(convertDataValues(where), value).update(convertDataValues(data));
+			return data;
+		} catch (err) {
+			return err;
+		}
 	}
 }
