@@ -14,11 +14,11 @@ export class Address {
 	constructor(data: IAddress, id?: number) {
 		this.id = Number(id || data.id) || undefined;
 		this.cep = clearString(data.cep);
-		this.street = data.street.trim();
+		this.street = data.street?.trim();
 		this.number = Number(data.number) || 0;
 		this.complement = data.complement?.trim();
-		this.district = data.district.trim();
-		this.city = data.city.trim();
-		this.uf = data.uf.trim();
+		this.district = data.district?.trim();
+		this.city = data.city?.trim();
+		this.uf = data.uf?.trim();
 	}
 }

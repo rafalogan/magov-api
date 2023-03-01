@@ -1,6 +1,6 @@
 import jwt from 'jwt-simple';
 import { Request } from 'express';
-import httpStatus from 'http-status';
+import httpStatus, { UNAUTHORIZED } from 'http-status';
 
 import { decodeToken, extractToken, getPayload, onLog } from 'src/core/handlers';
 
@@ -50,6 +50,7 @@ export class AuthService {
 		const userFromDb = (await this.userService.getUser(credentials.email)) as UserViewModel;
 
 		existsOrError(userFromDb, 'User not found');
+		existsOrError(userFromDb.active, 'User desactivated');
 		onLog('user from DB', userFromDb);
 
 		if (isMatch(credentials, userFromDb)) {
@@ -57,6 +58,8 @@ export class AuthService {
 			onLog('payload', payload);
 			return { ...payload, token: jwt.encode(payload, this.authsecret) };
 		}
+
+		return { status: UNAUTHORIZED, message: 'Login unauthorized! verify your credentials.' };
 	}
 
 	async signupOnApp(user: UserModel) {

@@ -33,7 +33,7 @@ export const convertDataValues = (data: any, to?: string) => {
 	return res;
 };
 
-export const clearString = (value: string): string => value.replace(/\W/g, '').trim();
+export const clearString = (value: string): string => value?.replace(/\W/g, '').trim();
 
 export const convertBlobToString = (value: Blob | string): string => (typeof value === 'string' ? value : value.toString());
 

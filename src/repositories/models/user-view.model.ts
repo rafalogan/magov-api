@@ -14,7 +14,7 @@ export class UserViewModel {
 	level: number;
 	userRules: IUserRule[];
 	tenancyId?: number;
-	address: Address;
+	address?: Address;
 	unit: IUserUnit;
 	image?: FileEntity;
 
@@ -31,7 +31,7 @@ export class UserViewModel {
 		this.level = data.level;
 		this.userRules = data.userRules || [];
 		this.tenancyId = Number(data.tenancyId) || undefined;
-		this.address = new Address(data.address);
+		this.address = data.address ? new Address(data.address) : undefined;
 		this.unit = data.unit;
 		this.image = data.image ? new FileEntity(data.image) : undefined;
 	}

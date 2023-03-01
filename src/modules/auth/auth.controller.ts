@@ -1,11 +1,10 @@
-import httpStatus, { BAD_REQUEST } from 'http-status';
+import { BAD_REQUEST, UNAUTHORIZED } from 'http-status';
 import { Request, Response } from 'express';
 
-import { baseUrl, equalsOrError, isRequired, notExistisOrError, requiredFields, setAddress, setUserImage } from 'src/utils';
+import { equalsOrError, isRequired, notExistisOrError, requiredFields, setAddress, setUserImage } from 'src/utils';
 import { AuthService } from 'src/services';
 import { onLog, ResponseHandle } from 'src/core/handlers';
 import { Credentials, RecoveryModel, UserModel } from 'src/repositories/models';
-import { CustomFile, IFile } from 'src/repositories/types';
 
 export class AuthController {
 	constructor(private authService: AuthService) {}
@@ -14,20 +13,20 @@ export class AuthController {
 		try {
 			this.authService.validateCredentials(req.body);
 		} catch (message: any) {
-			return ResponseHandle.onError({ res, message, status: httpStatus.BAD_REQUEST });
+			return ResponseHandle.onError({ res, message, status: BAD_REQUEST });
 		}
 
 		const credentials = new Credentials(req.body);
 
 		this.authService
 			.verifyCredentials(credentials)
-			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err =>
 				ResponseHandle.onError({
 					res,
 					message: 'Login unauthorized! verify your credentials.',
 					err,
-					status: httpStatus.UNAUTHORIZED,
+					status: UNAUTHORIZED,
 				})
 			);
 	}
@@ -37,7 +36,7 @@ export class AuthController {
 		try {
 			this.authService.validateSignupData(setAddress(req));
 		} catch (message: any) {
-			return ResponseHandle.onError({ res, message, status: httpStatus.BAD_REQUEST });
+			return ResponseHandle.onError({ res, message, status: BAD_REQUEST });
 		}
 
 		const image = this.setUserImage(req);
@@ -68,7 +67,7 @@ export class AuthController {
 
 			notExistisOrError(requiredData, requiredData?.join('\n') as string);
 		} catch (message: any) {
-			return ResponseHandle.onError({ res, message, status: httpStatus.BAD_REQUEST });
+			return ResponseHandle.onError({ res, message, status: BAD_REQUEST });
 		}
 
 		this.authService
