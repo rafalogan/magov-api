@@ -28,6 +28,7 @@ export class AuthConfig {
 
 	verify(payload: Payload, done: VerifiedCallback) {
 		const id = Number(payload.id);
+
 		this.userService
 			.getUser(id)
 			.then(data => done(null, data instanceof UserViewModel ? this.setUserNoPass(data) : false))

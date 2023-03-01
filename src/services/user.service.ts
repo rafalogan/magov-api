@@ -28,6 +28,10 @@ export class UserService extends DatabaseService {
 		}
 	}
 
+	async read(options: ReadOptionsModel, id?: number) {
+		return id ? this.getUser(id) : this.getUsers(options);
+	}
+
 	async update(data: UserModel, id: number): Promise<any> {
 		try {
 			const userFromDb = await this.getUser(id);
@@ -55,9 +59,19 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	getUsers(options: ReadOptionsModel) {
-		if (options?.tenancyId) return this.findAllByTenacy('users', options);
-		return this.findAll('users', options);
+	async getUsers(options: ReadOptionsModel) {
+		try {
+			const users = options?.tenancyId ? await this.findAllByTenacy('users', options) : await this.findAll('users', options);
+			onLog('users', users);
+			const data = users.data?.map((user: any) => {
+				deleteField(user, 'password');
+				return user;
+			});
+
+			return { ...users, data };
+		} catch (err) {
+			return err;
+		}
 	}
 
 	async getUser(filter: number | string) {
@@ -66,8 +80,6 @@ export class UserService extends DatabaseService {
 				typeof filter === 'number'
 					? convertDataValues(await this.db('users').where({ id: filter }).first(), 'camel')
 					: convertDataValues(await this.db('users').where({ email: filter }).first(), 'camel');
-
-			onLog('user', user);
 
 			if (!user) return {};
 

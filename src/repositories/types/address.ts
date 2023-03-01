@@ -4,7 +4,7 @@ export interface IAddress extends IID {
 	cep: string;
 	street: string;
 	number?: number;
-	component?: string;
+	complement?: string;
 	district: string;
 	city: string;
 	uf: string;

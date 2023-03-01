@@ -2,7 +2,7 @@ import { BAD_REQUEST } from 'http-status';
 import { Request, Response } from 'express';
 
 import { Controller } from 'src/core/controllers';
-import { setAddress, requiredFields, notExistisOrError, equalsOrError, setUserImage } from 'src/utils';
+import { setAddress, requiredFields, notExistisOrError, equalsOrError, setUserImage, deleteField } from 'src/utils';
 import { UserService } from 'src/services';
 import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
 import { ReadOptionsModel, UserModel } from 'src/repositories/models';
@@ -12,14 +12,14 @@ export class UserController extends Controller {
 		super();
 	}
 
-	save(req: Request, res: Response) {
+	async save(req: Request, res: Response) {
 		try {
-			this.isUserValid(req);
+			await this.isUserValid(req);
 		} catch (message: any) {
 			return ResponseHandle.onError({ res, message, status: BAD_REQUEST });
 		}
 
-		const address = setAddress(req);
+		const address = setAddress(req).address;
 		const image = setUserImage(req);
 		const tenancyId = req.body.tenancyId ?? getTenancyByToken(req);
 
@@ -46,10 +46,14 @@ export class UserController extends Controller {
 	list(req: Request, res: Response) {
 		const tenancyId = req.query.tenancyId ? Number(req.query.tenancyId) : getTenancyByToken(req) || undefined;
 		const options = new ReadOptionsModel({ ...req.query, tenancyId });
+		const { id } = req.params;
 
 		this.userService
-			.getUsers(options)
-			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
+			.read(options, Number(id))
+			.then((data: any) => {
+				if ('password' in data) deleteField(data, 'password');
+				return ResponseHandle.onSuccess({ res, data, status: data.status });
+			})
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
 	}
 
@@ -62,10 +66,9 @@ export class UserController extends Controller {
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
 	}
 
-	private isUserValid(req: Request) {
+	private async isUserValid(req: Request) {
 		const { firstName, lastName, email, office, password, confirmPassword, cpf, phone, level } = req.body;
-		const { cep, street, district, city, uf } = setAddress(req);
-
+		const { cep, street, district, city, uf } = setAddress(req).address;
 		const requireds = requiredFields([
 			{ field: firstName, message: 'firstName' },
 			{ field: lastName, message: 'lastName' },
@@ -85,5 +88,9 @@ export class UserController extends Controller {
 
 		notExistisOrError(requireds, `${requireds?.join(' is required \n')} is required`);
 		equalsOrError(password, confirmPassword, 'confirmPassword should be equal to password');
+
+		const user = await this.userService.getUser(email);
+
+		notExistisOrError(user, `Already user withi this e-mail: ${email}`);
 	}
 }

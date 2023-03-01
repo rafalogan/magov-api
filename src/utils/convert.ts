@@ -33,6 +33,8 @@ export const convertDataValues = (data: any, to?: string) => {
 	return res;
 };
 
+export const clearString = (value: string): string => value.replace(/\W/g, '').trim();
+
 export const convertBlobToString = (value: Blob | string): string => (typeof value === 'string' ? value : value.toString());
 
 export const hashString = (field: string, salt = Number(process.env.SALT_ROUNDS)) => bcrypt.hashSync(field, salt);
@@ -62,16 +64,6 @@ export const uppercaseFirstLetter = (value: string) => {
 	const [first, ...last] = value.split('');
 
 	return `${first.toUpperCase()}${last.join('')}`;
-};
-
-export const setReadOptions = (req: Request, cacheTime?: number, fields?: string[]): ReadOptions => {
-	const id = Number(req.params.id);
-	const page = Number(req.query.page);
-	const limit = Number(req.query.limit);
-	const order: OrderOptions | undefined =
-		req.query.order || req.query.orderBy ? { by: req.query.order as string, type: req.query.orderBy as string } : undefined;
-
-	return { id, page, limit, order, cacheTime, fields };
 };
 
 export const deleteField = (data: any, field: string) => Reflect.deleteProperty(data, field);

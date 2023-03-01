@@ -15,7 +15,7 @@ const databaseConfig = new DatabaseConfig(knexfile);
 const cacheConfig = new CacheConfig();
 
 const services = new ServicesFactory(databaseConfig.connection, cacheConfig.connection, mailer);
-const auth = new AuthConfig();
+const auth = new AuthConfig(services.userService);
 
 const express = new AppConfig(logger, auth, services, multer.upload).express;
 

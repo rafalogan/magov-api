@@ -1,7 +1,7 @@
 import { Knex } from 'knex';
 import { PaginationModel, ReadOptionsModel } from 'src/repositories/models';
 
-import { IReadOptions, IServiceOptions } from 'src/repositories/types';
+import { IServiceOptions } from 'src/repositories/types';
 import { convertDataValues } from 'src/utils';
 import { CacheService } from './abistract-cache.service';
 
@@ -26,7 +26,7 @@ export abstract class DatabaseService extends CacheService {
 		if (tenacy) {
 			return this.db(tableName)
 				.count({ count: 'id' })
-				.where({ tenacy_id: tenacy })
+				.where({ tenancy_id: tenacy })
 				.first()
 				.then(res => Number(res?.count))
 				.catch(err => err);
@@ -48,21 +48,21 @@ export abstract class DatabaseService extends CacheService {
 			.limit(limit)
 			.offset(page * limit - limit)
 			.orderBy(orderBy, order)
-			.then(data => (!data ? {} : { data: convertDataValues(data, 'camel'), pagination }))
+			.then(data => (!data ? {} : { data: data.map(i => convertDataValues(i, 'camel')), pagination }))
 			.catch(err => err);
 	}
 
 	async findAllByTenacy(tableName: string, options: ReadOptionsModel) {
-		const { limit, page, tenancyId: tenacy_id, orderBy, order } = options;
-		const total = (await this.getCount(tableName, tenacy_id)) as number;
+		const { limit, page, tenancyId: tenancy_id, orderBy, order } = options;
+		const total = (await this.getCount(tableName, tenancy_id)) as number;
 		const pagination = new PaginationModel({ page, limit, total });
 
 		return this.db(tableName)
-			.where({ tenacy_id })
+			.where({ tenancy_id })
 			.limit(limit)
 			.offset(page * limit - limit)
 			.orderBy(orderBy, order)
-			.then(data => (!data ? {} : { data: convertDataValues(data, 'camel'), pagination }))
+			.then(data => (!data ? {} : { data: data.map(i => convertDataValues(i, 'camel')), pagination }))
 			.catch(err => err);
 	}
 }
