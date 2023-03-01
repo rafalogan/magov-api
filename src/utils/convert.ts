@@ -35,7 +35,10 @@ export const convertDataValues = (data: any, to?: string) => {
 
 export const clearString = (value: string): string => value?.replace(/\W/g, '').trim();
 
-export const convertBlobToString = (value: Blob | string): string => (typeof value === 'string' ? value : value.toString());
+export const convertBlobToString = (value?: Blob | string): string | undefined => {
+	if (!value) return undefined;
+	return typeof value === 'string' ? value : value.toString();
+};
 
 export const hashString = (field: string, salt = Number(process.env.SALT_ROUNDS)) => bcrypt.hashSync(field, salt);
 
