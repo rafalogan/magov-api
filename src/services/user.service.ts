@@ -65,6 +65,7 @@ export class UserService extends DatabaseService {
 			onLog('users', users);
 			const data = users.data?.map((user: any) => {
 				deleteField(user, 'password');
+				user.active = !!user.active;
 				return user;
 			});
 
@@ -106,7 +107,10 @@ export class UserService extends DatabaseService {
 				await this.db('users')
 					.where({ id })
 					.update({ ...convertDataValues(user) });
-				return { message: 'User disabled with success', user };
+				return {
+					message: 'User disabled with success',
+					user: { id: user.id, email: user.email, active: !!user.active },
+				};
 			}
 
 			return { message: 'User not found' };

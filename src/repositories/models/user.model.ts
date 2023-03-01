@@ -1,4 +1,4 @@
-import { hashString } from 'src/utils';
+import { clearString, hashString } from 'src/utils';
 
 import { IUserModel } from '../types';
 import { Address, FileEntity } from 'src/repositories/entities';
@@ -23,13 +23,13 @@ export class UserModel {
 
 	constructor(data: IUserModel, id?: number) {
 		this.id = Number(id || data.id) || undefined;
-		this.firstName = data.firstName;
-		this.lastName = data.lastName;
-		this.email = data.email;
+		this.firstName = data.firstName.trim();
+		this.lastName = data.lastName.trim();
+		this.email = data.email.toLowerCase();
 		this.password = data.confirmPassword ? hashString(data.password) : data.password;
-		this.cpf = data.cpf;
-		this.phone = data.phone;
-		this.office = data.office;
+		this.cpf = clearString(data.cpf);
+		this.phone = clearString(data.phone);
+		this.office = data.office.trim();
 		this.active = data.active || true;
 		this.level = Number(data.level);
 		this.unitId = Number(data.unitId) || undefined;

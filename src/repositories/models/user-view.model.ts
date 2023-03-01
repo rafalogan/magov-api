@@ -20,14 +20,14 @@ export class UserViewModel {
 
 	constructor(data: IUserViewModel) {
 		this.id = Number(data.id);
-		this.firstName = data.firstName;
-		this.lastName = data.lastName;
-		this.email = data.email;
+		this.firstName = data.firstName.trim();
+		this.lastName = data.lastName.trim();
+		this.email = data.email.trim();
 		this.password = data.password;
-		this.cpf = data.cpf;
-		this.phone = data.phone;
-		this.office = data.office;
-		this.active = data.active;
+		this.cpf = data.cpf.trim();
+		this.phone = data.phone.trim();
+		this.office = data.office.trim();
+		this.active = !!data.active;
 		this.level = data.level;
 		this.userRules = data.userRules || [];
 		this.tenancyId = Number(data.tenancyId) || undefined;
