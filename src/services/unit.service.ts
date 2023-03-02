@@ -1,4 +1,4 @@
-import { BAD_REQUEST, NOT_FOUND, NO_CONTENT } from 'http-status';
+import { BAD_REQUEST, NOT_FOUND } from 'http-status';
 
 import { Unit } from 'src/repositories/entities';
 import { ReadOptionsModel, UnitModel } from 'src/repositories/models';
