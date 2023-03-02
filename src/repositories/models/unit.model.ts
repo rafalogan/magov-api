@@ -1,25 +1,25 @@
-import { onLog } from 'src/core/handlers';
-import { clearString, convertBlobToString, setInstanceId } from 'src/utils';
+import { clearString, convertBlobToString } from 'src/utils';
 import { IUnit } from '../types';
+import { Address } from 'src/repositories/entities';
 
-export class Unit {
+export class UnitModel {
 	id?: number;
 	name: string;
 	description?: string;
 	cnpj: string;
 	phone: string;
-	active: boolean;
 	tenancyId: number;
+	active: boolean;
+	address: Address;
 
 	constructor(data: IUnit, id?: number) {
-		onLog('data raw unit', data);
-
-		this.id = setInstanceId(id || data.id);
+		this.id = Number(id || data.id) || undefined;
 		this.name = data.name?.trim();
 		this.description = convertBlobToString(data?.description);
 		this.cnpj = clearString(data.cnpj);
 		this.phone = clearString(data.phone);
-		this.active = data.active || true;
 		this.tenancyId = Number(data.tenancyId);
+		this.active = !!data.active;
+		this.address = new Address(data.address);
 	}
 }

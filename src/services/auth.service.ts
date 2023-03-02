@@ -26,21 +26,21 @@ export class AuthService {
 
 	validateSignupData(data: IUserModel) {
 		const requiredEmpty = requiredFields([
-			{ field: data.firstName, message: isRequired('Fist Name') },
-			{ field: data.lastName, message: isRequired('last Name') },
-			{ field: data.email, message: isRequired('E-mail') },
-			{ field: data.password, message: isRequired('Password') },
-			{ field: data.confirmPassword, message: isRequired('Confirm Password') },
-			{ field: data.cpf, message: isRequired('CPF') },
-			{ field: data.phone, message: isRequired('Phone') },
-			{ field: data.office, message: isRequired('Office') },
-			{ field: data.level, message: isRequired('Level') },
-			{ field: data.address.cep, message: isRequired('CEP') },
-			{ field: data.address.street, message: isRequired('Street') },
-			{ field: data.address.district, message: isRequired('District') },
-			{ field: data.address.city, message: isRequired('City') },
-			{ field: data.address.uf, message: isRequired('Uf') },
-			{ field: data.planId, message: isRequired('Plan') },
+			{ field: data.firstName, message: isRequired('firstName') },
+			{ field: data.lastName, message: isRequired('lastName') },
+			{ field: data.email, message: isRequired('email') },
+			{ field: data.password, message: isRequired('password') },
+			{ field: data.confirmPassword, message: isRequired('confirmPassword') },
+			{ field: data.cpf, message: isRequired('cpf') },
+			{ field: data.phone, message: isRequired('phone') },
+			{ field: data.office, message: isRequired('office') },
+			{ field: data.level, message: isRequired('level') },
+			{ field: data.address.cep, message: isRequired('address.cep') },
+			{ field: data.address.street, message: isRequired('address.street') },
+			{ field: data.address.district, message: isRequired('address.district') },
+			{ field: data.address.city, message: isRequired('address.city') },
+			{ field: data.address.uf, message: isRequired('address.uf') },
+			{ field: data.planId, message: isRequired('planId') },
 		]);
 
 		notExistisOrError(requiredEmpty, requiredEmpty?.join('\n') as string);

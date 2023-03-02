@@ -1,4 +1,4 @@
-import { hashString } from 'src/utils';
+import { hashString, setInstanceId } from 'src/utils';
 import { IUser } from '../types';
 
 export class User {
@@ -16,7 +16,7 @@ export class User {
 	tenancyId?: number;
 
 	constructor(data: IUser, id?: number) {
-		this.id = Number(id || data.id) || undefined;
+		this.id = setInstanceId(id || data.id);
 		this.firstName = data.firstName;
 		this.lastName = data.lastName;
 		this.email = data.email;

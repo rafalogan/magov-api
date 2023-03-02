@@ -19,7 +19,7 @@ export class UserController extends Controller {
 			return ResponseHandle.onError({ res, message, status: BAD_REQUEST });
 		}
 
-		const address = setAddress(req).address;
+		const address = setAddress(req);
 		const image = setUserImage(req);
 		const tenancyId = req.body.tenancyId ?? getTenancyByToken(req);
 
@@ -68,7 +68,7 @@ export class UserController extends Controller {
 
 	private async isUserValid(req: Request) {
 		const { firstName, lastName, email, office, password, confirmPassword, cpf, phone, level } = req.body;
-		const { cep, street, district, city, uf } = setAddress(req).address;
+		const { cep, street, district, city, uf } = setAddress(req);
 		const requireds = requiredFields([
 			{ field: firstName, message: 'firstName' },
 			{ field: lastName, message: 'lastName' },

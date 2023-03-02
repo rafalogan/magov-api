@@ -7,5 +7,6 @@ export interface IUnit extends IID {
 	cnpj: string;
 	phone: string;
 	tenancyId: number;
+	active: boolean;
 	address: IAddress;
 }

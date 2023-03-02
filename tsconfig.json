@@ -59,7 +59,8 @@
 		"emitDecoratorMetadata": true,
 		"forceConsistentCasingInFileNames": true,
 		"importHelpers": true,
-		"skipLibCheck": true
+		"skipLibCheck": true,
+		"suppressImplicitAnyIndexErrors": true
 	},
 	"include": [
 		"database/migrations/**/*",

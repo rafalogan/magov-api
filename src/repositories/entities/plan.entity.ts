@@ -1,4 +1,4 @@
-import { convertBlobToString } from 'src/utils';
+import { convertBlobToString, setInstanceId } from 'src/utils';
 import { IPlan } from '../types';
 
 export class Plan {
@@ -9,7 +9,7 @@ export class Plan {
 	unitaryValue: number;
 
 	constructor(data: IPlan, id?: number) {
-		this.id = Number(id || data.id) ?? undefined;
+		this.id = setInstanceId(id || data.id);
 		this.name = data.name;
 		this.decription = data.description ? convertBlobToString(data.description) : undefined;
 		this.userLimit = data.userLimit || 0;
