@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 export const notfoundRoute = (req: Request, res: Response, next: any) => {
 	res.status(404).send({
 		status: 404,
-		message: 'Not Found',
+		message: 'Not Found Route',
 	});
 };
 
