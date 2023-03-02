@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { Request } from 'express';
-import { CustomFile, IFile } from 'src/repositories/types';
+import { CustomFile, IAddress, IFile } from 'src/repositories/types';
 import { baseUrl } from 'src/utils/validate';
 import { upperCaseFirstLetter } from './convert-date';
 
@@ -110,12 +110,11 @@ export const setUserImage = (req: Request) => {
 	} as IFile;
 };
 
-export const setAddress = (req: Request) => {
-	if (req.body.address) return req.body;
+export const setAddress = (req: Request): IAddress => {
+	if (req.body.address) return req.body.address;
 	const { cep, street, number, complement, district, city, uf } = req.body;
 
-	return {
-		...req.body,
-		address: { cep, street, number, complement, district, city, uf },
-	};
+	return { cep, street, number, complement, district, city, uf };
 };
+
+export const setInstanceId = (id?:number) => Number(id) || undefined;

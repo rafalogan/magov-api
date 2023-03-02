@@ -1,4 +1,4 @@
-import { convertBlobToString } from 'src/utils';
+import { convertBlobToString, setInstanceId } from 'src/utils';
 import { IFile } from '../types';
 
 export class FileEntity {
@@ -11,7 +11,7 @@ export class FileEntity {
 	url: string;
 
 	constructor(data: IFile, id?: number) {
-		this.id = Number(id || data.id) || undefined;
+		this.id = setInstanceId(id || data.id);
 		this.title = data.title;
 		this.alt = data.alt ? convertBlobToString(data.alt) : undefined;
 		this.name = data.name;

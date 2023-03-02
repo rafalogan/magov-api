@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { ITenacy } from '../types';
+import { setInstanceId } from 'src/utils';
 
 export class Tenancy {
 	id?: number;
@@ -8,8 +9,8 @@ export class Tenancy {
 	totalUsers?: number;
 	active: boolean;
 
-	constructor(data: ITenacy, id?: Number) {
-		this.id = Number(id || data.id) || undefined;
+	constructor(data: ITenacy, id?: number) {
+		this.id = setInstanceId(id || data.id);
 		this.tenancyKey = data.tenancyKey || randomUUID();
 		this.totalUsers = data.totalUsers;
 		this.active = data.active;

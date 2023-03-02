@@ -1,4 +1,4 @@
-import { clearString } from 'src/utils';
+import { clearString, setInstanceId } from 'src/utils';
 import { IAddress } from '../types';
 
 export class Address {
@@ -12,7 +12,7 @@ export class Address {
 	uf: string;
 
 	constructor(data: IAddress, id?: number) {
-		this.id = Number(id || data.id) || undefined;
+		this.id = setInstanceId(id || data.id);
 		this.cep = clearString(data.cep);
 		this.street = data.street?.trim();
 		this.number = Number(data.number) || 0;

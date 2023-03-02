@@ -1,4 +1,4 @@
-import { clearString, convertBlobToString } from 'src/utils';
+import { clearString, convertBlobToString, setInstanceId } from 'src/utils';
 import { IUnit } from '../types';
 
 export class Unit {
@@ -11,7 +11,7 @@ export class Unit {
 	tenancyId: number;
 
 	constructor(data: IUnit, id?: number) {
-		this.id = Number(id || data.id) || undefined;
+		this.id = setInstanceId(id || data.id);
 		this.name = data.name?.trim();
 		this.description = convertBlobToString(data?.description);
 		this.cnpj = clearString(data.cnpj);
