@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { Controller } from 'src/core/controllers';
 import { existsOrError, isRequired, notExistisOrError, requiredFields, setAddress } from 'src/utils';
 import { UnitService } from 'src/services';
-import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
+import { getTenancyByToken, onLog, ResponseHandle } from 'src/core/handlers';
 import { ReadOptionsModel, UnitModel } from 'src/repositories/models';
 import { IReadOptions } from 'src/repositories/types';
 
@@ -20,7 +20,8 @@ export class UnitController extends Controller {
 			return ResponseHandle.onError({ res, message, status: BAD_REQUEST });
 		}
 		const tenancyId = Number(req.body.tenantId) || getTenancyByToken(req);
-		const unit = new UnitModel({ ...req.body, address: setAddress(req), tenancyId });
+		const address = setAddress(req);
+		const unit = new UnitModel({ ...req.body, address, tenancyId });
 
 		this.unitService
 			.save(unit)
@@ -68,7 +69,7 @@ export class UnitController extends Controller {
 
 	private isValidRequest(req: Request) {
 		const { name, cnpj, phone } = req.body;
-		const { cep, street, district, city, uf } = setAddress(req.body);
+		const { cep, street, district, city, uf } = setAddress(req);
 		const requireds = requiredFields([
 			{ field: name, message: 'name' },
 			{ field: cnpj, message: 'cnpj' },

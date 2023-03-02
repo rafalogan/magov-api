@@ -1,9 +1,10 @@
 import { BAD_REQUEST, NOT_FOUND } from 'http-status';
+import { onLog } from 'src/core/handlers';
 
 import { Unit } from 'src/repositories/entities';
 import { ReadOptionsModel, UnitModel } from 'src/repositories/models';
 import { IServiceOptions, IUnit } from 'src/repositories/types';
-import { convertBlobToString, convertDataValues } from 'src/utils';
+import { camelToSnake, convertBlobToString, convertDataValues } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 
 export class UnitService extends DatabaseService {
@@ -15,6 +16,7 @@ export class UnitService extends DatabaseService {
 		try {
 			const unit = new Unit(data as IUnit);
 			const [id] = await this.db('units').insert(convertDataValues(unit));
+
 			await this.setAddress(data.address, 'unitId', Number(id));
 
 			return { message: 'Unit created successfully.', unit: { ...data, id } };
