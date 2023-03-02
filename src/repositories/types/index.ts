@@ -12,3 +12,4 @@ export * from './user';
 export * from './address';
 export * from './module';
 export * from './mail';
+export * from './plantiff';

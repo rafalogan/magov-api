@@ -5,6 +5,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.increments('id').primary();
 		table.string('name', 155).notNullable();
 		table.timestamp('birthday').notNullable();
+		table.string('cpf_cnpj', 45).notNullable();
 		table.string('institute', 255).notNullable();
 		table.string('relationship_type', 100).nullable();
 		table.binary('observation').nullable();
