@@ -5,6 +5,7 @@ import { equalsOrError, isRequired, notExistisOrError, requiredFields, setAddres
 import { AuthService } from 'src/services';
 import { onLog, ResponseHandle } from 'src/core/handlers';
 import { Credentials, RecoveryModel, UserModel } from 'src/repositories/models';
+import { IUserModel } from 'src/repositories/types';
 
 export class AuthController {
 	constructor(private authService: AuthService) {}
@@ -33,15 +34,16 @@ export class AuthController {
 
 	signup(req: Request, res: Response) {
 		onLog('body', setAddress(req));
+		const address = setAddress(req);
+
 		try {
-			this.authService.validateSignupData(setAddress(req));
+			this.authService.validateSignupData({ ...req.body, address });
 		} catch (message: any) {
 			return ResponseHandle.onError({ res, message, status: BAD_REQUEST });
 		}
 
 		const image = this.setUserImage(req);
-		const rawData = setAddress(req);
-		const user = new UserModel({ ...rawData, image });
+		const user = new UserModel({ ...req.body, address, image });
 
 		this.authService
 			.signupOnApp(user)

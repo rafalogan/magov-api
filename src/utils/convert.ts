@@ -103,10 +103,10 @@ export const setUserImage = (req: Request) => {
 	return {
 		title,
 		alt,
-		name: file.originalname,
-		filename: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file.key : file.filename,
+		name: file?.originalname,
+		filename: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file?.key : file?.filename,
 		type: file.mimetype,
-		url: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file.location : `${baseUrl()}/media/${file.filename}`,
+		url: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file?.location : `${baseUrl()}/media/${file.filename}`,
 	} as IFile;
 };
 
@@ -117,4 +117,4 @@ export const setAddress = (req: Request): IAddress => {
 	return { cep, street, number, complement, district, city, uf };
 };
 
-export const setInstanceId = (id?:number) => Number(id) || undefined;
+export const setInstanceId = (id?: number) => Number(id) || undefined;
