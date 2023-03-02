@@ -1,3 +1,4 @@
+import { onLog } from 'src/core/handlers';
 import { clearString, convertBlobToString, setInstanceId } from 'src/utils';
 import { IUnit } from '../types';
 
@@ -11,6 +12,8 @@ export class Unit {
 	tenancyId: number;
 
 	constructor(data: IUnit, id?: number) {
+		onLog('data raw unit', data);
+
 		this.id = setInstanceId(id || data.id);
 		this.name = data.name?.trim();
 		this.description = convertBlobToString(data?.description);

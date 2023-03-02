@@ -1,4 +1,4 @@
-import { BAD_REQUEST } from 'http-status';
+import { BAD_REQUEST, NOT_FOUND } from 'http-status';
 import { Request, Response } from 'express';
 
 import { Controller } from 'src/core/controllers';
@@ -33,6 +33,7 @@ export class UnitController extends Controller {
 		const { id } = req.params;
 		const address = setAddress(req);
 		const unit = new UnitModel({ ...req.body, address }, Number(id));
+		onLog('Unit to update', unit);
 
 		this.unitService
 			.save(unit)
@@ -54,7 +55,10 @@ export class UnitController extends Controller {
 
 		this.unitService
 			.read(options, Number(id))
-			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
+			.then(data => {
+				if (id && data.tenancyId !== tenancyId) return ResponseHandle.onError({ res, message: 'Unit Not Found.', status: NOT_FOUND });
+				return ResponseHandle.onSuccess({ res, data, status: data.status });
+			})
 			.catch(err => ResponseHandle.onError({ res, message: err.message, status: err.status }));
 	}
 
