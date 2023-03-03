@@ -2,6 +2,6 @@ export interface IPlan {
 	id: number;
 	name: string;
 	description?: Blob;
-	userLimit?: number;
+	usersLimit?: number;
 	unitaryValue: number;
 }

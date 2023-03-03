@@ -1,7 +1,7 @@
 import { onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { ReadOptionsModel, UserModel, UserViewModel } from 'src/repositories/models';
-import { IAddress, IServiceOptions, ITenacy, IUser, IUserViewModel } from 'src/repositories/types';
+import { IAddress, IServiceOptions, ITenancy, IUser, IUserViewModel } from 'src/repositories/types';
 import { convertDataValues, deleteField } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 
@@ -121,7 +121,7 @@ export class UserService extends DatabaseService {
 
 	private async createTenancy(planId: number) {
 		try {
-			const tenacy = new Tenancy({ totalUsers: 1, active: true } as ITenacy);
+			const tenacy = new Tenancy({ totalUsers: 1, active: true } as ITenancy);
 			const [tenancyId] = await this.db('tenancies').insert(convertDataValues(tenacy));
 
 			await this.db('tenancies_plans').insert({ plan_id: planId, tenancy_id: tenancyId });

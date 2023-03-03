@@ -5,3 +5,5 @@ export * from './user.service';
 export * from './auth.service';
 export * from './mail.service';
 export * from './unit.service';
+export * from './keyword.service';
+export * from './theme.service';

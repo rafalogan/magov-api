@@ -4,8 +4,8 @@ import { Response } from 'express';
 
 export interface ErrorResponseParams {
 	res: Response;
-	message: string;
-	err?: Error;
+	message?: string;
+	err?: Error | any;
 	status?: number;
 	dirname?: string;
 	filename?: string;

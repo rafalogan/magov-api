@@ -5,7 +5,6 @@ import { equalsOrError, isRequired, notExistisOrError, requiredFields, setAddres
 import { AuthService } from 'src/services';
 import { onLog, ResponseHandle } from 'src/core/handlers';
 import { Credentials, RecoveryModel, UserModel } from 'src/repositories/models';
-import { IUserModel } from 'src/repositories/types';
 
 export class AuthController {
 	constructor(private authService: AuthService) {}

@@ -2,19 +2,19 @@
 	{
 		"name": "Essencial",
 		"description": "Conteudo plano esseicial",
-		"user_limit": 20,
+		"users_limit": 20,
 		"unitary_value": 10000
 	},
 	{
 		"name": "Explorer",
 		"description": "Conteudo plano explorer",
-		"user_limit": 70,
+		"users_limit": 70,
 		"unitary_value": 30000
 	},
 	{
 		"name": "Master",
 		"description": "Conteudo plano Master",
-		"user_limit": 100,
+		"users_limit": 100,
 		"unitary_value": 55000
 	}
 ]

@@ -13,3 +13,5 @@ export * from './address';
 export * from './module';
 export * from './mail';
 export * from './plantiff';
+export * from './keyword';
+export * from './theme';

@@ -10,7 +10,8 @@ import { ResponseHandle } from 'src/core/handlers';
 import { messages } from 'src/utils/messages';
 import { ErrorResponseParams } from 'src/repositories/types';
 
-const isValid = !process.env.NODE_ENV || process.env.NODE_ENV !== 'production';
+const isValid = !process.env.NODE_ENV || process.env.NODE_ENV.toLowerCase().includes('dev');
+export const isProd = () => process.env.NODE_ENV?.toLowerCase().includes('prod');
 
 export const execDotenv = () => (isValid ? dotenv.config({ path: process.env.NODE_ENV === 'test' ? './.env.testing' : './.env' }) : null);
 
