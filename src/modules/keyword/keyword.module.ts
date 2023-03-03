@@ -4,7 +4,7 @@ import { KeywordService } from 'src/services';
 import { KeywordController } from './keyword.controller';
 import { KeywordRoute } from './keyword.route';
 
-export class keywordModule extends CommonModule {
+export class KeywordModule extends CommonModule {
 	private readonly keywordController: KeywordController;
 	private keywordRoute: KeywordRoute;
 
