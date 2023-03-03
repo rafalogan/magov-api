@@ -1,8 +1,8 @@
-import {} from 'http-status';
+import { UNAUTHORIZED } from 'http-status';
 import { Request, Response } from 'express';
 
 import { KeywordService } from 'src/services';
-import { ResponseHandle } from 'src/core/handlers';
+import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
 
 export class KeywordController {
 	constructor(private keywordService: KeywordService) {}
@@ -21,6 +21,7 @@ export class KeywordController {
 	}
 
 	remove(req: Request, res: Response) {
+		if (getTenancyByToken(req)) return ResponseHandle.onError({ res, message: 'Unauthorized', status: UNAUTHORIZED });
 		const { id } = req.params;
 		const filter = Number(id) || id;
 

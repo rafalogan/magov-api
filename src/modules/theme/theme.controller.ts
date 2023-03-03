@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { Controller } from 'src/core/controllers';
 import { ThemeService } from 'src/services';
 import { isRequired, notExistisOrError, requiredFields } from 'src/utils';
-import { ResponseHandle } from 'src/core/handlers';
+import { onLog, ResponseHandle } from 'src/core/handlers';
 import { Theme } from 'src/repositories/entities';
 
 export class ThemeController extends Controller {
@@ -38,10 +38,13 @@ export class ThemeController extends Controller {
 
 	list(req: Request, res: Response) {
 		const { id } = req.params;
-		const active = req.query?.active === 'true' || undefined;
+		const active = req.query?.active;
+		const filter = Number(id) || id;
+
+		onLog('filter to read', filter);
 
 		this.themeService
-			.read(Number(id), active)
+			.read(filter, active)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -56,10 +59,10 @@ export class ThemeController extends Controller {
 	}
 
 	private validateRequest(req: Request) {
-		const { name, actve } = req.body;
+		const { name, active } = req.body;
 		const requireds = requiredFields([
 			{ field: name, message: 'name' },
-			{ field: actve, message: 'actve' },
+			{ field: active, message: 'actve' },
 		]);
 
 		notExistisOrError(requireds, requireds?.map(m => isRequired(m)).join('\n') as string);

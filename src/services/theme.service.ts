@@ -1,4 +1,5 @@
 import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+import { onLog } from 'src/core/handlers';
 
 import { Theme } from 'src/repositories/entities';
 import { IServiceOptions } from 'src/repositories/types';
@@ -31,7 +32,7 @@ export class ThemeService extends DatabaseService {
 
 			if (!fromDB?.id) return { message: 'Theme not found', status: NOT_FOUND };
 
-			const toSave = new Theme({ ...fromDB, data });
+			const toSave = new Theme({ ...fromDB, ...data });
 			await this.db('themes').where({ id }).update(convertDataValues(toSave));
 
 			return { message: 'Theme updated successfully', data: toSave };
@@ -40,7 +41,9 @@ export class ThemeService extends DatabaseService {
 		}
 	}
 
-	async read(filter?: string | number, active?: boolean) {
+	async read(filter?: string | number, active?: string) {
+		onLog('filter', filter);
+		onLog('active', active);
 		if (filter) {
 			return this.db('themes')
 				.where({ id: filter })
@@ -51,8 +54,9 @@ export class ThemeService extends DatabaseService {
 		}
 
 		if (active) {
+			const value = active === 'true';
 			return this.db('themes')
-				.where({ active })
+				.where({ active: value })
 				.then(res => res?.map(t => new Theme(t)))
 				.catch(err => err);
 		}

@@ -4,7 +4,7 @@ import { IPlan, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { Plan } from 'src/repositories/entities';
 import { convertDataValues } from 'src/utils';
-import { ReadOptionsModel } from 'src/repositories/models';
+import { PlanModel, ReadOptionsModel } from 'src/repositories/models';
 
 export class PlanService extends DatabaseService {
 	constructor(options: IServiceOptions) {
@@ -44,7 +44,7 @@ export class PlanService extends DatabaseService {
 
 		return this.findAll('plans', options)
 			.then(res => {
-				const data = res.data?.map((p: IPlan) => new Plan(p));
+				const data = res.data?.map((p: any) => new PlanModel(p));
 				return { ...res, data };
 			})
 			.catch(err => err);
@@ -56,7 +56,7 @@ export class PlanService extends DatabaseService {
 
 			if (!fromDb?.id) return { message: 'Plan not found', status: NOT_FOUND };
 
-			return new Plan(convertDataValues(fromDb, 'camel'));
+			return new PlanModel(convertDataValues(fromDb, 'camel'));
 		} catch (err) {
 			return err;
 		}

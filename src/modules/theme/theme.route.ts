@@ -16,7 +16,7 @@ export class ThemeRoute extends Routes {
 			.all(methodNotAllowed);
 
 		this.app
-			.route('themes/:id')
+			.route('/themes/:id')
 			.all(this.auth?.exec().authenticate())
 			.get(this.themeController.list.bind(this.themeController))
 			.put(this.themeController.edit.bind(this.themeController))
