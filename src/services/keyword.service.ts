@@ -1,5 +1,6 @@
 import { BAD_REQUEST } from 'http-status';
 import { Knex } from 'knex';
+
 import { Keyword } from 'src/repositories/entities';
 import { IServiceOptions } from 'src/repositories/types';
 import { convertDataValues } from 'src/utils';
