@@ -1,10 +1,10 @@
-import { BAD_REQUEST } from 'http-status';
+import { BAD_REQUEST, UNAUTHORIZED } from 'http-status';
 import { Request, Response } from 'express';
 
 import { Controller } from 'src/core/controllers';
 import { PlanService } from 'src/services';
 import { isRequired, notExistisOrError, requiredFields } from 'src/utils';
-import { ResponseHandle } from 'src/core/handlers';
+import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
 import { Plan } from 'src/repositories/entities';
 import { ReadOptionsModel } from 'src/repositories/models';
 
@@ -14,6 +14,7 @@ export class PlanController extends Controller {
 	}
 
 	save(req: Request, res: Response) {
+		if (getTenancyByToken(req)) return ResponseHandle.onError({ message: 'User Unauthorized', status: UNAUTHORIZED, res });
 		try {
 			this.validRequest(req);
 		} catch (message: any) {
@@ -29,6 +30,8 @@ export class PlanController extends Controller {
 	}
 
 	edit(req: Request, res: Response) {
+		if (getTenancyByToken(req)) return ResponseHandle.onError({ message: 'User Unauthorized', status: UNAUTHORIZED, res });
+
 		const { id } = req.params;
 		const plan = new Plan(req.body, Number(id));
 
@@ -49,6 +52,7 @@ export class PlanController extends Controller {
 	}
 
 	remove(req: Request, res: Response) {
+		if (getTenancyByToken(req)) return ResponseHandle.onError({ message: 'User Unauthorized', status: UNAUTHORIZED, res });
 		const { id } = req.params;
 
 		this.planService
@@ -66,6 +70,6 @@ export class PlanController extends Controller {
 			{ field: unitaryValue, message: 'unitaryValue' },
 		]);
 
-		notExistisOrError(requireds, requireds?.map(i => isRequired(i)).join('\n') as string);
+		notExistisOrError(requireds, requireds?.map(i => isRequired(i)).join('\n ') as string);
 	}
 }

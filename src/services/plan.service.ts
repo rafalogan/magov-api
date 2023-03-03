@@ -13,9 +13,9 @@ export class PlanService extends DatabaseService {
 
 	async create(data: Plan) {
 		try {
-			const fromDB = await this.getPlan(data.name);
+			const fromDB = (await this.getPlan(data.name)) as Plan;
 
-			if (fromDB) return { message: 'Plan already exists', status: BAD_REQUEST };
+			if (fromDB?.id) return { message: 'Plan already exists', status: BAD_REQUEST };
 			const [id] = await this.db('plans').insert(convertDataValues(data));
 
 			return { message: 'Plan save with success', data: { ...data, id } };

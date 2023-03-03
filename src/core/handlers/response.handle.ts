@@ -4,8 +4,6 @@ import { onError, onWarn } from 'src/core/handlers/log.handler';
 import { ErrorResponseParams, SucessResponseParams } from 'src/repositories/types';
 
 export class ResponseHandle {
-	constructor() {}
-
 	static onSuccess(options: SucessResponseParams) {
 		const { res, data, status, message } = options;
 
