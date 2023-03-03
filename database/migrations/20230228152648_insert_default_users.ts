@@ -12,5 +12,5 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-	return DefaultUsers.forEach((user: any) => knex('users').where('email', user.email).del());
+	return DefaultUsers.forEach(({ email }) => knex('users').where({ email }).del());
 }

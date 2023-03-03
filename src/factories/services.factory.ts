@@ -3,11 +3,12 @@ import { RedisClientType } from 'redis';
 
 import { MailerConfig } from 'src/config';
 import { IServiceOptions } from 'src/repositories/types';
-import { AuthService, KeywordService, MailService, ThemeService, UnitService, UserService } from 'src/services';
+import { AuthService, KeywordService, MailService, PlanService, ThemeService, UnitService, UserService } from 'src/services';
 
 export class ServicesFactory {
 	authService: AuthService;
 	userService: UserService;
+	planService: PlanService;
 	mailService: MailService;
 	unitService: UnitService;
 	keywordService: KeywordService;
@@ -20,6 +21,7 @@ export class ServicesFactory {
 		this.unitService = new UnitService({ ...this.setServiceOptions() });
 		this.keywordService = new KeywordService(this.setServiceOptions());
 		this.themeService = new ThemeService(this.setServiceOptions());
+		this.planService = new PlanService(this.setServiceOptions());
 	}
 
 	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client });

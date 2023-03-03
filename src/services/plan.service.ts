@@ -61,4 +61,17 @@ export class PlanService extends DatabaseService {
 			return err;
 		}
 	}
+
+	async delete(id: number) {
+		try {
+			const fromDB = (await this.getPlan(id)) as Plan;
+
+			if (!fromDB?.id) return { message: 'Plan not found', status: NOT_FOUND };
+
+			await this.db('plans').where({ id }).del();
+			return { message: 'Plan deleted successfully', data: { ...fromDB } };
+		} catch (err) {
+			return err;
+		}
+	}
 }
