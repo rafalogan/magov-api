@@ -2,7 +2,7 @@ import isEmpty from 'is-empty';
 import bcrypt from 'bcrypt';
 
 import { DatabaseException, PaymentException, ResponseException } from 'src/utils/exceptions';
-import { Credentials, UserModel, UserViewModel } from 'src/repositories/models';
+import { Credentials, UserViewModel } from 'src/repositories/models';
 import { INotificationOption, IsMachValidateOptions } from 'src/repositories/types';
 import { User } from 'src/repositories/entities';
 import { NotificationContext } from 'src/core/handlers/notification-context.handle';
@@ -16,7 +16,7 @@ export const baseUrl = () => {
 	return `${prefix}${host}:${port}`;
 };
 
-export const existsOrError = (value: any, message: string): void | ResponseException => {
+export const existsOrError = (value: any, message: any): void | ResponseException => {
 	if (isEmpty(value)) throw message;
 	if (!value) throw message;
 	if (Array.isArray(value) && value.length === 0) throw message;
@@ -25,7 +25,7 @@ export const existsOrError = (value: any, message: string): void | ResponseExcep
 	if (value instanceof ResponseException || value instanceof DatabaseException) throw value;
 };
 
-export const notExistisOrError = (value: any, message: string) => {
+export const notExistisOrError = (value: any, message: any) => {
 	try {
 		existsOrError(value, message);
 	} catch (message) {
