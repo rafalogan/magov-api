@@ -1,4 +1,5 @@
-import { NOT_FOUND } from 'http-status';
+import { NOT_FOUND, UNAUTHORIZED } from 'http-status';
+import { onLog } from 'src/core/handlers';
 
 import { Rule } from 'src/repositories/entities';
 import { IServiceOptions } from 'src/repositories/types';
@@ -11,10 +12,16 @@ export class RuleService extends DatabaseService {
 	}
 
 	async create(data: Rule) {
-		return this.db('rules')
-			.insert(convertDataValues(data))
-			.then(([id]) => ({ message: 'Rule saved successfully', data: { ...data, id } }))
-			.catch(err => err);
+		try {
+			const fromDb = (await this.getRule(data.name)) as Rule;
+
+			if (fromDb.id) throw { message: 'Rule already exists', status: UNAUTHORIZED };
+
+			const [id] = await this.db('rules').insert(convertDataValues(data));
+			return { message: 'Rule saved successfully', data: { ...data, id } };
+		} catch (err) {
+			return err;
+		}
 	}
 
 	async update(data: Rule, id: number) {
@@ -22,9 +29,9 @@ export class RuleService extends DatabaseService {
 			const fromDB = (await this.getRule(id)) as Rule;
 
 			if (!fromDB.id) throw { message: 'Rule not found', status: NOT_FOUND };
-			const rule = new Rule({ ...convertDataValues(fromDB, 'camel'), ...data });
+			const rule = new Rule({ ...fromDB, ...data });
 
-			await this.db('rules').where({ id }).insert(convertDataValues(rule));
+			await this.db('rules').where({ id }).update(convertDataValues(rule));
 			return { message: 'Rule updated successfully', data: rule };
 		} catch (err) {
 			return err;
@@ -41,7 +48,11 @@ export class RuleService extends DatabaseService {
 
 	async getRule(value: number | string) {
 		try {
-			const fromDB = await this.db('rules').where({ id: value }).orWhere({ name: value }).first();
+			const fromDB =
+				typeof value === 'number'
+					? await this.db('rules').where({ id: value }).first()
+					: await this.db('rules').where({ name: value }).first();
+
 			if (!fromDB?.id) throw { message: 'Rule not found', status: NOT_FOUND };
 
 			return new Rule(convertDataValues(fromDB, 'camel'));
@@ -53,11 +64,15 @@ export class RuleService extends DatabaseService {
 	async delete(id: number) {
 		try {
 			const fromDB = (await this.getRule(id)) as Rule;
+
+			onLog('element from delete', fromDB);
+
 			if (!fromDB?.id) throw { message: 'Rule not found', status: NOT_FOUND };
 
-			await this.db('users_rules').where({ rules_id: fromDB.id }).del();
-			await this.db('rules').where({ id: fromDB.id }).del();
+			const rulesUsersIds = await this.db('users_rules').where({ rule_id: fromDB.id });
+			if (rulesUsersIds.length !== 0) await this.db('users_rules').where({ rules_id: fromDB.id }).del();
 
+			await this.db('rules').where({ id: fromDB.id }).del();
 			return { message: 'Rule deleted successfull', data: fromDB };
 		} catch (err) {
 			return err;

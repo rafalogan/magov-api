@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { Controller } from 'src/core/controllers';
 import { RuleService } from 'src/services';
 import { existsOrError, isRequired, notExistisOrError } from 'src/utils';
-import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
+import { getTenancyByToken, onLog, ResponseHandle } from 'src/core/handlers';
 import { Rule } from 'src/repositories/entities';
 
 export class RuleController extends Controller {
@@ -14,13 +14,9 @@ export class RuleController extends Controller {
 
 	async save(req: Request, res: Response) {
 		try {
-			this.verifyRequest(req);
+			await this.verifyRequest(req);
 		} catch (err) {
 			return ResponseHandle.onError({ res, err });
-		}
-
-		if (getTenancyByToken(req)) {
-			return ResponseHandle.onError({ res, message: 'This user is not authorized for this action', status: UNAUTHORIZED });
 		}
 
 		const rule = new Rule(req.body);
@@ -50,19 +46,23 @@ export class RuleController extends Controller {
 	}
 
 	remove(req: Request, res: Response) {
-		const { id } = req.body;
+		const { id } = req.params;
 
 		this.ruleService
-			.delete(id)
+			.delete(Number(id))
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
 	async verifyRequest(req: Request) {
-		const { name } = req.body;
-		const fromDB = await this.ruleService.getRule(name);
+		try {
+			const { name } = req.body;
+			const tenantId = getTenancyByToken(req);
 
-		notExistisOrError(fromDB, { message: 'Rules already exist.', status: FORBIDDEN });
-		existsOrError(name, { message: isRequired('name'), status: BAD_REQUEST });
+			notExistisOrError(tenantId, { message: 'This user is not authorized for this action', status: UNAUTHORIZED });
+			existsOrError(name, { message: isRequired('name'), status: BAD_REQUEST });
+		} catch (err: any) {
+			return err;
+		}
 	}
 }
