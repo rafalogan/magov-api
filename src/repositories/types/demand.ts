@@ -23,9 +23,9 @@ export interface IDemandModel extends IDemand, IPlantiff {
 	themes: number[];
 }
 
-export interface IDemandViewModel {
+export interface IDemandViewModel extends IID {
 	name: string;
-	description: string;
+	description: string | Blob;
 	favorites?: boolean;
 	level: number;
 	active: boolean;
