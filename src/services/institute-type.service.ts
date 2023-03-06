@@ -1,4 +1,4 @@
-import { NOT_FOUND } from 'http-status';
+import { FORBIDDEN, NOT_FOUND } from 'http-status';
 import { InstituteType } from 'src/repositories/entities';
 import { IServiceOptions } from 'src/repositories/types';
 import { convertDataValues } from 'src/utils';
@@ -10,10 +10,16 @@ export class InstituteTypeService extends DatabaseService {
 	}
 
 	async create(data: InstituteType) {
-		return this.db('institutes_types')
-			.insert(convertDataValues(data))
-			.then(([id]) => ({ message: 'Institute type created successfull', data: { ...data, id } }))
-			.catch(err => err);
+		try {
+			const fromDB = (await this.getInstituteType(data.name)) as InstituteType;
+
+			if (fromDB.id) throw { message: 'Institute type already exists', status: FORBIDDEN };
+
+			const [id] = await this.db('institutes_types').insert(convertDataValues(data));
+			return { message: 'Institute type saved successfull', data: { ...data, id } };
+		} catch (err) {
+			return err;
+		}
 	}
 
 	async update(data: InstituteType, id: number) {

@@ -58,8 +58,5 @@ export class InstituteTypeController extends Controller {
 	async verifyRequired(req: Request) {
 		const { name } = req.body;
 		existsOrError(name, { message: isRequired('name'), status: BAD_REQUEST });
-
-		const fromDB = await this.instituteTypeService.getInstituteType(name);
-		notExistisOrError(fromDB, { message: 'Institute type already exists', status: FORBIDDEN });
 	}
 }
