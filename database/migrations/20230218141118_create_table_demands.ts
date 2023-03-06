@@ -8,6 +8,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.boolean('favorite').notNullable().defaultTo(false);
 		table.integer('level').notNullable();
 		table.boolean('actice').notNullable().defaultTo(true);
+		table.timestamp('dead_line').notNullable();
 		table.string('status', 45).nullable();
 		table.integer('unit_id').unsigned().references('id').inTable('units').notNullable();
 		table.integer('user_id').unsigned().references('id').inTable('users').notNullable();

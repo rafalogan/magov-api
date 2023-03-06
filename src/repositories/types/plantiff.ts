@@ -1,4 +1,5 @@
 import { IAddress } from './address';
+import { IContactModel } from './contact';
 import { IID } from './shared';
 import { ITenancyIdRequired } from './tenacy';
 
@@ -15,10 +16,8 @@ export interface IPlantiff extends IID, ITenancyIdRequired {
 	instituteTypeId: number;
 }
 
-export interface IPlantiffModel extends IPlantiff {
+export interface IPlantiffModel extends IPlantiff, IContactModel {
 	instituteType: string;
-	phone?: string;
-	email?: string;
 	address: IAddress;
 }
 

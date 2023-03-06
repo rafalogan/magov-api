@@ -17,3 +17,5 @@ export * from './keyword';
 export * from './theme';
 export * from './rule';
 export * from './institute-type';
+export * from './demand';
+export * from './contact';
