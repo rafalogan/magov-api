@@ -15,3 +15,5 @@ export * from './mail';
 export * from './plantiff';
 export * from './keyword';
 export * from './theme';
+export * from './rule';
+export * from './institute-type';

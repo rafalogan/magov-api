@@ -3,6 +3,7 @@ import { IID } from './shared';
 export interface ITenancy extends IID {
 	tenancyKey?: string;
 	totalUsers?: number;
+	dueDate: Date | string;
 	active: boolean;
 	plans: ITenancyPlan[];
 }

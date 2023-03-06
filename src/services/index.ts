@@ -7,3 +7,5 @@ export * from './mail.service';
 export * from './unit.service';
 export * from './keyword.service';
 export * from './theme.service';
+export * from './rule.service';
+export * from './institute-type.service';
