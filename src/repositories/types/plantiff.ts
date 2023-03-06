@@ -17,7 +17,6 @@ export interface IPlantiff extends IID, ITenancyIdRequired {
 }
 
 export interface IPlantiffModel extends IPlantiff, IContactModel {
-	instituteType: string;
 	address: IAddress;
 }
 

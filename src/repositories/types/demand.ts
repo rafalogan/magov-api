@@ -5,7 +5,7 @@ import { ITheme } from './theme';
 
 export interface IDemand extends IID {
 	name: string;
-	description: string;
+	description: string | Blob;
 	favorites?: boolean;
 	level: number;
 	active: boolean;
@@ -18,6 +18,7 @@ export interface IDemand extends IID {
 }
 
 export interface IDemandModel extends IDemand, IPlantiff {
+	plantiff: IPlantiffModel;
 	keywords: string[];
 	themes: number[];
 }
