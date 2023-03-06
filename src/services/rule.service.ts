@@ -1,4 +1,4 @@
-import { NOT_FOUND, UNAUTHORIZED } from 'http-status';
+import { FORBIDDEN, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 
 import { Rule } from 'src/repositories/entities';
@@ -15,7 +15,7 @@ export class RuleService extends DatabaseService {
 		try {
 			const fromDb = (await this.getRule(data.name)) as Rule;
 
-			if (fromDb.id) throw { message: 'Rule already exists', status: UNAUTHORIZED };
+			if (fromDb.id) throw { message: 'Rule already exists', status: FORBIDDEN };
 
 			const [id] = await this.db('rules').insert(convertDataValues(data));
 			return { message: 'Rule saved successfully', data: { ...data, id } };

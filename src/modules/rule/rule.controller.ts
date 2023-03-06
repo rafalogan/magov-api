@@ -1,10 +1,10 @@
-import { BAD_REQUEST, FORBIDDEN, UNAUTHORIZED } from 'http-status';
+import { BAD_REQUEST, UNAUTHORIZED } from 'http-status';
 import { Request, Response } from 'express';
 
 import { Controller } from 'src/core/controllers';
 import { RuleService } from 'src/services';
 import { existsOrError, isRequired, notExistisOrError } from 'src/utils';
-import { getTenancyByToken, onLog, ResponseHandle } from 'src/core/handlers';
+import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
 import { Rule } from 'src/repositories/entities';
 
 export class RuleController extends Controller {
