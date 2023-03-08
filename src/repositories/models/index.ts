@@ -11,3 +11,4 @@ export * from './unit.model';
 export * from './demand.model';
 export * from './demand-view.model';
 export * from './plaintiff.model';
+export * from './demandReadOptions.model';

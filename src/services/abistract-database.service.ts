@@ -87,4 +87,18 @@ export abstract class DatabaseService extends CacheService {
 			return err;
 		}
 	}
+	protected async findAllDadaByArray(table: string, ids?: number[]) {
+		try {
+			if (!ids?.length) return [];
+			const result: any = [];
+			ids.forEach(async id => {
+				const item = await this.db(table).where({ id }).first();
+				result.push(convertDataValues(item, 'camel'));
+			});
+
+			return result;
+		} catch (err) {
+			return err;
+		}
+	}
 }

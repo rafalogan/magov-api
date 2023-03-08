@@ -17,17 +17,18 @@ export class KeywordService extends CacheService {
 		this.table = 'keywords';
 	}
 
-	async read(id?: number) {
+	async read(id?: number | string) {
 		if (id) {
 			return this.db(this.table)
 				.where({ id })
+				.orWhere({ name: id })
 				.first()
-				.then(res => new Keyword(convertDataValues(res)))
+				.then(res => new Keyword(convertDataValues(res, 'camel')))
 				.catch(err => err);
 		}
 
 		return this.db(this.table)
-			.then(res => res?.map(i => new Keyword(convertDataValues(i))))
+			.then(res => res?.map(i => new Keyword(convertDataValues(i, 'camel'))))
 			.catch(err => err);
 	}
 

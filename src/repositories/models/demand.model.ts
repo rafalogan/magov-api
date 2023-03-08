@@ -11,21 +11,23 @@ export class DemandModel {
 	active: boolean;
 	deadLine: Date;
 	status?: string;
+	createdAt: Date;
 	unitId: number;
 	userId: number;
 	plaintiff: PlaintiffModel;
 	tenancyId: number;
 	keywords: string[];
-	themes: number[];
+	themes: string[];
 
 	constructor(data: IDemandModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
 		this.name = data.name.trim();
 		this.description = convertBlobToString(data.description) as string;
-		this.favorites = !!data.favorites;
+		this.favorites = !!data.favorites ?? false;
 		this.level = data.level;
 		this.active = !!data.active;
 		this.deadLine = convertToDate(data.deadLine);
+		this.createdAt = data.createdAt ? convertToDate(data.createdAt) : new Date();
 		this.status = data.status?.trim();
 		this.unitId = Number(data.unitId);
 		this.userId = Number(data.userId);

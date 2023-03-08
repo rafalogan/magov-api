@@ -19,7 +19,7 @@ export class Demand {
 		this.id = setInstanceId(id || data.id);
 		this.name = data.name.trim();
 		this.description = convertBlobToString(data.description) as string;
-		this.favorites = !!data.favorites;
+		this.favorites = !!data.favorites || undefined;
 		this.level = Number(data.level);
 		this.active = !!data.active;
 		this.deadLine = convertToDate(data.deadLine);
