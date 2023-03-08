@@ -5,6 +5,7 @@ import { MailerConfig } from 'src/config';
 import { IServiceOptions } from 'src/repositories/types';
 import {
 	AuthService,
+	DemandService,
 	InstituteTypeService,
 	KeywordService,
 	MailService,
@@ -25,6 +26,7 @@ export class ServicesFactory {
 	themeService: ThemeService;
 	ruleService: RuleService;
 	instituteTypeService: InstituteTypeService;
+	demandService: DemandService;
 
 	constructor(private conn: Knex, private client: RedisClientType, private mailConfig: MailerConfig) {
 		this.userService = new UserService({ ...this.setServiceOptions() });
@@ -36,6 +38,7 @@ export class ServicesFactory {
 		this.planService = new PlanService(this.setServiceOptions());
 		this.ruleService = new RuleService(this.setServiceOptions());
 		this.instituteTypeService = new InstituteTypeService(this.setServiceOptions());
+		this.demandService = new DemandService(this.setServiceOptions(), this.keywordService);
 	}
 
 	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client });
