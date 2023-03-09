@@ -1,4 +1,5 @@
 import { IAddress } from './address';
+import { IContactModel } from './contact';
 import { IID } from './shared';
 import { ITenancyIdRequired } from './tenacy';
 
@@ -7,7 +8,7 @@ export interface IPlantiff extends IID, ITenancyIdRequired {
 	birthday: Date | string;
 	institute: string;
 	cpfCnpj: string;
-	relationshipsType: string;
+	relationshipType?: string;
 	observation?: Blob | string;
 	relatives?: string;
 	voterRegistration?: string;
@@ -15,11 +16,9 @@ export interface IPlantiff extends IID, ITenancyIdRequired {
 	instituteTypeId: number;
 }
 
-export interface IPlantiffModel extends IPlantiff {
-	instituteType: string;
-	phone?: string;
-	email?: string;
+export interface IPlantiffModel extends IPlantiff, IContactModel {
 	address: IAddress;
+	active: boolean;
 }
 
 export interface IPlantiffContact extends IID, ITenancyIdRequired {

@@ -15,8 +15,8 @@ export class UserController extends Controller {
 	async save(req: Request, res: Response) {
 		try {
 			await this.isUserValid(req);
-		} catch (message: any) {
-			return ResponseHandle.onError({ res, message, status: BAD_REQUEST });
+		} catch (err: any) {
+			return ResponseHandle.onError({ res, err });
 		}
 
 		const address = setAddress(req);
@@ -86,11 +86,7 @@ export class UserController extends Controller {
 			{ field: uf, message: 'address.uf' },
 		]);
 
-		notExistisOrError(requireds, `${requireds?.join(' is required \n')} is required`);
-		equalsOrError(password, confirmPassword, 'confirmPassword should be equal to password');
-
-		const user = await this.userService.getUser(email);
-
-		notExistisOrError(user, `Already user withi this e-mail: ${email}`);
+		notExistisOrError(requireds, { message: `${requireds?.join(' is required \n')} is required`, status: BAD_REQUEST });
+		equalsOrError(password, confirmPassword, { message: 'confirmPassword should be equal to password', status: BAD_REQUEST });
 	}
 }

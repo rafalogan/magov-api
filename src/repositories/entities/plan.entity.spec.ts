@@ -1,4 +1,4 @@
-import { describe, expect, it, vitest, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vitest } from 'vitest';
 import { faker } from '@faker-js/faker';
 
 import { IPlan } from '../types';
@@ -9,7 +9,7 @@ describe('#Plan Entity tests', () => {
 		id: 10,
 		name: faker.name.fullName(),
 		description: new Blob([faker.lorem.paragraphs(5)]),
-		userLimit: 100,
+		usersLimit: 100,
 		unitaryValue: 250,
 	};
 
@@ -24,6 +24,6 @@ describe('#Plan Entity tests', () => {
 
 		expect(result).instanceof(Plan);
 		expect(result).toStrictEqual(expected);
-		expect(result.decription).toBeDefined();
+		expect(result.description).toBeDefined();
 	});
 });

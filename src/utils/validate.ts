@@ -35,7 +35,7 @@ export const notExistisOrError = (value: any, message: any) => {
 	throw message;
 };
 
-export const equalsOrError = (valueA: any, valueB: any, message: string) => {
+export const equalsOrError = (valueA: any, valueB: any, message: any) => {
 	if (valueA !== valueB) throw message;
 };
 

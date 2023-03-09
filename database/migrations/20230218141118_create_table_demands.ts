@@ -7,8 +7,10 @@ export async function up(knex: Knex): Promise<void> {
 		table.binary('description').notNullable();
 		table.boolean('favorite').notNullable().defaultTo(false);
 		table.integer('level').notNullable();
-		table.boolean('actice').notNullable().defaultTo(true);
+		table.boolean('active').notNullable().defaultTo(true);
+		table.timestamp('dead_line').notNullable();
 		table.string('status', 45).nullable();
+		table.timestamp('created_at').notNullable();
 		table.integer('unit_id').unsigned().references('id').inTable('units').notNullable();
 		table.integer('user_id').unsigned().references('id').inTable('users').notNullable();
 		table.integer('plaintiff_id').unsigned().references('id').inTable('plaintiffs').notNullable();

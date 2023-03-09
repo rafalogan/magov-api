@@ -7,13 +7,13 @@ export class ResponseHandle {
 	static onSuccess(options: SucessResponseParams) {
 		const { res, data, status, message } = options;
 
-		if (message) return res.status(status || OK).json({ data, status: status || OK, message });
-		return res.status(status || OK).json(data);
+		if (message) return res.status(Number(status) || OK).json({ data, status: status || OK, message });
+		return res.status(Number(status) || OK).json(data);
 	}
 
 	static onError(options: ErrorResponseParams) {
 		const { res, message, err, status } = options;
-		const sts = status || err?.status || INTERNAL_SERVER_ERROR;
+		const sts = Number(status || err?.status) || INTERNAL_SERVER_ERROR;
 		const sendMessage = !sts || sts === 500 ? 'internal server error' : message;
 		const msg = message || err?.message;
 
