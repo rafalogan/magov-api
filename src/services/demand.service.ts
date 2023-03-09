@@ -1,9 +1,9 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
-import { Demand, Keyword, Plaintiff, Plan, Theme } from 'src/repositories/entities';
-import { DemandModel, DemandViewModel, ReadOptionsModel, PlaintiffModel, DemandListModel } from 'src/repositories/models';
+import { Demand, Plaintiff } from 'src/repositories/entities';
+import { DemandListModel, DemandModel, DemandViewModel, PlaintiffModel, ReadOptionsModel } from 'src/repositories/models';
 import { IDemand, IDemands, IPlantiff, IPlantiffModel, IServiceOptions, ITheme } from 'src/repositories/types';
-import { convertDataValues, convertToDate, equalsOrError, existsOrError, isRequired } from 'src/utils';
+import { convertDataValues, equalsOrError, existsOrError, isRequired } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { KeywordService } from './keyword.service';
 
@@ -52,10 +52,22 @@ export class DemandService extends DatabaseService {
 				await this.setThemes(data.themes, id);
 			}
 
-			const demandToUpdate = new Demand({ ...demand, ...data, plaintiffId: data.plaintiff.id as number }, id);
+			const demandToUpdate = new Demand(
+				{ ...demand, ...data, plaintiffId: demand.plaintiff.id as number, tenancyId: demand.tenancyId },
+				id
+			);
 			await this.db('demands').where({ id }).update(convertDataValues(demandToUpdate));
 
-			return { message: 'Demand updated successfully', data: demandToUpdate };
+			return {
+				message: 'Demand updated successfully',
+				data: {
+					...demand,
+					...demandToUpdate,
+					Plaintiff: demand.plaintiff,
+					themes: data.themes,
+					keywords: data.keywords,
+				},
+			};
 		} catch (err) {
 			return err;
 		}
@@ -80,7 +92,16 @@ export class DemandService extends DatabaseService {
 			const demandToUpdate = new Demand({ ...demand, ...data, plaintiffId: data.plaintiff.id as number }, id);
 			await this.db('demands').where({ id }).update(convertDataValues(demandToUpdate));
 
-			return { message: 'Demand updated successfully', data: demandToUpdate };
+			return {
+				message: 'Demand updated successfully',
+				data: {
+					...demand,
+					...demandToUpdate,
+					Plaintiff: demand.plaintiff,
+					themes: data.themes,
+					keyword: data.keywords,
+				},
+			};
 		} catch (err) {
 			return err;
 		}
@@ -121,6 +142,7 @@ export class DemandService extends DatabaseService {
 				.select(
 					{
 						id: 'd.id',
+						name: 'd.name',
 						favorite: 'd.favorite',
 						level: 'd.level',
 						description: 'd.description',
@@ -149,36 +171,75 @@ export class DemandService extends DatabaseService {
 
 	async getDemand(id: number) {
 		try {
-			const fromDB = (await this.db('demands').where({ id }).first()) as IDemand;
-			existsOrError(fromDB.id, { message: 'Demand Not Found', status: NOT_FOUND });
-			const raw = convertDataValues(fromDB, 'camel') as IDemand;
+			const fromDB = (await this.db({ d: 'demands', p: 'plaintiffs', a: 'adresses', c: 'contacts', u: 'users' })
+				.select(
+					{
+						id: 'd.id',
+						name: 'd.name',
+						description: 'd.description',
+						favorite: 'd.favorite',
+						level: 'd.level',
+						active: 'd.active',
+						dead_line: 'd.dead_line',
+						status: 'd.status',
+						created_at: 'd.created_at',
+						unit_id: 'd.unit_id',
+						user_id: 'd.user_id',
+						plaintiff_id: 'd.plaintiff_id',
+						tenancy_id: 'd.tenancy_id',
+					},
+					{
+						plaintiff: 'p.name',
+						birthday: 'p.birthday',
+						cpf_cnpj: 'p.cpf_cnpj',
+						institute: 'p.institute',
+						relationship_type: 'p.relationship_type',
+						relatives: 'p.relatives',
+						voter_registration: 'p.voter_registration',
+						parent_id: 'p.parent_id',
+						institute_type_id: 'p.institute_type_id',
+					},
+					{ email: 'c.email', phone: 'c.phone' },
+					{
+						cep: 'a.cep',
+						street: 'a.street',
+						number: 'a.number',
+						complement: 'a.complement',
+						district: 'a.district',
+						city: 'a.city',
+						uf: 'a.uf',
+					},
+					{ user_first_name: 'u.first_name', user_last_name: 'u.last_name' }
+				)
+				.where('d.id', id)
+				.andWhereRaw('p.id = d.plaintiff_id')
+				.andWhereRaw('a.plaintiff_id = d.plaintiff_id')
+				.andWhereRaw('u.id = d.user_id')
+				.andWhereRaw('c.plaintiff_id = d.plaintiff_id')
+				.first()) as IDemand;
 
-			const plaintiff = await this.db('plaintiffs').where({ id: raw.plaintiffId }).first();
-			const contact = await this.db('contacts').where({ plaintiff_id: plaintiff.id });
-			const address = await this.db('adresses').where({ plaintiff_id: plaintiff.id }).first();
-
+			onLog('demand Raw', fromDB);
+			existsOrError(fromDB?.id, { message: 'Demand Not Found', status: NOT_FOUND });
+			const raw = convertDataValues(fromDB, 'camel');
+			onLog('raw', raw);
 			const themesIds = await this.db('demands_themes').where({ demand_id: raw.id });
 			const keywordsIds = await this.db('demands_keywords').where({ demand_id: raw.id });
 
+			onLog(
+				'keywords id',
+				keywordsIds.map(({ keyword_id }) => keyword_id)
+			);
+
 			const themes = (await this.findAllDadaByArray(
 				'themes',
-				themesIds.map(({ theme_id: id }) => id)
+				themesIds.map(({ theme_id }) => theme_id)
 			)) as ITheme[];
 			const keywords = await this.findAllDadaByArray(
 				'keywords',
-				keywordsIds.map(({ keyword_id: id }) => id)
+				keywordsIds.map(({ keyword_id }) => keyword_id)
 			);
 
-			return new DemandViewModel({
-				...raw,
-				plaintiff: {
-					...convertDataValues(plaintiff, 'camel'),
-					address: convertDataValues(address, 'camel'),
-					...convertDataValues(contact, 'camel'),
-				},
-				themes,
-				keywords,
-			});
+			return new DemandViewModel({ ...raw, themes, keywords });
 		} catch (err) {
 			return err;
 		}

@@ -26,22 +26,43 @@ export interface IDemandModel extends IDemand, IPlantiff {
 
 export interface IDemandViewModel extends IID {
 	name: string;
-	description: string | Blob;
-	favorite?: boolean;
-	createdAt: Date | string;
+	description: Blob | string;
+	favorite: boolean;
 	level: number;
 	active: boolean;
 	deadLine: Date | string;
 	status?: string;
+	createdAt: Date | string;
 	unitId: number;
 	userId: number;
-	plaintiff: IPlantiffModel;
+	plaintiffId: number;
 	tenancyId: number;
+	plaintiff: string;
+	birthday: Date | string;
+	cpfCnpj: string;
+	institute: string;
+	relationshipType?: string;
+	relatives?: string;
+	voterRegistration?: string;
+	parentId?: number;
+	instituteTypeId: number;
+	email: string;
+	phone: string;
+	cep: string;
+	street: string;
+	number?: number;
+	complement?: string;
+	district: string;
+	city: string;
+	uf: string;
+	userFirstName: string;
+	userLastName: string;
 	keywords: IKeyword[];
 	themes: ITheme[];
 }
 
 export interface IDemands extends IID {
+	name: string;
 	favorite: boolean;
 	level: number;
 	description: Blob | string;

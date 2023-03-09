@@ -3,6 +3,7 @@ import { IDemands, IDemanTask } from '../types';
 
 export class DemandListModel {
 	id?: number;
+	name: string;
 	favorite: boolean;
 	level: number;
 	description: string;
@@ -19,6 +20,7 @@ export class DemandListModel {
 
 	constructor(data: IDemands) {
 		this.id = setInstanceId(data?.id);
+		this.name = data.name.trim();
 		this.favorite = !!data.favorite;
 		this.level = Number(data.level);
 		this.description = convertBlobToString(data.description) || '';

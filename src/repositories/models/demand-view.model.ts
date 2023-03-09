@@ -1,6 +1,6 @@
 import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { Keyword, Theme } from '../entities';
-import { IDemandViewModel, IKeyword, ITheme } from '../types';
+import { IDemandViewModel, IKeyword, IPlantiffModel, ITheme } from '../types';
 import { PlaintiffModel } from './plaintiff.model';
 
 export class DemandViewModel {
@@ -17,6 +17,7 @@ export class DemandViewModel {
 	userId: number;
 	plaintiff: PlaintiffModel;
 	tenancyId: number;
+	responsable: string;
 	keywords: Keyword[];
 	themes: Theme[];
 
@@ -25,14 +26,20 @@ export class DemandViewModel {
 		this.name = data.name;
 		this.description = convertBlobToString(data.description);
 		this.createdAt = convertToDate(data.createdAt);
-		this.favorite = data.favorite;
+		this.favorite = !!data.favorite;
 		this.level = data.level;
-		this.active = data.active;
+		this.active = !!data.active;
 		this.deadLine = convertToDate(data.deadLine);
 		this.status = data.status;
 		this.unitId = data.unitId;
 		this.userId = data.userId;
-		this.plaintiff = new PlaintiffModel(data.plaintiff);
+		this.responsable = `${data.userFirstName} ${data.userLastName}`;
+		this.plaintiff = new PlaintiffModel({
+			...data,
+			name: data.plaintiff,
+			id: data.plaintiffId,
+			address: { ...data, id: undefined },
+		});
 		this.tenancyId = data.tenancyId;
 		this.keywords = this.setKeywords(data.keywords);
 		this.themes = this.setThemes(data.themes);

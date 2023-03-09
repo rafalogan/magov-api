@@ -8,7 +8,7 @@ export interface IPlantiff extends IID, ITenancyIdRequired {
 	birthday: Date | string;
 	institute: string;
 	cpfCnpj: string;
-	relationshipType: string;
+	relationshipType?: string;
 	observation?: Blob | string;
 	relatives?: string;
 	voterRegistration?: string;
