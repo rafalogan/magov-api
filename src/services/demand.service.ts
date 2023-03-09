@@ -1,8 +1,9 @@
-import { BAD_REQUEST, NOT_FOUND } from 'http-status';
+import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+import { onLog } from 'src/core/handlers';
 import { Demand, Keyword, Plaintiff, Plan, Theme } from 'src/repositories/entities';
-import { DemandModel, DemandViewModel, ReadOptionsModel, PlaintiffModel } from 'src/repositories/models';
-import { IDemand, IDemands, IPlantiff, IServiceOptions, ITheme } from 'src/repositories/types';
-import { convertDataValues, convertToDate, existsOrError, isRequired } from 'src/utils';
+import { DemandModel, DemandViewModel, ReadOptionsModel, PlaintiffModel, DemandListModel } from 'src/repositories/models';
+import { IDemand, IDemands, IPlantiff, IPlantiffModel, IServiceOptions, ITheme } from 'src/repositories/types';
+import { convertDataValues, convertToDate, equalsOrError, existsOrError, isRequired } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { KeywordService } from './keyword.service';
 
@@ -13,13 +14,20 @@ export class DemandService extends DatabaseService {
 
 	async create(data: DemandModel) {
 		try {
-			const plaintiffId = await this.setPlaintiff(data, data.plaintiff?.id);
+			const plaintiffId = await this.setPlaintiff({ ...data.plaintiff, tenancyId: data.tenancyId, active: data.active });
+
+			existsOrError(Number(plaintiffId), { messsage: 'Internal Server Errro', err: plaintiffId, status: INTERNAL_SERVER_ERROR });
 
 			const demandToSave = new Demand({ ...data, active: data.active || true, plaintiffId } as IDemand);
+			onLog('demand To Save', demandToSave);
 			const [id] = await this.db('demands').insert(convertDataValues(demandToSave));
 
-			if (data.keywords?.length !== 0) await this.setKeywords(data.keywords, id);
-			if (data.themes.length !== 0) await this.setThemes(data.themes, id);
+			existsOrError(Number(id), { messsage: 'Internal Server Error', err: id, status: INTERNAL_SERVER_ERROR });
+
+			onLog('keywords', data.keywords.length);
+
+			if (data.keywords?.length !== 0) await this.setKeywords(data.keywords, Number(id));
+			if (data.themes.length !== 0) await this.setThemes(data.themes, Number(id));
 
 			return { message: 'Demand saved successfully', data: { ...data, id } };
 		} catch (err) {
@@ -27,11 +35,13 @@ export class DemandService extends DatabaseService {
 		}
 	}
 
-	async update(data: DemandModel, id: number) {
+	async updateDemand(data: DemandModel, id: number, tenancyId: number) {
 		try {
 			const demand = (await this.getDemand(id)) as DemandViewModel;
 
 			existsOrError(demand.id, { message: 'Demand not found', status: NOT_FOUND });
+			equalsOrError(demand.tenancyId, tenancyId, { message: "User can't execute this action", status: FORBIDDEN });
+
 			if (data.keywords.length !== 0) {
 				await this.db('demands_keywords').where({ demand_id: id }).del();
 				await this.setKeywords(data.keywords, id);
@@ -51,7 +61,32 @@ export class DemandService extends DatabaseService {
 		}
 	}
 
-	read(options: ReadOptionsModel, id?: number) {
+	async update(data: DemandModel, id: number) {
+		try {
+			const demand = (await this.getDemand(id)) as DemandViewModel;
+
+			existsOrError(demand.id, { message: 'Demand not found', status: NOT_FOUND });
+
+			if (data.keywords.length !== 0) {
+				await this.db('demands_keywords').where({ demand_id: id }).del();
+				await this.setKeywords(data.keywords, id);
+			}
+
+			if (data.themes.length !== 0) {
+				await this.db('demands_themes').where({ demand_id: id }).del();
+				await this.setThemes(data.themes, id);
+			}
+
+			const demandToUpdate = new Demand({ ...demand, ...data, plaintiffId: data.plaintiff.id as number }, id);
+			await this.db('demands').where({ id }).update(convertDataValues(demandToUpdate));
+
+			return { message: 'Demand updated successfully', data: demandToUpdate };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	async read(options: ReadOptionsModel, id?: number) {
 		try {
 			if (id) return this.getDemand(id);
 
@@ -64,12 +99,41 @@ export class DemandService extends DatabaseService {
 		}
 	}
 
+	async disabled(id: number, tenancyId: number) {
+		try {
+			const data = (await this.getDemand(id)) as DemandViewModel;
+			existsOrError(data.id, { message: 'Denand not found', status: NOT_FOUND });
+			equalsOrError(data.tenancyId, tenancyId, { message: "User can't execute this action", status: FORBIDDEN });
+
+			const toDesabled = new Demand({ ...data, plaintiffId: data.plaintiff.id as number, active: false } as IDemand);
+			await this.db('demands').where({ id }).update(convertDataValues(toDesabled));
+
+			return { message: 'Demand disabled successfully', data: { ...data, active: false } };
+		} catch (err) {
+			return err;
+		}
+	}
+
 	async getDemands(options: ReadOptionsModel) {
 		try {
 			const { tenancyId: tenancy_id, order, orderBy } = options;
-			const demandsRaw = await this.db({ d: 'demenads', p: 'plaintiffs', a: 'adresses', u: 'users' })
-				.select('*.d', { plaintiff: 'p.name' }, { responsible: 'u.name' }, { uf: 'a.uf', city: 'a.city', district: 'a.district' })
-				.where({ tenancy_id })
+			const demandsRaw = await this.db({ d: 'demands', p: 'plaintiffs', a: 'adresses', u: 'users' })
+				.select(
+					{
+						id: 'd.id',
+						favorite: 'd.favorite',
+						level: 'd.level',
+						description: 'd.description',
+						dead_line: 'd.dead_line',
+						created_at: 'd.created_at',
+						user_id: 'd.user_id',
+						plaintiff_id: 'd.plaintiff_id',
+					},
+					{ plaintiff: 'p.name' },
+					{ first_name_responsible: 'u.first_name', last_name_responsible: 'u.last_name' },
+					{ uf: 'a.uf', city: 'a.city', district: 'a.district' }
+				)
+				.where('d.tenancy_id', tenancy_id)
 				.andWhereRaw('p.id = d.plaintiff_id')
 				.andWhereRaw('u.id = d.user_id')
 				.andWhereRaw('a.plaintiff_id = d.plaintiff_id')
@@ -77,7 +141,7 @@ export class DemandService extends DatabaseService {
 
 			const demands = (await this.setTasksperDemands(demandsRaw)) as IDemands[];
 
-			return demands.map(i => convertDataValues(i, 'camel'));
+			return demands.map(i => new DemandListModel(convertDataValues(i, 'camel')));
 		} catch (err) {
 			return err;
 		}
@@ -85,7 +149,7 @@ export class DemandService extends DatabaseService {
 
 	async getDemand(id: number) {
 		try {
-			const fromDB = (await this.db('demenads').where({ id }).first()) as IDemand;
+			const fromDB = (await this.db('demands').where({ id }).first()) as IDemand;
 			existsOrError(fromDB.id, { message: 'Demand Not Found', status: NOT_FOUND });
 			const raw = convertDataValues(fromDB, 'camel') as IDemand;
 
@@ -124,8 +188,10 @@ export class DemandService extends DatabaseService {
 		try {
 			const keyword = await this.keywordService.read(value);
 
-			if (keyword.id) return keyword.id;
-			const [id] = await this.db('keywords').insert({ name: value });
+			if (keyword?.id) return keyword.id;
+
+			const [id] = await this.db('keywords').insert({ keyword: value });
+			existsOrError(Number(id), { message: 'Internal error', err: id, status: INTERNAL_SERVER_ERROR });
 			return id;
 		} catch (err) {
 			return err;
@@ -136,7 +202,9 @@ export class DemandService extends DatabaseService {
 		try {
 			const theme = await this.db('themes').where({ name: value }).first();
 			if (theme?.id) return theme.id;
+
 			const [id] = await this.db('themes').insert({ name: value, active: true });
+			existsOrError(Number(id), { message: 'Internal error', err: id, status: INTERNAL_SERVER_ERROR });
 
 			return id;
 		} catch (err) {
@@ -162,6 +230,8 @@ export class DemandService extends DatabaseService {
 		try {
 			for (const keyword of keywords) {
 				const kwId = await this.findKeywordId(keyword);
+
+				existsOrError(Number(kwId), { message: 'Internal error', err: kwId, status: INTERNAL_SERVER_ERROR });
 				await this.db('demands_keywords').insert({ demand_id: id, keyword_id: kwId });
 			}
 		} catch (err) {
@@ -180,13 +250,18 @@ export class DemandService extends DatabaseService {
 		}
 	}
 
-	private async setPlaintiff(value: DemandModel, plaintiffId?: number) {
+	private async setPlaintiff(value: IPlantiffModel) {
 		try {
-			if (plaintiffId) return plaintiffId;
+			if (value.id) return Number(value.id);
 
-			const data = new Plaintiff({ ...value.plaintiff, tenancyId: value.tenancyId } as IPlantiff);
-			const { email, phone, address } = value.plaintiff;
+			const fromDB = await this.db('plaintiffs').where({ cpf_cnpj: value.cpfCnpj }).andWhere({ tenancy_id: value.tenancyId }).first();
+			if (fromDB?.id) return Number(fromDB.id);
+
+			const data = new Plaintiff({ ...value } as IPlantiff);
+			const { email, phone, address } = value;
 			const [id] = await this.db('plaintiffs').insert(convertDataValues(data));
+			existsOrError(Number(id), { message: 'Internal error', err: id, status: INTERNAL_SERVER_ERROR });
+
 			if (Number(id)) {
 				await this.db('contacts').insert(convertDataValues({ email, phone, tenancyId: value.tenancyId, plaintiffId: id }));
 				await this.db('adresses').insert(convertDataValues({ ...address, plaintiffId: id }));

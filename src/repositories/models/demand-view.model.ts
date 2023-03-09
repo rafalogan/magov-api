@@ -7,7 +7,8 @@ export class DemandViewModel {
 	id?: number;
 	name: string;
 	description?: string;
-	favorites?: boolean;
+	createdAt: Date;
+	favorite?: boolean;
 	level: number;
 	active: boolean;
 	deadLine: Date;
@@ -23,7 +24,8 @@ export class DemandViewModel {
 		this.id = setInstanceId(id || data.id);
 		this.name = data.name;
 		this.description = convertBlobToString(data.description);
-		this.favorites = data.favorites;
+		this.createdAt = convertToDate(data.createdAt);
+		this.favorite = data.favorite;
 		this.level = data.level;
 		this.active = data.active;
 		this.deadLine = convertToDate(data.deadLine);

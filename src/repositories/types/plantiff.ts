@@ -8,7 +8,7 @@ export interface IPlantiff extends IID, ITenancyIdRequired {
 	birthday: Date | string;
 	institute: string;
 	cpfCnpj: string;
-	relationshipsType: string;
+	relationshipType: string;
 	observation?: Blob | string;
 	relatives?: string;
 	voterRegistration?: string;
@@ -18,6 +18,7 @@ export interface IPlantiff extends IID, ITenancyIdRequired {
 
 export interface IPlantiffModel extends IPlantiff, IContactModel {
 	address: IAddress;
+	active: boolean;
 }
 
 export interface IPlantiffContact extends IID, ITenancyIdRequired {

@@ -14,6 +14,7 @@ import { ThemeModule } from 'src/modules/theme';
 import { PlanModule } from 'src/modules/plan';
 import { RuleModule } from 'src/modules/rule';
 import { InstituteTypeModule } from 'src/modules/institute-type';
+import { DemandModule } from 'src/modules/demand';
 
 export class ModulesFactory {
 	private authModule: AuthModule;
@@ -24,6 +25,7 @@ export class ModulesFactory {
 	private planModule: PlanModule;
 	private ruleModule: RuleModule;
 	private instituteTypeModule: InstituteTypeModule;
+	private demandModule: DemandModule;
 
 	constructor(private app: Application, private auth: AuthConfig, services: ServicesFactory, upload: Multer) {
 		this.authModule = new AuthModule({ ...this.getRouteOptions(), service: services.authService, upload });
@@ -34,6 +36,7 @@ export class ModulesFactory {
 		this.keywordModule = new KeywordModule({ ...this.getRouteOptions(), service: services.keywordService });
 		this.ruleModule = new RuleModule({ ...this.getRouteOptions(), service: services.ruleService });
 		this.instituteTypeModule = new InstituteTypeModule({ ...this.getRouteOptions(), service: services.instituteTypeService });
+		this.demandModule = new DemandModule({ ...this.getRouteOptions(), service: services.demandService });
 	}
 
 	exec() {
@@ -45,6 +48,7 @@ export class ModulesFactory {
 		this.themeModule.exec();
 		this.ruleModule.exec();
 		this.instituteTypeModule.exec();
+		this.demandModule.exec();
 		this.app.use('/media', express.static(resolve(__dirname, '../..', 'tmp', 'uploads')));
 		this.app.use(notfoundRoute);
 	}

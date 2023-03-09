@@ -1,8 +1,9 @@
+import { FORBIDDEN } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { ReadOptionsModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { IAddress, IServiceOptions, ITenancy, IUser, IUserViewModel } from 'src/repositories/types';
-import { convertDataValues, deleteField } from 'src/utils';
+import { convertDataValues, deleteField, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 
 export class UserService extends DatabaseService {
@@ -12,6 +13,10 @@ export class UserService extends DatabaseService {
 
 	async create(data: UserModel): Promise<any> {
 		try {
+			const fromDB = (await this.getUser(data.email)) as UserViewModel;
+
+			notExistisOrError(fromDB.id, { message: 'User already exists', status: FORBIDDEN });
+
 			const tenancyId = data.planId ? await this.createTenancy(data.planId) : data.tenancyId;
 			onLog('tenancyId', tenancyId);
 			const [userId] = await this.db('users').insert(convertDataValues({ ...new User({ ...data, tenancyId } as IUser) }));

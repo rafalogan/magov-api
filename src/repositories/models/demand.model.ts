@@ -6,7 +6,7 @@ export class DemandModel {
 	id?: number;
 	name: string;
 	description: string;
-	favorites?: boolean;
+	favorite?: boolean;
 	level: number;
 	active: boolean;
 	deadLine: Date;
@@ -23,7 +23,7 @@ export class DemandModel {
 		this.id = setInstanceId(id || data.id);
 		this.name = data.name.trim();
 		this.description = convertBlobToString(data.description) as string;
-		this.favorites = !!data.favorites ?? false;
+		this.favorite = !!data.favorite;
 		this.level = data.level;
 		this.active = !!data.active;
 		this.deadLine = convertToDate(data.deadLine);
@@ -31,7 +31,7 @@ export class DemandModel {
 		this.status = data.status?.trim();
 		this.unitId = Number(data.unitId);
 		this.userId = Number(data.userId);
-		this.plaintiff = new PlaintiffModel(data.plantiff);
+		this.plaintiff = new PlaintiffModel(data.plaintiff);
 		this.tenancyId = data.tenancyId;
 		this.keywords = data.keywords;
 		this.themes = data.themes;

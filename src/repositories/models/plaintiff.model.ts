@@ -1,3 +1,4 @@
+import { onLog } from 'src/core/handlers';
 import { clearString, convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { Address } from '../entities';
 import { IPlantiffModel } from '../types';
@@ -7,8 +8,9 @@ export class PlaintiffModel {
 	name: string;
 	birthday: Date;
 	institute: string;
+	active: boolean;
 	cpfCnpj: string;
-	relationshipsType: string;
+	relationshipType: string;
 	observation?: string;
 	relatives?: string;
 	voterRegistration?: string;
@@ -19,19 +21,27 @@ export class PlaintiffModel {
 	address: Address;
 
 	constructor(data: IPlantiffModel, id?: number) {
-		this.id = setInstanceId(id || data.id);
+		onLog('plantiff, data raw', data);
+		this.id = setInstanceId(id || data?.id);
 		this.name = data.name.trim();
 		this.birthday = convertToDate(data.birthday);
+		this.active = this.setActive(data.active);
 		this.institute = data.institute.trim();
 		this.cpfCnpj = clearString(data.cpfCnpj);
-		this.relationshipsType = data.relationshipsType.trim();
+		this.relationshipType = data.relationshipType?.trim();
 		this.observation = convertBlobToString(data.observation);
 		this.relatives = data.relatives?.trim();
 		this.voterRegistration = data.voterRegistration ? clearString(data?.voterRegistration) : undefined;
 		this.phone = clearString(data.phone);
 		this.email = data.email.toLowerCase().trim();
-		this.parentId = setInstanceId(data.parentId);
+		this.parentId = setInstanceId(data?.parentId);
 		this.instituteTypeId = Number(data.instituteTypeId);
 		this.address = new Address(data.address);
+	}
+
+	private setActive(value: boolean) {
+		if (this.id) return value;
+
+		return true;
 	}
 }

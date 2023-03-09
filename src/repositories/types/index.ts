@@ -3,6 +3,7 @@ export * from './knex';
 export * from './file';
 export * from './auth';
 export * from './route';
+export * from './module';
 export * from './response';
 export * from './cache';
 export * from './plan';

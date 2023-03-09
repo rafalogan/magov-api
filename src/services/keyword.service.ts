@@ -21,7 +21,7 @@ export class KeywordService extends CacheService {
 		if (id) {
 			return this.db(this.table)
 				.where({ id })
-				.orWhere({ name: id })
+				.orWhere({ keyword: id })
 				.first()
 				.then(res => new Keyword(convertDataValues(res, 'camel')))
 				.catch(err => err);

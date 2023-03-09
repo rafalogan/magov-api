@@ -5,7 +5,8 @@ export class Demand {
 	id?: number;
 	name: string;
 	description: string;
-	favorites?: boolean;
+	createdAt: Date;
+	favorite?: boolean;
 	level: number;
 	active: boolean;
 	deadLine: Date;
@@ -19,10 +20,11 @@ export class Demand {
 		this.id = setInstanceId(id || data.id);
 		this.name = data.name.trim();
 		this.description = convertBlobToString(data.description) as string;
-		this.favorites = !!data.favorites || undefined;
+		this.favorite = !!data.favorite;
 		this.level = Number(data.level);
 		this.active = !!data.active;
 		this.deadLine = convertToDate(data.deadLine);
+		this.createdAt = convertToDate(data.createdAt);
 		this.status = data.status?.trim();
 		this.unitId = Number(data.unitId);
 		this.userId = Number(data.userId);

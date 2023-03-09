@@ -1,13 +1,13 @@
 import { IKeyword } from './keyword';
 import { IPlantiff, IPlantiffModel } from './plantiff';
-import { IID, IReadOptions } from './shared';
+import { IID } from './shared';
 import { ITenancyIdRequired } from './tenacy';
 import { ITheme } from './theme';
 
-export interface IDemand extends IID {
+export interface IDemand extends IID, ITenancyIdRequired {
 	name: string;
 	description: string | Blob;
-	favorites?: boolean;
+	favorite?: boolean;
 	level: number;
 	active: boolean;
 	deadLine: Date | string;
@@ -16,11 +16,10 @@ export interface IDemand extends IID {
 	unitId: number;
 	userId: number;
 	plaintiffId: number;
-	tenancyId: number;
 }
 
 export interface IDemandModel extends IDemand, IPlantiff {
-	plantiff: IPlantiffModel;
+	plaintiff: IPlantiffModel;
 	keywords: string[];
 	themes: string[];
 }
@@ -28,7 +27,8 @@ export interface IDemandModel extends IDemand, IPlantiff {
 export interface IDemandViewModel extends IID {
 	name: string;
 	description: string | Blob;
-	favorites?: boolean;
+	favorite?: boolean;
+	createdAt: Date | string;
 	level: number;
 	active: boolean;
 	deadLine: Date | string;
@@ -41,13 +41,21 @@ export interface IDemandViewModel extends IID {
 	themes: ITheme[];
 }
 
-export interface IDemands extends IDemand {
-	responsible: string;
+export interface IDemands extends IID {
+	favorite: boolean;
+	level: number;
+	description: Blob | string;
+	deadLine: Date | string;
+	createdAt: Date | string;
+	firstNameResponsible: string;
+	lastNameResponsible: string;
 	plaintiff: string;
 	uf: string;
 	city: string;
 	district: string;
 	tasks?: IDemanTask[];
+	userId: number;
+	plaintiffId: number;
 }
 
 export interface IDemanTask {
