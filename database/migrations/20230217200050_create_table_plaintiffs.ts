@@ -11,6 +11,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.binary('observation').nullable();
 		table.string('relatives', 255).nullable();
 		table.string('voter_registration', 50).nullable();
+		table.boolean('active').notNullable().defaultTo(true);
 		table.integer('parent_id').unsigned().references('id').inTable('plaintiffs').nullable();
 		table.integer('institute_type_id').unsigned().references('id').inTable('institutes_types').nullable();
 		table.integer('tenancy_id').unsigned().references('id').inTable('tenancies').notNullable();

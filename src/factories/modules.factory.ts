@@ -15,6 +15,7 @@ import { PlanModule } from 'src/modules/plan';
 import { RuleModule } from 'src/modules/rule';
 import { InstituteTypeModule } from 'src/modules/institute-type';
 import { DemandModule } from 'src/modules/demand';
+import { PlaintiffModule } from 'src/modules/plaintiff';
 
 export class ModulesFactory {
 	private authModule: AuthModule;
@@ -26,6 +27,7 @@ export class ModulesFactory {
 	private ruleModule: RuleModule;
 	private instituteTypeModule: InstituteTypeModule;
 	private demandModule: DemandModule;
+	private plaintiffModule: PlaintiffModule;
 
 	constructor(private app: Application, private auth: AuthConfig, services: ServicesFactory, upload: Multer) {
 		this.authModule = new AuthModule({ ...this.getRouteOptions(), service: services.authService, upload });
@@ -37,6 +39,7 @@ export class ModulesFactory {
 		this.ruleModule = new RuleModule({ ...this.getRouteOptions(), service: services.ruleService });
 		this.instituteTypeModule = new InstituteTypeModule({ ...this.getRouteOptions(), service: services.instituteTypeService });
 		this.demandModule = new DemandModule({ ...this.getRouteOptions(), service: services.demandService });
+		this.plaintiffModule = new PlaintiffModule({ ...this.getRouteOptions(), service: services.plaintiffService });
 	}
 
 	exec() {
@@ -49,6 +52,7 @@ export class ModulesFactory {
 		this.ruleModule.exec();
 		this.instituteTypeModule.exec();
 		this.demandModule.exec();
+		this.plaintiffModule.exec();
 		this.app.use('/media', express.static(resolve(__dirname, '../..', 'tmp', 'uploads')));
 		this.app.use(notfoundRoute);
 	}

@@ -12,13 +12,13 @@ export interface IPlantiff extends IID, ITenancyIdRequired {
 	observation?: Blob | string;
 	relatives?: string;
 	voterRegistration?: string;
+	active: boolean;
 	parentId?: number;
 	instituteTypeId: number;
 }
 
 export interface IPlantiffModel extends IPlantiff, IContactModel {
 	address: IAddress;
-	active: boolean;
 }
 
 export interface IPlantiffContact extends IID, ITenancyIdRequired {
