@@ -8,10 +8,11 @@ export class Plaintiff {
 	birthday: Date;
 	institute: string;
 	cpfCnpj: string;
-	relationshipType: string;
+	relationshipType?: string;
 	observation?: string;
 	relatives?: string;
 	voterRegistration?: string;
+	active: boolean;
 	parentId?: number;
 	instituteTypeId: number;
 	tenancyId: number;
@@ -27,6 +28,7 @@ export class Plaintiff {
 		this.relationshipType = data.relationshipType;
 		this.observation = convertBlobToString(data.observation);
 		this.relatives = data.relatives;
+		this.active = !!data.active;
 		this.voterRegistration = data.voterRegistration;
 		this.parentId = setInstanceId(data?.parentId);
 		this.instituteTypeId = Number(data.instituteTypeId);

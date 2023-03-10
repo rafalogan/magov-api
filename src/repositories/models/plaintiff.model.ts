@@ -17,6 +17,7 @@ export class PlaintiffModel {
 	phone: string;
 	email: string;
 	parentId?: number;
+	tenancyId?: number;
 	instituteTypeId: number;
 	address: Address;
 
@@ -28,13 +29,14 @@ export class PlaintiffModel {
 		this.active = this.setActive(data.active);
 		this.institute = data.institute.trim();
 		this.cpfCnpj = clearString(data.cpfCnpj);
-		this.relationshipType = data.relationshipType?.trim();
+		this.relationshipType = data.relationshipType?.trim() as string;
 		this.observation = convertBlobToString(data.observation);
 		this.relatives = data.relatives?.trim();
 		this.voterRegistration = data.voterRegistration ? clearString(data?.voterRegistration) : undefined;
 		this.phone = clearString(data.phone);
 		this.email = data.email.toLowerCase().trim();
 		this.parentId = setInstanceId(data?.parentId);
+		this.tenancyId = setInstanceId(data?.tenancyId);
 		this.instituteTypeId = Number(data.instituteTypeId);
 		this.address = new Address(data.address);
 	}
