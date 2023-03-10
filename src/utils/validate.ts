@@ -77,3 +77,5 @@ const existsOrNotficate = (option: INotificationOption) => {
 
 	return undefined;
 };
+
+export const isDataInArray = (data?: any[]) => data?.length !== 0;

@@ -1,9 +1,9 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Demand, Plaintiff } from 'src/repositories/entities';
-import { DemandListModel, DemandModel, DemandViewModel, PlaintiffModel, ReadOptionsModel } from 'src/repositories/models';
+import { DemandListModel, DemandModel, DemandViewModel, ReadOptionsModel } from 'src/repositories/models';
 import { IDemand, IDemands, IPlantiff, IPlantiffModel, IServiceOptions, ITheme } from 'src/repositories/types';
-import { convertDataValues, equalsOrError, existsOrError, isRequired } from 'src/utils';
+import { convertDataValues, equalsOrError, existsOrError, isDataInArray, isRequired } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { KeywordService } from './keyword.service';
 
@@ -26,8 +26,8 @@ export class DemandService extends DatabaseService {
 
 			onLog('keywords', data.keywords.length);
 
-			if (data.keywords?.length !== 0) await this.setKeywords(data.keywords, Number(id));
-			if (data.themes.length !== 0) await this.setThemes(data.themes, Number(id));
+			if (isDataInArray(data.keywords)) await this.setKeywords(data.keywords, Number(id));
+			if (isDataInArray(data.themes)) await this.setThemes(data.themes, Number(id));
 
 			return { message: 'Demand saved successfully', data: { ...data, id } };
 		} catch (err) {
@@ -42,12 +42,12 @@ export class DemandService extends DatabaseService {
 			existsOrError(demand.id, { message: 'Demand not found', status: NOT_FOUND });
 			equalsOrError(demand.tenancyId, tenancyId, { message: "User can't execute this action", status: FORBIDDEN });
 
-			if (data.keywords.length !== 0) {
+			if (isDataInArray(data.keywords)) {
 				await this.db('demands_keywords').where({ demand_id: id }).del();
 				await this.setKeywords(data.keywords, id);
 			}
 
-			if (data.themes.length !== 0) {
+			if (isDataInArray(data.themes)) {
 				await this.db('demands_themes').where({ demand_id: id }).del();
 				await this.setThemes(data.themes, id);
 			}
@@ -79,12 +79,12 @@ export class DemandService extends DatabaseService {
 
 			existsOrError(demand.id, { message: 'Demand not found', status: NOT_FOUND });
 
-			if (data.keywords.length !== 0) {
+			if (isDataInArray(data.keywords)) {
 				await this.db('demands_keywords').where({ demand_id: id }).del();
 				await this.setKeywords(data.keywords, id);
 			}
 
-			if (data.themes.length !== 0) {
+			if (isDataInArray(data.themes)) {
 				await this.db('demands_themes').where({ demand_id: id }).del();
 				await this.setThemes(data.themes, id);
 			}
