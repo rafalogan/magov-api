@@ -1,4 +1,5 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+import { onLog } from 'src/core/handlers';
 import { ContactModel, PaginationModel, ReadOptionsModel } from 'src/repositories/models';
 
 import { IServiceOptions } from 'src/repositories/types';
@@ -41,13 +42,14 @@ export class ContactService extends DatabaseService {
 
 			const total = await this.getCount('contacts', tenancyId);
 			const pagination = new PaginationModel({ page, limit, total });
+			onLog('tenancyId', tenancyId);
 
 			return this.db({ ...this.tables, d: 'demands' })
 				.select(...this.fields, { demand: 'd.name' })
-				.where({ tenancy_id: tenancyId })
-				.andWhere('d.plaintiff_id', 'c.plaintiff_id')
-				.andWhere('p.id', 'c.plaintiff_id')
-				.andWhere('a.plaintiff_id', 'c.plaintiff_id')
+				.where('c.tenancy_id', tenancyId)
+				.andWhereRaw('d.plaintiff_id = c.plaintiff_id')
+				.andWhereRaw('p.id = c.plaintiff_id')
+				.andWhereRaw('a.plaintiff_id = c.plaintiff_id')
 				.limit(limit)
 				.offset(page * limit - limit)
 				.orderBy(orderBy || 'id', order || 'asc')
@@ -67,10 +69,10 @@ export class ContactService extends DatabaseService {
 		try {
 			const fromDB = await this.db(this.tables)
 				.select(...this.fields)
-				.where({ id })
-				.andWhere({ tenancy_id: tenancyId })
-				.andWhere('p.id', 'c.plaintiff_id')
-				.andWhere('a.plaintiff_id', 'c.plaintiff_id')
+				.where('c.id', id)
+				.andWhere('c.tenancy_id', tenancyId)
+				.andWhereRaw('p.id = c.plaintiff_id')
+				.andWhereRaw('a.plaintiff_id = c.plaintiff_id')
 				.first();
 
 			existsOrError(fromDB?.id, { message: 'Contact not found', status: NOT_FOUND });
