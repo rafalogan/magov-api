@@ -5,6 +5,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.increments('id').primary();
 		table.string('email', 255).notNullable();
 		table.string('phone', 50).notNullable();
+		table.boolean('active').notNullable().defaultTo(true);
 		table.integer('tenancy_id').unsigned().references('id').inTable('tenancies').notNullable();
 		table.integer('plaintiff_id').unsigned().references('id').inTable('plaintiffs').notNullable();
 	});
