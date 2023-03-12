@@ -20,3 +20,4 @@ export * from './institute-type';
 export * from './demand';
 export * from './contact';
 export * from './propositons-type';
+export * from './revenue';
