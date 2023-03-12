@@ -20,7 +20,7 @@ export class PropositonsTypeService extends DatabaseService {
 			const [id] = await this.db('types').insert(convertDataValues(toSave));
 			existsOrError(id, { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
 
-			const [fileId] = await this.db('files').insert(convertDataValues(data.document));
+			const [fileId] = await this.db('files').insert(convertDataValues({ ...data.document, type_id: id }));
 			existsOrError(fileId, { message: 'Internal error', error: fileId, status: INTERNAL_SERVER_ERROR });
 
 			return { ...data, id, document: { ...data.document, id: fileId } };
@@ -54,6 +54,7 @@ export class PropositonsTypeService extends DatabaseService {
 
 			return this.db({ t: 'types', f: 'files' })
 				.select({ id: 't.id', name: 't.name' }, { document_url: 'f.url' })
+				.whereRaw('f.type_id = t.id')
 				.then(res => {
 					existsOrError(Array.isArray(res), { message: 'Internal error', status: INTERNAL_SERVER_ERROR });
 					return res.map(i => convertDataValues(i, 'camel'));
