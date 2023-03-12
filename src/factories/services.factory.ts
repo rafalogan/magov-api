@@ -12,6 +12,7 @@ import {
 	MailService,
 	PlaintiffService,
 	PlanService,
+	PropositonsTypeService,
 	RuleService,
 	ThemeService,
 	UnitService,
@@ -31,6 +32,7 @@ export class ServicesFactory {
 	demandService: DemandService;
 	plaintiffService: PlaintiffService;
 	contactService: ContactService;
+	propositionTypeService: PropositonsTypeService;
 
 	constructor(private conn: Knex, private client: RedisClientType, private mailConfig: MailerConfig) {
 		this.userService = new UserService({ ...this.setServiceOptions() });
@@ -45,6 +47,7 @@ export class ServicesFactory {
 		this.demandService = new DemandService(this.setServiceOptions(), this.keywordService);
 		this.plaintiffService = new PlaintiffService(this.setServiceOptions());
 		this.contactService = new ContactService(this.setServiceOptions());
+		this.propositionTypeService = new PropositonsTypeService(this.setServiceOptions());
 	}
 
 	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client });

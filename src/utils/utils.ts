@@ -1,9 +1,10 @@
-import { existsSync } from 'fs';
-import { mkdir } from 'fs/promises';
-import { resolve } from 'path';
+import { existsSync } from 'node:fs';
+import { mkdir, unlink } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import dotenv from 'dotenv';
 import httpStatus from 'http-status';
 import { Response } from 'express';
+import { S3 } from 'aws-sdk';
 
 import { DatabaseException, ResponseException } from 'src/utils/exceptions';
 import { ResponseHandle } from 'src/core/handlers';
@@ -49,3 +50,10 @@ export const responseNotFoundRegisters = new ResponseException(messages.notFound
 	status: httpStatus.FORBIDDEN,
 	message: messages.notFoundRegister,
 });
+
+export const deleteFile = (filename: string) => {
+	const s3 = new S3();
+	return process.env.STORAGE_TYPE?.toLowerCase() === 's3'
+		? s3.deleteObject({ Bucket: process.env.AWS_BUCKET as string, Key: filename }).promise()
+		: unlink(resolve(__dirname, '..', '..', 'tmp', 'uploads', filename));
+};

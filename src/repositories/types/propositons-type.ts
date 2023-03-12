@@ -5,4 +5,5 @@ export interface IPropositonsType extends IID {
 	name: string;
 	description: Blob | string;
 	document: IFile;
+	active?: boolean;
 }
