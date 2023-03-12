@@ -11,3 +11,4 @@ export * from './rule.entity';
 export * from './institute-type.entity';
 export * from './demand.entity';
 export * from './plaintiff.entity';
+export * from './propositons-type.entity';

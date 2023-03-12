@@ -110,6 +110,21 @@ export const setUserImage = (req: Request) => {
 	} as IFile;
 };
 
+export const setFileToSave = (req: Request) => {
+	const bodyFile = req.body.file ?? { title: req.body.fileTitle, alt: req.body.fileAlt };
+	const { title, alt } = bodyFile;
+	const file = req.file as CustomFile;
+
+	return {
+		title,
+		alt,
+		name: file?.originalname,
+		filename: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file?.key : file?.filename,
+		type: file.mimetype,
+		url: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file?.location : `${baseUrl()}/media/${file.filename}`,
+	} as IFile;
+};
+
 export const setAddress = (req: Request): IAddress => {
 	if (req.body.address) return req.body.address;
 	const { cep, street, number, complement, district, city, uf } = req.body;

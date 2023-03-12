@@ -12,3 +12,5 @@ export * from './demand.model';
 export * from './demand-view.model';
 export * from './plaintiff.model';
 export * from './demand-list.model';
+export * from './contact.model';
+export * from './propositons-type.model';
