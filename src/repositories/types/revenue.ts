@@ -7,6 +7,7 @@ export interface IRevenue extends IID {
 	description?: Blob | string;
 	status: number;
 	active: boolean;
+	recurrent: boolean;
 	documentUrl?: string;
 	value: number;
 	unitId: number;
@@ -20,6 +21,7 @@ export interface IOrigin extends IID {
 }
 
 export interface IRevenueModel extends IRevenue {
+	unit?: string;
 	document?: IFile;
-	origin: IOrigin;
+	origin: IOrigin | string;
 }

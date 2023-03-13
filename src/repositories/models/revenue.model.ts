@@ -9,9 +9,11 @@ export class RevenueModel {
 	description?: string;
 	status: number;
 	active: boolean;
+	recurrent: boolean;
 	documentUrl?: string;
 	value: number;
 	unitId: number;
+	unit?: string;
 	tenancyId: number;
 	document?: FileEntity;
 	origin: Origin;
@@ -23,11 +25,13 @@ export class RevenueModel {
 		this.description = convertBlobToString(data.description);
 		this.status = Number(data.status);
 		this.active = !!data.active;
+		this.recurrent = !!data.recurrent;
 		this.documentUrl = data.documentUrl?.trim();
 		this.value = Number.isInteger(data.value) ? Number(data.value) : Number(data.value) * 100;
 		this.unitId = Number(data.unitId);
+		this.unit = data.unit;
 		this.tenancyId = data.tenancyId;
 		this.document = data.document ? new FileEntity(data?.document as IFile) : undefined;
-		this.origin = new Origin(data.origin);
+		this.origin = typeof data.origin === 'string' ? new Origin({ origin: data.origin }) : new Origin(data.origin);
 	}
 }

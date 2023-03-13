@@ -8,6 +8,7 @@ export class Revenue {
 	description?: string;
 	status: number;
 	active: boolean;
+	recurrent: boolean;
 	documentUrl?: string;
 	value: number;
 	unitId: number;
@@ -17,10 +18,11 @@ export class Revenue {
 	constructor(data: IRevenueModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
 		this.revenue = data.revenue.trim();
-		this.receive = convertToDate(data.revenue);
+		this.receive = convertToDate(data.receive);
 		this.description = convertBlobToString(data.description);
 		this.status = Number(data.status);
 		this.active = !!data.active;
+		this.recurrent = !!data.recurrent;
 		this.documentUrl = data.documentUrl?.trim();
 		this.value = Number.isInteger(data.value) ? Number(data.value) : Number(data.value) * 100;
 		this.unitId = Number(data.unitId);

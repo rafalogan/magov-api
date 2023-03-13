@@ -1,4 +1,5 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+import { onLog } from 'src/core/handlers';
 import { Revenue, Origin } from 'src/repositories/entities';
 import { ReadOptionsModel, RevenueModel } from 'src/repositories/models';
 import { IRevenueModel, IServiceOptions } from 'src/repositories/types';
@@ -16,12 +17,15 @@ export class RevenueService extends DatabaseService {
 
 			notExistisOrError(fromDB.id, { message: 'Revenue already exists', status: FORBIDDEN });
 			const originId = await this.setOriginId(data.origin);
+
+			existsOrError(Number(originId), { message: 'Internal Error', error: originId, status: INTERNAL_SERVER_ERROR });
+			onLog('data', data);
 			const toSave = new Revenue({ ...data, originId } as IRevenueModel);
 			const [id] = await this.db('revenues').insert(convertDataValues(toSave));
-			if (data.document) await this.db('files').insert(convertDataValues(data.document));
+			if (data.document) await this.db('files').insert(convertDataValues({ ...data.document, revenueId: id }));
 			existsOrError(Number(id), { message: 'Internal Error', error: id, status: INTERNAL_SERVER_ERROR });
 
-			return { message: 'Revenue saved with succsess', data: { ...data, id } };
+			return { message: 'Revenue saved with succsess', data: { ...data, id, origin: { ...data.origin, id: originId } } };
 		} catch (err) {
 			return err;
 		}
@@ -36,7 +40,7 @@ export class RevenueService extends DatabaseService {
 			let originId = fromDB.origin.id;
 			if (data.document) {
 				await this.deleteFileRevenue(fromDB.document?.filename as string);
-				await this.db('files').insert(convertDataValues(data.document));
+				await this.db('files').insert(convertDataValues({ ...data.document, revenueId: fromDB.id }));
 			}
 
 			if (data.origin) originId = await this.setOriginId(data.origin);
@@ -62,7 +66,9 @@ export class RevenueService extends DatabaseService {
 					{ origin: 'o.origin' },
 					{ document_url: 'f.url' }
 				)
-				.where('tenancy_id', tenancyId)
+				.where('r.tenancy_id', tenancyId)
+				.andWhereRaw('o.id = r.origin_id')
+				.andWhereRaw('f.revenue_id = r.id')
 				.then(res => {
 					existsOrError(Array.isArray(res), { message: 'Internal error', error: res, status: INTERNAL_SERVER_ERROR });
 
@@ -79,7 +85,7 @@ export class RevenueService extends DatabaseService {
 
 	async getRevenue(value: number | string, tenancyId: number) {
 		try {
-			const fromDB = await this.db({ r: 'revenues', o: 'origins', f: 'files' })
+			const fromDB = await this.db({ r: 'revenues', o: 'origins', f: 'files', u: 'units' })
 				.select(
 					{
 						id: 'r.id',
@@ -88,8 +94,12 @@ export class RevenueService extends DatabaseService {
 						description: 'r.description',
 						status: 'r.status',
 						active: 'r.active',
+						recurrent: 'r.recurrent',
 						value: 'r.value',
+						tenancy_id: 'r.tenancy_id',
+						unit_id: 'r.unit_id',
 					},
+					{ unit: 'u.name' },
 					{ origin_id: 'o.id', origin: 'o.origin' },
 					{
 						file_title: 'f.title',
@@ -100,10 +110,11 @@ export class RevenueService extends DatabaseService {
 						url: 'f.url',
 					}
 				)
-				.where('r.tenancy_id', tenancyId)
+				.where('r.id', value)
+				.andWhere('r.tenancy_id', tenancyId)
 				.andWhereRaw('o.id = r.origin_id')
 				.andWhereRaw('f.revenue_id = r.id')
-				.orWhere('r.id', value)
+				.andWhereRaw('u.id = r.unit_id')
 				.orWhere('r.revenue', value)
 				.first();
 
@@ -114,7 +125,7 @@ export class RevenueService extends DatabaseService {
 					{
 						...fromDB,
 						origin: { id: fromDB.origin_id, origin: fromDB.origin },
-						document: { ...fromDB, title: fromDB.file_title, alt: fromDB.file_alt },
+						document: { ...fromDB, title: fromDB.file_title, alt: fromDB.file_alt, id: undefined },
 					},
 					'camel'
 				)
@@ -131,7 +142,7 @@ export class RevenueService extends DatabaseService {
 
 			const toDisable = new Revenue(convertDataValues({ ...revenue, active: false }, 'camel'));
 
-			await this.db('revenue').where({ id }).update(toDisable);
+			await this.db('revenues').where({ id }).update(convertDataValues(toDisable));
 
 			return { message: 'Revenue disabled with succsess', data: toDisable };
 		} catch (err) {
@@ -144,7 +155,8 @@ export class RevenueService extends DatabaseService {
 			if (value.id) return value.id;
 
 			const origin = await this.db('origins').where({ origin: value.origin }).first();
-			if (origin.id) return origin.id;
+			onLog('GET Origin', origin);
+			if (origin?.id) return origin.id;
 
 			const [id] = await this.db('origins').insert(convertDataValues(value));
 			existsOrError(Number(id), { message: 'Internal Error', error: id, status: INTERNAL_SERVER_ERROR });
