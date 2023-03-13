@@ -12,3 +12,5 @@ export * from './institute-type.entity';
 export * from './demand.entity';
 export * from './plaintiff.entity';
 export * from './propositons-type.entity';
+export * from './revenue.entity';
+export * from './origin.entity';

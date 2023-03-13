@@ -87,6 +87,7 @@ export abstract class DatabaseService extends CacheService {
 			return err;
 		}
 	}
+
 	protected async findAllDadaByArray(table: string, ids: number[]) {
 		try {
 			if (!ids?.length) return [];

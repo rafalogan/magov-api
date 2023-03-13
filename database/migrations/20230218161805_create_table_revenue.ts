@@ -8,6 +8,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.binary('description').nullable();
 		table.integer('status').notNullable();
 		table.boolean('active').notNullable().defaultTo(true);
+		table.boolean('recurrent').notNullable().defaultTo(false);
 		table.string('document_url').nullable();
 		table.integer('value').notNullable();
 		table.integer('unit_id').unsigned().references('id').inTable('units').nullable();
