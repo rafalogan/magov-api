@@ -15,3 +15,5 @@ export * from './demand-list.model';
 export * from './contact.model';
 export * from './propositons-type.model';
 export * from './revenue.model';
+export * from './propositon.model';
+export * from './propositon-view.model';

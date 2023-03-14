@@ -57,3 +57,13 @@ export const deleteFile = (filename: string) => {
 		? s3.deleteObject({ Bucket: process.env.AWS_BUCKET as string, Key: filename }).promise()
 		: unlink(resolve(__dirname, '..', '..', 'tmp', 'uploads', filename));
 };
+
+export const setValueNumberToDadaBase = (value?: number) => {
+	if (!value) return undefined;
+	return Number.isInteger(value) ? Number(value) : Number(value) * 100;
+};
+
+export const setValueNumberToView = (value?: number) => {
+	if (!value) return undefined;
+	return Number.isInteger(value) ? value / 100 : value;
+};
