@@ -21,3 +21,5 @@ export * from './demand';
 export * from './contact';
 export * from './propositons-type';
 export * from './revenue';
+export * from './proposition';
+export * from './task';

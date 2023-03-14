@@ -10,11 +10,12 @@ export async function up(knex: Knex): Promise<void> {
 		table.timestamp('end').notNullable();
 		table.integer('level').notNullable();
 		table.integer('status').notNullable();
+		table.integer('user_id').unsigned().references('id').inTable('users').notNullable();
+		table.integer('unit_id').unsigned().references('id').inTable('units').notNullable();
+		table.integer('tenacy_id').unsigned().references('id').inTable('tenancies').notNullable();
 		table.integer('proposition_id').unsigned().references('id').inTable('propositions').nullable();
 		table.integer('demand_id').unsigned().references('id').inTable('demands').nullable();
-		table.integer('unit_id').unsigned().references('id').inTable('units').notNullable();
-		table.integer('plaintiff_id').unsigned().references('id').inTable('plaintiffs').notNullable();
-		table.integer('tenacy_id').unsigned().references('id').inTable('tenancies').notNullable();
+		table.integer('plaintiff_id').unsigned().references('id').inTable('plaintiffs').nullable();
 	});
 }
 
