@@ -23,12 +23,12 @@ export interface IPropositionModel extends IProposition {
 }
 
 export interface IPropositionViewModel extends IProposition {
-	budgets: IBudgetProposition[];
+	budgets?: IBudgetProposition[];
 	keywords: IKeyword[];
 	themes: ITheme[];
-	demands: IDemandPoprosition[];
-	propositions: ISubProposition[];
-	tasks: ITaskProposition[];
+	demands?: IDemandPoprosition[];
+	propositions?: ISubProposition[];
+	tasks?: ITaskProposition[];
 }
 
 export interface IBudgetProposition {
@@ -48,8 +48,10 @@ export interface ISubProposition {
 }
 
 export interface ITaskProposition {
+	id?: number;
 	task: string;
 	deadline: Date | string;
 	level: number;
 	userId: number;
+	responsible?: string;
 }
