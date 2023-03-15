@@ -107,6 +107,7 @@ export abstract class DatabaseService extends CacheService {
 		try {
 			const fields = await this.db(options.tableIds).select(options.fieldIds).where(options.whereIds, options.value);
 			const ids = fields.map(i => i[options.fieldIds]);
+
 			if (!Array.isArray(ids)) return [];
 
 			const result: any[] = [];
