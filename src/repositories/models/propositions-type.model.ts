@@ -1,15 +1,15 @@
 import { convertBlobToString, setInstanceId } from 'src/utils';
 import { FileEntity } from '../entities';
-import { IPropositonsType } from '../types';
+import { IPropositionsType } from '../types';
 
-export class PropositonsTypeModel {
+export class PropositionsTypeModel {
 	id?: number;
 	name: string;
 	description?: string;
 	active: boolean;
 	document: FileEntity;
 
-	constructor(data: IPropositonsType, id?: number) {
+	constructor(data: IPropositionsType, id?: number) {
 		this.id = setInstanceId(id || data.id);
 		this.name = data.name.trim();
 		this.description = convertBlobToString(data.description);

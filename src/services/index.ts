@@ -12,6 +12,7 @@ export * from './institute-type.service';
 export * from './demand.service';
 export * from './plaintiff.service';
 export * from './contact.service';
-export * from './propositons-type.service';
+export * from './propositions-type.service';
 export * from './revenue.service';
 export * from './origin.service';
+export * from './proposition.service';

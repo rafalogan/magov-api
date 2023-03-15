@@ -1,7 +1,7 @@
 import { IFile } from './file';
 import { IID } from './shared';
 
-export interface IPropositonsType extends IID {
+export interface IPropositionsType extends IID {
 	name: string;
 	description: Blob | string;
 	document: IFile;

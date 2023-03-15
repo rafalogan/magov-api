@@ -2,7 +2,7 @@ import { Knex } from 'knex';
 import { onLog } from 'src/core/handlers';
 import { PaginationModel, ReadOptionsModel } from 'src/repositories/models';
 
-import { IAddress, IServiceOptions } from 'src/repositories/types';
+import { IAddress, IGetValuesOptions, IServiceOptions } from 'src/repositories/types';
 import { camelToSnake, convertDataValues } from 'src/utils';
 import { CacheService } from './abistract-cache.service';
 import { Address } from 'src/repositories/entities';
@@ -95,6 +95,28 @@ export abstract class DatabaseService extends CacheService {
 			for (const id of ids) {
 				const item = await this.db(table).where({ id }).first();
 				result.push(convertDataValues(item, 'camel'));
+			}
+
+			return result;
+		} catch (err) {
+			return err;
+		}
+	}
+
+	protected async getValues(options: IGetValuesOptions) {
+		try {
+			const fields = await this.db(options.tableIds).select(options.fieldIds).where(options.whereIds, options.value);
+			const ids = fields.map(i => i[options.fieldIds]);
+
+			if (!Array.isArray(ids)) return [];
+
+			const result: any[] = [];
+			for (const itemId of ids) {
+				const data = await this.db(options.table)
+					.select(...options.fields)
+					.where('id', itemId)
+					.first();
+				if (data.id) result.push(data);
 			}
 
 			return result;
