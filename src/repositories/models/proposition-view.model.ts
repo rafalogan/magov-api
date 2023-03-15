@@ -2,7 +2,7 @@ import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView
 import { Keyword, Theme } from '../entities';
 import { IBudgetProposition, IDemandPoprosition, IPropositionViewModel, ISubProposition, ITaskProposition } from '../types';
 
-export class PropositonViewModel {
+export class PropositionViewModel {
 	id?: number;
 	title: string;
 	menu: string;

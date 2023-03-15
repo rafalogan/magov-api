@@ -2,13 +2,13 @@ import { BAD_REQUEST } from 'http-status';
 import { Request, Response } from 'express';
 
 import { Controller } from 'src/core/controllers';
-import { PropositonsTypeService } from 'src/services';
+import { PropositionsTypeService } from 'src/services';
 import { existsOrError, isRequired, setFileToSave } from 'src/utils';
 import { ResponseHandle } from 'src/core/handlers';
-import { PropositonsTypeModel } from 'src/repositories/models';
+import { PropositionsTypeModel } from 'src/repositories/models';
 
-export class PropositonsTypeController extends Controller {
-	constructor(private propositonsTypeService: PropositonsTypeService) {
+export class PropositionsTypeController extends Controller {
+	constructor(private PropositionsTypeService: PropositionsTypeService) {
 		super();
 	}
 
@@ -19,10 +19,9 @@ export class PropositonsTypeController extends Controller {
 			return ResponseHandle.onError({ res, err });
 		}
 		const document = setFileToSave(req);
-		const propositionsType = new PropositonsTypeModel({ ...req.body, document });
+		const propositionsType = new PropositionsTypeModel({ ...req.body, document });
 
-		this.propositonsTypeService
-			.save(propositionsType)
+		this.PropositionsTypeService.save(propositionsType)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -30,10 +29,9 @@ export class PropositonsTypeController extends Controller {
 	edit(req: Request, res: Response) {
 		const { id } = req.params;
 		const document = setFileToSave(req);
-		const propositionsType = new PropositonsTypeModel({ ...req.body, document }, Number(id));
+		const propositionsType = new PropositionsTypeModel({ ...req.body, document }, Number(id));
 
-		this.propositonsTypeService
-			.save(propositionsType)
+		this.PropositionsTypeService.save(propositionsType)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -41,8 +39,7 @@ export class PropositonsTypeController extends Controller {
 	list(req: Request, res: Response) {
 		const { id } = req.params;
 
-		this.propositonsTypeService
-			.read(Number(id))
+		this.PropositionsTypeService.read(Number(id))
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -50,8 +47,7 @@ export class PropositonsTypeController extends Controller {
 	remove(req: Request, res: Response) {
 		const { id } = req.params;
 
-		this.propositonsTypeService
-			.desabled(Number(id))
+		this.PropositionsTypeService.desabled(Number(id))
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

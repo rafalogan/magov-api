@@ -1,22 +1,22 @@
 import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
-import { PropositonsType } from 'src/repositories/entities';
-import { PropositonsTypeModel } from 'src/repositories/models';
-import { IFile, IPropositonsType, IServiceOptions } from 'src/repositories/types';
+import { PropositionsType } from 'src/repositories/entities';
+import { PropositionsTypeModel } from 'src/repositories/models';
+import { IFile, IPropositionsType, IServiceOptions } from 'src/repositories/types';
 import { convertDataValues, deleteFile, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 
-export class PropositonsTypeService extends DatabaseService {
+export class PropositionsTypeService extends DatabaseService {
 	constructor(options: IServiceOptions) {
 		super(options);
 	}
 
-	async create(data: PropositonsTypeModel) {
+	async create(data: PropositionsTypeModel) {
 		try {
-			const fromDB = (await this.getPropositionsType(data.name)) as PropositonsTypeModel;
+			const fromDB = (await this.getPropositionsType(data.name)) as PropositionsTypeModel;
 			notExistisOrError(fromDB?.id, { message: 'Type already exists', status: FORBIDDEN });
 
-			const toSave = new PropositonsType({ ...data, active: true } as IPropositonsType);
+			const toSave = new PropositionsType({ ...data, active: true } as IPropositionsType);
 			const [id] = await this.db('types').insert(convertDataValues(toSave));
 			existsOrError(id, { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
 
@@ -29,12 +29,12 @@ export class PropositonsTypeService extends DatabaseService {
 		}
 	}
 
-	async update(data: PropositonsTypeModel, id: number) {
+	async update(data: PropositionsTypeModel, id: number) {
 		try {
-			const fromDB = (await this.getPropositionsType(id)) as PropositonsTypeModel;
+			const fromDB = (await this.getPropositionsType(id)) as PropositionsTypeModel;
 
 			existsOrError(fromDB?.id, { message: 'Not found', status: NOT_FOUND });
-			const toUpdate = new PropositonsType({ ...fromDB, ...data } as IPropositonsType);
+			const toUpdate = new PropositionsType({ ...fromDB, ...data } as IPropositionsType);
 
 			if (data?.document) {
 				await this.deleteDocument(fromDB.id as number);
@@ -87,7 +87,7 @@ export class PropositonsTypeService extends DatabaseService {
 			existsOrError(fromDB, { message: 'Not found', status: NOT_FOUND });
 			existsOrError(fromDB?.id, { message: 'Internal error', status: INTERNAL_SERVER_ERROR });
 
-			return new PropositonsTypeModel({
+			return new PropositionsTypeModel({
 				...convertDataValues(fromDB, 'camel'),
 				document: convertDataValues({ ...fromDB, name: fromDB.document_name }, 'camel'),
 			});
@@ -98,10 +98,10 @@ export class PropositonsTypeService extends DatabaseService {
 
 	async desabled(id: number) {
 		try {
-			const fromDB = (await this.getPropositionsType(id)) as PropositonsTypeModel;
+			const fromDB = (await this.getPropositionsType(id)) as PropositionsTypeModel;
 			existsOrError(fromDB?.id, { message: 'Type Not found', status: NOT_FOUND });
 
-			const toDesabled = new PropositonsType({ ...fromDB, active: false } as IPropositonsType);
+			const toDesabled = new PropositionsType({ ...fromDB, active: false } as IPropositionsType);
 			await this.db('types').where({ id: fromDB.id }).update(convertDataValues(toDesabled));
 
 			return { message: 'Type Desabled successfully', data: { ...fromDB, active: false } };

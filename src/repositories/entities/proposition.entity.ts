@@ -1,7 +1,7 @@
 import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { IProposition } from '../types';
 
-export class Propositon {
+export class Proposition {
 	id?: number;
 	title: string;
 	menu: string;

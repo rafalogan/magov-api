@@ -17,7 +17,7 @@ import { InstituteTypeModule } from 'src/modules/institute-type';
 import { DemandModule } from 'src/modules/demand';
 import { PlaintiffModule } from 'src/modules/plaintiff';
 import { ContactModule } from 'src/modules/contact';
-import { PropositonsTypeModule } from 'src/modules/propositons-type';
+import { PropositionsTypeModule } from 'src/modules/propositions-type';
 import { OriginModule } from 'src/modules/origin';
 import { RevenueModule } from 'src/modules/revenue';
 
@@ -33,7 +33,7 @@ export class ModulesFactory {
 	private demandModule: DemandModule;
 	private plaintiffModule: PlaintiffModule;
 	private contactModule: ContactModule;
-	private propositionsTypeModule: PropositonsTypeModule;
+	private propositionsTypeModule: PropositionsTypeModule;
 	private originModule: OriginModule;
 	private revenueModule: RevenueModule;
 
@@ -49,7 +49,7 @@ export class ModulesFactory {
 		this.demandModule = new DemandModule({ ...this.getRouteOptions(), service: services.demandService });
 		this.plaintiffModule = new PlaintiffModule({ ...this.getRouteOptions(), service: services.plaintiffService });
 		this.contactModule = new ContactModule({ ...this.getRouteOptions(), service: services.contactService });
-		this.propositionsTypeModule = new PropositonsTypeModule(
+		this.propositionsTypeModule = new PropositionsTypeModule(
 			{ ...this.getRouteOptions(), service: services.propositionTypeService },
 			upload
 		);

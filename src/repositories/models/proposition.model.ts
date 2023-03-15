@@ -2,7 +2,7 @@ import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { IPropositionModel, ITask } from '../types';
 import { Task } from 'src/repositories/entities';
 
-export class PropositonModel {
+export class PropositionModel {
 	id?: number;
 	title: string;
 	menu: string;

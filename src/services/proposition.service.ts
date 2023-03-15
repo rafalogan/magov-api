@@ -1,22 +1,22 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
-import { Propositon, Task } from 'src/repositories/entities';
-import { PropositionsReadOptionsModel, PropositonModel, PropositonViewModel } from 'src/repositories/models';
+import { Proposition, Task } from 'src/repositories/entities';
+import { PropositionModel, PropositionsReadOptionsModel, PropositionViewModel } from 'src/repositories/models';
 import { IProposition, IServiceOptions } from 'src/repositories/types';
 import { convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 
-export class PropositonService extends DatabaseService {
+export class PropositionService extends DatabaseService {
 	constructor(options: IServiceOptions) {
 		super(options);
 	}
 
-	async create(data: PropositonModel) {
+	async create(data: PropositionModel) {
 		try {
-			const fromDB = (await this.getProprosition(data.title, data.tenancyId)) as PropositonViewModel;
+			const fromDB = (await this.getProprosition(data.title, data.tenancyId)) as PropositionViewModel;
 
 			notExistisOrError(fromDB.id, { messsage: 'Proposition alredy existis', status: FORBIDDEN });
 			notExistisOrError(fromDB, { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
-			const toSave = new Propositon({ ...data, active: true } as IProposition);
+			const toSave = new Proposition({ ...data, active: true } as IProposition);
 			const [id] = await this.db('propositions').insert(convertDataValues(toSave));
 
 			existsOrError(Number(id), { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
@@ -32,12 +32,12 @@ export class PropositonService extends DatabaseService {
 		}
 	}
 
-	async update(data: PropositonModel, id: number) {
+	async update(data: PropositionModel, id: number) {
 		try {
-			const fromDB = (await this.getProprosition(id, data.tenancyId)) as PropositonViewModel;
+			const fromDB = (await this.getProprosition(id, data.tenancyId)) as PropositionViewModel;
 
 			existsOrError(fromDB.id, { message: 'Not found', status: NOT_FOUND });
-			const toUpdate = new Propositon({ ...fromDB, ...data, tenancyId: fromDB.tenancyId });
+			const toUpdate = new Proposition({ ...fromDB, ...data, tenancyId: fromDB.tenancyId });
 			await this.db('propositions').where({ id }).andWhere({ tenancy_id: fromDB.tenancyId }).update(convertDataValues(toUpdate));
 
 			if (data?.budgets?.length) {
@@ -62,7 +62,7 @@ export class PropositonService extends DatabaseService {
 
 			if (data?.tasks?.length) await this.setTasks(data.tasks, id);
 
-			return { message: 'Propositon updated with success', data: { ...toUpdate, ...data } };
+			return { message: 'Proposition updated with success', data: { ...toUpdate, ...data } };
 		} catch (err) {
 			return err;
 		}
@@ -145,7 +145,7 @@ export class PropositonService extends DatabaseService {
 
 			const tasks = await this.getTasksProposition(fromDB.id);
 
-			return new PropositonViewModel(convertDataValues({ ...fromDB, budgets, demands, keywords, themes, tasks }, 'camel'));
+			return new PropositionViewModel(convertDataValues({ ...fromDB, budgets, demands, keywords, themes, tasks }, 'camel'));
 		} catch (err) {
 			return err;
 		}
@@ -153,13 +153,13 @@ export class PropositonService extends DatabaseService {
 
 	async disabled(id: number, tenancyId: number) {
 		try {
-			const fromDB = (await this.getProprosition(id, tenancyId)) as PropositonViewModel;
+			const fromDB = (await this.getProprosition(id, tenancyId)) as PropositionViewModel;
 			existsOrError(fromDB.id, { message: 'Not found', status: NOT_FOUND });
 
-			const toDesabled = new Propositon({ ...fromDB, active: false });
+			const toDesabled = new Proposition({ ...fromDB, active: false });
 			await this.db('propositions').where({ id }).andWhere({ tenancy_id: tenancyId }).update(convertDataValues(toDesabled));
 
-			return { message: 'Propositon disabled with success', data: { ...fromDB, ...toDesabled } };
+			return { message: 'Proposition disabled with success', data: { ...fromDB, ...toDesabled } };
 		} catch (err) {
 			return err;
 		}
