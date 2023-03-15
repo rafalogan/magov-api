@@ -2,7 +2,7 @@ import { Knex } from 'knex';
 import { onLog } from 'src/core/handlers';
 import { PaginationModel, ReadOptionsModel } from 'src/repositories/models';
 
-import { IAddress, IServiceOptions } from 'src/repositories/types';
+import { IAddress, IGetValuesOptions, IServiceOptions } from 'src/repositories/types';
 import { camelToSnake, convertDataValues } from 'src/utils';
 import { CacheService } from './abistract-cache.service';
 import { Address } from 'src/repositories/entities';
