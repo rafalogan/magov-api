@@ -7,15 +7,15 @@ import { PropositionsTypeService } from 'src/services';
 import { PropositionsTypeController, PropositionsTypeRoute } from 'src/modules/propositions-type';
 
 export class PropositionsTypeModule extends CommonModule {
-	private readonly PropositionsTypeController: PropositionsTypeController;
-	private PropositionsTypeRoute: PropositionsTypeRoute;
+	private readonly propositionsTypeController: PropositionsTypeController;
+	private propositionsTypeRoute: PropositionsTypeRoute;
 
 	constructor(options: ModuleOptions<PropositionsTypeService>, upload: Multer) {
 		super();
 
-		this.PropositionsTypeController = new PropositionsTypeController(options.service);
-		this.PropositionsTypeRoute = new PropositionsTypeRoute(options, upload, this.PropositionsTypeController);
+		this.propositionsTypeController = new PropositionsTypeController(options.service);
+		this.propositionsTypeRoute = new PropositionsTypeRoute(options, upload, this.propositionsTypeController);
 	}
 
-	exec = () => this.PropositionsTypeRoute.exec();
+	exec = () => this.propositionsTypeRoute.exec();
 }

@@ -1,3 +1,3 @@
-export * from './Propositions-type.controller';
-export * from './Propositions-type.route';
-export * from './Propositions-type.module';
+export * from './propositions-type.controller';
+export * from './propositions-type.route';
+export * from './propositions-type.module';

@@ -20,6 +20,7 @@ import { ContactModule } from 'src/modules/contact';
 import { PropositionsTypeModule } from 'src/modules/propositions-type';
 import { OriginModule } from 'src/modules/origin';
 import { RevenueModule } from 'src/modules/revenue';
+import { PropositionModule } from 'src/modules/proposition';
 
 export class ModulesFactory {
 	private authModule: AuthModule;
@@ -36,6 +37,7 @@ export class ModulesFactory {
 	private propositionsTypeModule: PropositionsTypeModule;
 	private originModule: OriginModule;
 	private revenueModule: RevenueModule;
+	private propositionModule: PropositionModule;
 
 	constructor(private app: Application, private auth: AuthConfig, services: ServicesFactory, upload: Multer) {
 		this.authModule = new AuthModule({ ...this.getRouteOptions(), service: services.authService, upload });
@@ -55,6 +57,7 @@ export class ModulesFactory {
 		);
 		this.originModule = new OriginModule({ ...this.getRouteOptions(), service: services.originService });
 		this.revenueModule = new RevenueModule({ ...this.getRouteOptions(), service: services.revenueService }, upload);
+		this.propositionModule = new PropositionModule({ ...this.getRouteOptions(), service: services.propositionService });
 	}
 
 	exec() {
@@ -72,6 +75,7 @@ export class ModulesFactory {
 		this.propositionsTypeModule.exec();
 		this.originModule.exec();
 		this.revenueModule.exec();
+		this.propositionModule.exec();
 		this.app.use('/media', express.static(resolve(__dirname, '../..', 'tmp', 'uploads')));
 		this.app.use(notfoundRoute);
 	}

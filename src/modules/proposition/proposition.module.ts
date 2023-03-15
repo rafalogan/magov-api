@@ -1,16 +1,18 @@
 import { CommonModule } from 'src/core/modules';
 import { ModuleOptions } from 'src/repositories/types';
+import { PropositionService } from 'src/services';
+import { PropositionController, PropositionRoute } from 'src/modules/proposition';
 
 export class PropositionModule extends CommonModule {
-private readonly PropositionController: ;
-private PropositionRoute: ;
+	private readonly propositionController: PropositionController;
+	private propositionRoute: PropositionRoute;
 
-constructor(options: ModuleOptions<>) {
-	super();
+	constructor(options: ModuleOptions<PropositionService>) {
+		super();
 
-  this.PropositionController =
-  this.PropositionRoute =
-}
+		this.propositionController = new PropositionController(options.service);
+		this.propositionRoute = new PropositionRoute(options, this.propositionController);
+	}
 
-exec = () => this.PropositionRoute.exec();
+	exec = () => this.propositionRoute.exec();
 }

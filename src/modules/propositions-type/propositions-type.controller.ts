@@ -8,7 +8,7 @@ import { ResponseHandle } from 'src/core/handlers';
 import { PropositionsTypeModel } from 'src/repositories/models';
 
 export class PropositionsTypeController extends Controller {
-	constructor(private PropositionsTypeService: PropositionsTypeService) {
+	constructor(private propositionsTypeService: PropositionsTypeService) {
 		super();
 	}
 
@@ -21,7 +21,8 @@ export class PropositionsTypeController extends Controller {
 		const document = setFileToSave(req);
 		const propositionsType = new PropositionsTypeModel({ ...req.body, document });
 
-		this.PropositionsTypeService.save(propositionsType)
+		this.propositionsTypeService
+			.save(propositionsType)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -31,7 +32,8 @@ export class PropositionsTypeController extends Controller {
 		const document = setFileToSave(req);
 		const propositionsType = new PropositionsTypeModel({ ...req.body, document }, Number(id));
 
-		this.PropositionsTypeService.save(propositionsType)
+		this.propositionsTypeService
+			.save(propositionsType)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -39,7 +41,8 @@ export class PropositionsTypeController extends Controller {
 	list(req: Request, res: Response) {
 		const { id } = req.params;
 
-		this.PropositionsTypeService.read(Number(id))
+		this.propositionsTypeService
+			.read(Number(id))
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -47,7 +50,8 @@ export class PropositionsTypeController extends Controller {
 	remove(req: Request, res: Response) {
 		const { id } = req.params;
 
-		this.PropositionsTypeService.desabled(Number(id))
+		this.propositionsTypeService
+			.desabled(Number(id))
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

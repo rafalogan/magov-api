@@ -38,14 +38,14 @@ export class PropositionModel {
 	}
 
 	private setTasks(data: IPropositionModel) {
-		const { deadline, expense, unitId, tenancyId } = data;
+		const { menu, expense, unitId, tenancyId } = data;
 		return data.tasks.map(
 			item =>
 				new Task(
 					{
 						title: item.task,
-						description: data.menu,
-						end: deadline,
+						description: menu,
+						end: item.deadline,
 						cost: expense,
 						start: new Date(),
 						status: 0,

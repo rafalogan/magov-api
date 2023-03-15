@@ -15,7 +15,7 @@ export interface IProposition extends IID {
 }
 
 export interface IPropositionModel extends IProposition {
-	budgets: number[];
+	budgets?: number[];
 	keywords: string[];
 	themes: string[];
 	demands?: number[];

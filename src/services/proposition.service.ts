@@ -1,4 +1,5 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+import { onLog } from 'src/core/handlers';
 import { Proposition, Task } from 'src/repositories/entities';
 import { PropositionModel, PropositionsReadOptionsModel, PropositionViewModel } from 'src/repositories/models';
 import { IProposition, IServiceOptions } from 'src/repositories/types';
@@ -15,16 +16,15 @@ export class PropositionService extends DatabaseService {
 			const fromDB = (await this.getProprosition(data.title, data.tenancyId)) as PropositionViewModel;
 
 			notExistisOrError(fromDB.id, { messsage: 'Proposition alredy existis', status: FORBIDDEN });
-			notExistisOrError(fromDB, { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
 			const toSave = new Proposition({ ...data, active: true } as IProposition);
 			const [id] = await this.db('propositions').insert(convertDataValues(toSave));
 
 			existsOrError(Number(id), { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
-			if (data.budgets) await this.setBudgets(data.budgets, id);
+			if (data.budgets?.length) await this.setBudgets(data.budgets, id);
 			if (data.keywords.length !== 0) await this.setKeywords(data.keywords, id);
 			if (data.themes.length !== 0) await this.setThemes(data.themes, id);
 			if (data.demands?.length !== 0) await this.setDemands(data.demands as number[], id);
-			await await this.setTasks(data.tasks, id);
+			await this.setTasks(data.tasks, id);
 
 			return { message: 'Proposition saved with success', data: { ...data, id } };
 		} catch (err) {
@@ -37,7 +37,8 @@ export class PropositionService extends DatabaseService {
 			const fromDB = (await this.getProprosition(id, data.tenancyId)) as PropositionViewModel;
 
 			existsOrError(fromDB.id, { message: 'Not found', status: NOT_FOUND });
-			const toUpdate = new Proposition({ ...fromDB, ...data, tenancyId: fromDB.tenancyId });
+			const active = data.active !== null && data.active !== undefined ? data.active : fromDB.active;
+			const toUpdate = new Proposition({ ...fromDB, ...data, tenancyId: fromDB.tenancyId, active });
 			await this.db('propositions').where({ id }).andWhere({ tenancy_id: fromDB.tenancyId }).update(convertDataValues(toUpdate));
 
 			if (data?.budgets?.length) {
@@ -178,6 +179,7 @@ export class PropositionService extends DatabaseService {
 	private async setTasks(tasks: Task[], propositionId: number) {
 		try {
 			for (const task of tasks) {
+				onLog('task to save', task);
 				await this.setPropositionTask(task, propositionId);
 			}
 		} catch (err) {
@@ -185,10 +187,11 @@ export class PropositionService extends DatabaseService {
 		}
 	}
 
-	private async setBudgets(budgets: number[], id: number) {
+	private async setBudgets(budgets: number[], propositionId: number) {
 		try {
 			for (const revenueId of budgets) {
-				await this.db('budget_proposals').insert(convertDataValues({ revenueId, propositionId: id }));
+				onLog('revenue', revenueId);
+				await this.db('budget_proposals').insert(convertDataValues({ revenueId, propositionId }));
 			}
 		} catch (err) {
 			return err;
@@ -199,7 +202,9 @@ export class PropositionService extends DatabaseService {
 		try {
 			const fromDB = await this.db('tasks').where({ title: data.title }).andWhere({ tenancy_id: data.tenancyId }).first();
 
-			if (fromDB.id) {
+			onLog('task from db', fromDB);
+
+			if (fromDB?.id) {
 				await this.db('tasks')
 					.where({ id: fromDB.id })
 					.andWhere({ tenancy_id: data.tenancyId })
@@ -213,11 +218,10 @@ export class PropositionService extends DatabaseService {
 					);
 				return;
 			}
+
 			const [id] = await this.db('tasks').insert(convertDataValues({ ...data, propositionId }));
-
+			onLog('save task', id);
 			existsOrError(Number(id), { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
-
-			return;
 		} catch (err) {
 			return err;
 		}
@@ -227,32 +231,32 @@ export class PropositionService extends DatabaseService {
 		try {
 			for (const keyword of keywords) {
 				const fromDB = await this.db('keywords').where({ keyword }).first();
+				onLog('keyword', keyword);
+				onLog('keyword fromDB', fromDB);
 
-				if (!fromDB.id) {
+				if (!fromDB?.id) {
 					const [keywordId] = await this.db('keywords').insert(convertDataValues({ keyword }));
 					await this.db('propositions_keywords').insert(convertDataValues({ keywordId, propositionId: id }));
-					return;
+				} else {
+					await this.db('propositions_keywords').insert(convertDataValues({ keywordId: fromDB.id, propositionId: id }));
 				}
-
-				await this.db('propositions_keywords').insert(convertDataValues({ keywordId: fromDB.id, propositionId: id }));
 			}
 		} catch (err) {
 			return err;
 		}
 	}
 
-	private async setThemes(themes: string[], propositionsId: number) {
+	private async setThemes(themes: string[], propositionId: number) {
 		try {
 			for (const theme of themes) {
 				const fromDB = await this.db('themes').where({ name: theme }).first();
 
-				if (!fromDB.id) {
+				if (!fromDB?.id) {
 					const [themeId] = await this.db('themes').insert(convertDataValues({ name: theme }));
-					await this.db('propositions_themes').insert(convertDataValues({ themeId, propositionsId }));
-					return;
+					await this.db('propositions_themes').insert(convertDataValues({ themeId, propositionId }));
+				} else {
+					await this.db('propositions_themes').insert(convertDataValues({ themeId: fromDB.id, propositionId }));
 				}
-
-				await this.db('propositions_themes').insert(convertDataValues({ themeId: fromDB.id, propositionsId }));
 			}
 		} catch (err) {
 			return err;
@@ -265,8 +269,8 @@ export class PropositionService extends DatabaseService {
 				.select(
 					{
 						id: 't.id',
-						task: 't.task',
-						deadline: 't.deadline',
+						task: 't.title',
+						deadline: 't.end',
 						level: 't.level',
 					},
 					{ user_id: 'u.id', user_first_name: 'u.first_name', user_last_name: 'u.last_name' }
