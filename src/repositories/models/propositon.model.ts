@@ -1,5 +1,6 @@
 import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
-import { IPropositionModel, ITaskProposition } from '../types';
+import { IPropositionModel, ITask } from '../types';
+import { Task } from 'src/repositories/entities';
 
 export class PropositonModel {
 	id?: number;
@@ -15,8 +16,8 @@ export class PropositonModel {
 	budgets?: number[];
 	keywords: string[];
 	themes: string[];
-	demands: number[];
-	tasks: ITaskProposition[];
+	demands?: number[];
+	tasks: Task[];
 
 	constructor(data: IPropositionModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -33,6 +34,28 @@ export class PropositonModel {
 		this.keywords = data.keywords;
 		this.themes = data.themes;
 		this.demands = data.demands;
-		this.tasks = data.tasks;
+		this.tasks = this.setTasks(data);
+	}
+
+	private setTasks(data: IPropositionModel) {
+		const { deadline, expense, unitId, tenancyId } = data;
+		return data.tasks.map(
+			item =>
+				new Task(
+					{
+						title: item.task,
+						description: data.menu,
+						end: deadline,
+						cost: expense,
+						start: new Date(),
+						status: 0,
+						unitId,
+						tenancyId,
+						level: item.level,
+						userId: item.userId,
+					} as ITask,
+					Number(item?.id)
+				)
+		);
 	}
 }

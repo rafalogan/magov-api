@@ -46,3 +46,12 @@ export interface INotificationOption {
 	field: any;
 	message: string;
 }
+
+export interface IGetValuesOptions {
+	tableIds: string;
+	whereIds: string;
+	fieldIds: string;
+	value: number;
+	table: string;
+	fields: string[];
+}

@@ -1,5 +1,5 @@
 import { IKeyword } from './keyword';
-import { IID } from './shared';
+import { IID, IReadOptions } from './shared';
 import { ITheme } from './theme';
 
 export interface IProposition extends IID {
@@ -18,7 +18,7 @@ export interface IPropositionModel extends IProposition {
 	budgets: number[];
 	keywords: string[];
 	themes: string[];
-	demands: number[];
+	demands?: number[];
 	tasks: ITaskProposition[];
 }
 
@@ -54,4 +54,8 @@ export interface ITaskProposition {
 	level: number;
 	userId: number;
 	responsible?: string;
+}
+
+export interface IPropositionsReadOptions extends IReadOptions {
+	unitId?: number;
 }

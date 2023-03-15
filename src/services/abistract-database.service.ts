@@ -102,4 +102,24 @@ export abstract class DatabaseService extends CacheService {
 			return err;
 		}
 	}
+
+	protected async getValues(options: IGetValuesOptions) {
+		try {
+			const ids = await this.db(options.tableIds).select(options.fieldIds).where(options.whereIds, options.value);
+			if (!Array.isArray(ids)) return [];
+
+			const result: any[] = [];
+			for (const itemId of ids) {
+				const data = await this.db(options.table)
+					.select(...options.fields)
+					.where('id', itemId)
+					.first();
+				if (data.id) result.push(data);
+			}
+
+			return result;
+		} catch (err) {
+			return err;
+		}
+	}
 }

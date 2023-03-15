@@ -12,7 +12,7 @@ export class Task {
 	status: number;
 	userId: number;
 	unitId: number;
-	tenacyId: number;
+	tenancyId: number;
 	propositionId?: number;
 	demandId?: number;
 	plaintiffId?: number;
@@ -28,7 +28,7 @@ export class Task {
 		this.status = Number(data.status);
 		this.userId = Number(data.userId);
 		this.unitId = Number(data.unitId);
-		this.tenacyId = Number(data.tenacyId);
+		this.tenancyId = Number(data.tenancyId);
 		this.propositionId = setInstanceId(data.propositionId);
 		this.demandId = setInstanceId(data.demandId);
 		this.plaintiffId = setInstanceId(data.plaintiffId);

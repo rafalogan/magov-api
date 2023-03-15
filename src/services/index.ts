@@ -15,3 +15,4 @@ export * from './contact.service';
 export * from './propositons-type.service';
 export * from './revenue.service';
 export * from './origin.service';
+export * from './propositon.service';

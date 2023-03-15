@@ -1,5 +1,5 @@
 import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
-import { IPropositionModel } from '../types';
+import { IProposition } from '../types';
 
 export class Propositon {
 	id?: number;
@@ -13,8 +13,8 @@ export class Propositon {
 	typeId: number;
 	tenancyId: number;
 
-	constructor(data: IPropositionModel, id?: number) {
-		this.id = setInstanceId(id || data.id);
+	constructor(data: IProposition, id?: number) {
+		this.id = setInstanceId(id || data?.id);
 		this.title = data.title.trim();
 		this.menu = convertBlobToString(data.menu) as string;
 		this.deadline = convertToDate(data.deadline);

@@ -17,3 +17,4 @@ export * from './propositons-type.model';
 export * from './revenue.model';
 export * from './propositon.model';
 export * from './propositon-view.model';
+export * from './propositions-read-options.model';

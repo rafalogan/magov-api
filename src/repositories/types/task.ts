@@ -10,7 +10,7 @@ export interface ITask extends IID {
 	status: number;
 	userId: number;
 	unitId: number;
-	tenacyId: number;
+	tenancyId: number;
 	propositionId?: number;
 	demandId?: number;
 	plaintiffId?: number;
