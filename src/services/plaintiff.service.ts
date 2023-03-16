@@ -2,7 +2,7 @@ import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Plaintiff } from 'src/repositories/entities';
 
-import { PaginationModel, PlaintiffModel, ReadOptionsModel } from 'src/repositories/models';
+import { PlaintiffModel, ReadOptionsModel } from 'src/repositories/models';
 import { IPlantiff, IServiceOptions } from 'src/repositories/types';
 import { convertDataValues, equalsOrError, existsOrError, isRequired, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';

@@ -32,6 +32,7 @@ export interface IPaginationOptions {
 }
 
 export interface IReadOptions extends IPaginationOptions {
+	unitId?: number;
 	tenancyId?: number;
 	all?: boolean;
 }

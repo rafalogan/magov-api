@@ -21,6 +21,7 @@ export class TaskModel {
 	plaintiff?: PlaintiffModel;
 	users: number[];
 	comments?: Comment[];
+	themes: string[];
 	unitExpense?: UnitExpense;
 
 	constructor(data: ITaskModel, id?: number) {
@@ -32,7 +33,6 @@ export class TaskModel {
 		this.end = convertToDate(data.end);
 		this.level = Number(data.level);
 		this.status = Number(data.status) || 0;
-		this.userId = Number(data.userId);
 		this.unitId = Number(data.unitId);
 		this.tenancyId = Number(data.tenancyId);
 		this.propositionId = setInstanceId(data.propositionId);
@@ -42,9 +42,11 @@ export class TaskModel {
 			? new PlaintiffModel({ ...data.plaintiff, tenancyId: data?.plaintiff?.tenancyId || this.tenancyId })
 			: undefined;
 		this.users = data.users;
+		this.userId = Number(data.userId || data.users[0]);
 		this.comments = this.setComents(data.comments);
 		this.unitExpense =
 			data.setUnitExpense && this.cost ? this.setUnitExpense() : data.unitExpense ? this.setUnitExpense(data.unitExpense) : undefined;
+		this.themes = data.themes;
 	}
 
 	private setUnitExpense(value?: IUnitExpense) {

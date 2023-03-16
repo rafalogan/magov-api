@@ -23,6 +23,7 @@ export interface ITaskModel extends ITask {
 	unitExpense?: IUnitExpense;
 	plaintiff?: IPlantiffModel;
 	users: number[];
+	themes: string[];
 	comments?: ITaskComment[];
 }
 
@@ -39,8 +40,14 @@ export interface ITaskViewModel extends IID {
 	tenancyId: number;
 	proposition?: IPropositionTask;
 	demand?: IDemandTask;
-	plaintiffId?: IPlantiffTask;
+	plaintiff?: IPlantiffTask;
 	comments?: ICommentTask[];
+	themes: IThemeTask[];
+}
+
+export interface IThemeTask {
+	id: number;
+	theme: string;
 }
 
 export interface ICommentTask {

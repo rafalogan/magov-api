@@ -16,3 +16,4 @@ export * from './propositions-type.service';
 export * from './revenue.service';
 export * from './origin.service';
 export * from './proposition.service';
+export * from './task.service';

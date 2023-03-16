@@ -1,5 +1,5 @@
 import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
-import { ICommentTask, IDemandTask, IPlantiffTask, IPropositionTask, ITaskComment, ITaskUnit, ITaskUsers, ITaskViewModel } from '../types';
+import { ICommentTask, IDemandTask, IPlantiffTask, IPropositionTask, ITaskUnit, ITaskUsers, ITaskViewModel, IThemeTask } from '../types';
 
 export class TaskViewModel {
 	id?: number;
@@ -15,8 +15,9 @@ export class TaskViewModel {
 	tenancyId: number;
 	proposition?: IPropositionTask;
 	demand?: IDemandTask;
-	plaintiffId?: IPlantiffTask;
+	plaintiff?: IPlantiffTask;
 	comments?: ICommentTask[];
+	themes: IThemeTask[];
 
 	constructor(data: ITaskViewModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -32,8 +33,9 @@ export class TaskViewModel {
 		this.tenancyId = Number(data.tenancyId);
 		this.proposition = this.setProposition(data.proposition);
 		this.demand = this.setDemand(data.demand);
-		this.plaintiffId = data.plaintiffId;
+		this.plaintiff = data.plaintiff;
 		this.comments = this.setComments(data.comments);
+		this.themes = data.themes;
 	}
 
 	private setDemand(value?: IDemandTask) {

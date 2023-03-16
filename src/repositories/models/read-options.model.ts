@@ -6,6 +6,7 @@ export class ReadOptionsModel {
 	orderBy: string;
 	order: string;
 	tenancyId?: number;
+	unitId?: number;
 
 	constructor(data: IReadOptions) {
 		this.page = Number(data.page) || 1;
@@ -13,5 +14,6 @@ export class ReadOptionsModel {
 		this.orderBy = data.orderBy || 'id';
 		this.order = data.orderBy || 'asc';
 		this.tenancyId = Number(data.tenancyId) || undefined;
+		this.unitId = Number(data.unitId) || undefined;
 	}
 }
