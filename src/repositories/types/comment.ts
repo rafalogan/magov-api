@@ -14,8 +14,12 @@ export interface ICommentModel extends IID {
 	active: boolean;
 	taskId: number;
 	parentId?: number;
-	user: ICommentUser;
+	userId: number;
+	firstName: string;
+	lastName: string;
+	email: string;
 	tenancyId: number;
+	comments?: ICommentModel[];
 }
 
 export interface ICommentUser {
