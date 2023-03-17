@@ -12,7 +12,7 @@ export class Comment {
 
 	constructor(data: IComment, id?: number) {
 		this.id = setInstanceId(id || data?.id);
-		this.comment = convertBlobToString(data.comment) as string;
+		this.comment = convertBlobToString(data.comment)?.trim() as string;
 		this.active = !!data.active;
 		this.taskId = setInstanceId(data.taskId);
 		this.parentId = setInstanceId(data.parentId);

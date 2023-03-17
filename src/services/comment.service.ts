@@ -4,7 +4,7 @@ import { ICommentModel, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { Comment } from 'src/repositories/entities';
 import { CommentModel, PaginationModel, ReadOptionsModel } from 'src/repositories/models';
-import { convertDataValues, existsOrError, fileFields, isRequired } from 'src/utils';
+import { convertDataValues, deleteField, existsOrError, isRequired } from 'src/utils';
 import { onLog } from 'src/core/handlers';
 
 export class CommentService extends DatabaseService {
@@ -13,6 +13,7 @@ export class CommentService extends DatabaseService {
 	}
 
 	async create(data: Comment) {
+		deleteField(data, 'active');
 		return this.db('comments')
 			.insert(convertDataValues(data))
 			.then(([id]) => {
@@ -88,8 +89,8 @@ export class CommentService extends DatabaseService {
 								.unionAll(qb =>
 									qb
 										.select(...subFields)
-										.from(subTables)
-										.andWhereRaw('sc.parent_id = c.id')
+										.from({ ...subTables, sub: 'subcommentaries' })
+										.whereRaw('sc.parent_id = sub.id')
 										.andWhereRaw('su.id = sc.user_id')
 								)
 						)
@@ -105,8 +106,8 @@ export class CommentService extends DatabaseService {
 								.unionAll(qb =>
 									qb
 										.select(...subFields)
-										.from(subTables)
-										.andWhereRaw('sc.parent_id = c.id')
+										.from({ ...subTables, sub: 'subcommentaries' })
+										.whereRaw('sc.parent_id = sub.id')
 										.andWhereRaw('su.id = sc.user_id')
 								)
 						)
@@ -117,7 +118,9 @@ export class CommentService extends DatabaseService {
 						.orderBy(orderBy || 'id', order || 'asc');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Comments Not Found' });
-			const raw = convertDataValues(fromDB, 'camel');
+			const raw = fromDB.map(i => convertDataValues(i, 'camel'));
+			onLog('comments raw', raw);
+
 			const res = this.setComments(raw).map(i => new CommentModel(i));
 			const pagination = !taskId ? new PaginationModel({ page, limit, total }) : null;
 
@@ -163,10 +166,10 @@ export class CommentService extends DatabaseService {
 											parent_id: 'sc.parent_id',
 											tenancy_id: 'sc.tenancy_id',
 										},
-										{ user_id: 'su.id', first_name: 'su.first_name', last_name: 'su.last_name', email: 'u.email' }
+										{ user_id: 'su.id', first_name: 'su.first_name', last_name: 'su.last_name', email: 'su.email' }
 									)
-									.from({ sc: 'comments', su: 'users' })
-									.whereRaw('sc.parent_id = c.id')
+									.from({ sc: 'comments', su: 'users', sub: 'subcommentaries' })
+									.whereRaw('sc.parent_id = sub.id')
 									.andWhereRaw('su.id = sc.user_id')
 							)
 				)
@@ -174,7 +177,7 @@ export class CommentService extends DatabaseService {
 				.from('subcommentaries');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Comment Not Found', status: NOT_FOUND });
-			const raw = convertDataValues(fromDB, 'camel');
+			const raw = fromDB.map(i => convertDataValues(i, 'camel'));
 
 			onLog('data raw', raw);
 			const res = this.setComments(raw)[0];
@@ -187,7 +190,8 @@ export class CommentService extends DatabaseService {
 	async disabled(id: number, tenancyId: number) {
 		try {
 			const fromDB = (await this.getComment(id, tenancyId)) as CommentModel;
-			existsOrError(fromDB.id, { message: 'Comment not found', status: NOT_FOUND });
+			onLog('comment for disabled', fromDB);
+			existsOrError(fromDB?.id, { message: 'Comment not found', status: NOT_FOUND });
 
 			if (fromDB?.comments) {
 				for (const sub of fromDB.comments) {
@@ -211,7 +215,7 @@ export class CommentService extends DatabaseService {
 		}
 	}
 
-	private setComments(value: ICommentModel[], parentId?: number) {
+	private setComments(value: ICommentModel[], parentId?: number): any {
 		if (parentId) {
 			return value
 				.filter(i => i.parentId === parentId)
@@ -221,9 +225,15 @@ export class CommentService extends DatabaseService {
 				});
 		}
 
-		return value.map(i => {
-			i.comments = this.setComments(value, i.id);
-			return i;
-		});
+		if (value.filter(i => !i.parentId).length !== 0) {
+			return value
+				.filter(i => !i.parentId)
+				.map(i => {
+					i.comments = this.setComments(value, i.id);
+					return i;
+				});
+		}
+
+		return value.length ? [{ ...value[0], comments: this.setComments(value, value[0].id) }] : [];
 	}
 }

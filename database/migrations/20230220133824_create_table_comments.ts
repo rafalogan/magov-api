@@ -2,7 +2,7 @@ import { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
 	return knex.schema.createTable('comments', (table: Knex.TableBuilder) => {
-		table.integer('id').primary();
+		table.increments('id').primary();
 		table.binary('comment').notNullable();
 		table.boolean('active').notNullable().defaultTo(true);
 		table.integer('task_id').unsigned().references('id').inTable('tasks').nullable();
