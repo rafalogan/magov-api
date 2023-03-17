@@ -1,8 +1,17 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+import { onLog } from 'src/core/handlers';
 import { Task } from 'src/repositories/entities';
 import { PlaintiffModel, ReadOptionsModel, TaskModel, TaskViewModel } from 'src/repositories/models';
 import { IServiceOptions } from 'src/repositories/types';
-import { clearDuplicateItems, convertDataValues, deleteField, existsOrError, isRequired, notExistisOrError } from 'src/utils';
+import {
+	clearDuplicateItems,
+	convertBlobToString,
+	convertDataValues,
+	deleteField,
+	existsOrError,
+	isRequired,
+	notExistisOrError,
+} from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { PlaintiffService } from './plaintiff.service';
 
@@ -22,7 +31,7 @@ export class TaskService extends DatabaseService {
 			demand_id: 't.demand_id',
 			plaintiff_id: 't.plaintiff_id',
 		},
-		{ user_id: 'u.id', user_frist_name: 'u.frist_name', user_last_name: 'u.last_name' },
+		{ user_id: 'u.id', user_first_name: 'u.first_name', user_last_name: 'u.last_name' },
 		{ unit_id: 'un.id', unit: 'un.name' },
 	];
 
@@ -36,10 +45,13 @@ export class TaskService extends DatabaseService {
 		try {
 			const fromDB = (await this.getTask(data.title, data.tenancyId)) as TaskViewModel;
 
-			notExistisOrError(fromDB, { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
-			notExistisOrError(fromDB.id, { message: 'Task already existis', status: FORBIDDEN });
+			onLog('response getTask', fromDB);
+
+			notExistisOrError(fromDB?.id, { message: 'Task already existis', status: FORBIDDEN });
 			const plaintiffId = await this.setPlaintiffId(data);
+			onLog('plaintiffId', plaintiffId);
 			const toSave = new Task({ ...data, plaintiffId });
+			onLog('task to save', toSave);
 			const [id] = await this.db('tasks').insert(convertDataValues(toSave));
 			await this.setUsers(data.users, id);
 			await this.setThemes(data.themes, id);
@@ -93,9 +105,14 @@ export class TaskService extends DatabaseService {
 						.select(...this.fieldsToList)
 						.where('t.tenancy_id', tenancyId)
 						.andWhere('t.unit_id', unitId)
+						.andWhereRaw('u.id = t.user_id')
+						.andWhereRaw('un.id = t.unit_id')
 				: await this.db(this.tablesToList)
 						.select(...this.fieldsToList)
-						.where('t.tenancy_id', tenancyId);
+						.where('t.tenancy_id', tenancyId)
+						.andWhereRaw('u.id = t.user_id')
+						.andWhereRaw('un.id = t.unit_id');
+			onLog('tasks from db: ', fromDB);
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
 
@@ -121,9 +138,9 @@ export class TaskService extends DatabaseService {
 				if (data.propositionId) {
 					const proposition = await this.db('propositions').select('title').where('id', data.propositionId).first();
 
-					existsOrError(proposition.name, { message: 'Internal error', error: proposition, status: INTERNAL_SERVER_ERROR });
+					existsOrError(proposition.title, { message: 'Internal error', error: proposition, status: INTERNAL_SERVER_ERROR });
 
-					data.proposition = proposition.name;
+					data.proposition = proposition.title;
 				}
 
 				data.themes = await this.getThemes(data.id);
@@ -131,7 +148,7 @@ export class TaskService extends DatabaseService {
 				deleteField(data, 'userFirstName');
 				deleteField(data, 'userLastName');
 
-				res.forEach(data);
+				res.push({ ...data, description: convertBlobToString(data.description) });
 			}
 
 			return res;
@@ -142,38 +159,51 @@ export class TaskService extends DatabaseService {
 
 	async getTask(value: number | string, tenancyId: number) {
 		try {
-			const fromDB = await this.db({ t: 'tasks', u: 'units' })
-				.select(
-					{
-						title: 't.title',
-						description: 't.description',
-						cost: 't.cost',
-						start: 't.start',
-						end: 't.end',
-						level: 't.level',
-						status: 't.status',
-						user_id: 't.user_id',
-						unit_id: 't.unit_id',
-						tenancy_id: 't.tenancy_id',
-						proposition_id: 't.proposition_id',
-						demand_id: 't.demand_id',
-						plaintiff_id: 't.plaintiff_id',
-					},
-					{ unit: 'u.name' }
-				)
-				.where('t.id', value)
-				.andWhere('t.tenancy_id', tenancyId)
-				.andWhereRaw('u.id = t.unit_id')
-				.orWhere('t.title', value)
-				.first();
+			const fields = [
+				{
+					id: 't.id',
+					title: 't.title',
+					description: 't.description',
+					cost: 't.cost',
+					start: 't.start',
+					end: 't.end',
+					level: 't.level',
+					status: 't.status',
+					user_id: 't.user_id',
+					unit_id: 't.unit_id',
+					tenancy_id: 't.tenancy_id',
+					proposition_id: 't.proposition_id',
+					demand_id: 't.demand_id',
+					plaintiff_id: 't.plaintiff_id',
+				},
+				{ unit: 'u.name' },
+			];
+			const tables = { t: 'tasks', u: 'units' };
+
+			const fromDB =
+				typeof value === 'number'
+					? await this.db(tables)
+							.select(...fields)
+							.where('t.id', value)
+							.andWhere('t.tenancy_id', tenancyId)
+							.andWhereRaw('u.id = t.unit_id')
+							.first()
+					: await this.db(tables)
+							.select(...fields)
+							.where('t.title', value)
+							.andWhere('t.tenancy_id', tenancyId)
+							.andWhereRaw('u.id = t.unit_id')
+							.first();
 
 			existsOrError(fromDB?.id, { message: 'Not found', status: NOT_FOUND });
 			const raw = convertDataValues(fromDB, 'camel');
+			onLog('raw to task', raw);
 
 			const users = await this.getUsers(raw.id, raw.userId);
 			const proposition = raw.propositionId
 				? await this.db('propositions').select('id', 'title', 'deadline').where({ id: raw.propositionId }).first()
 				: undefined;
+
 			const demand = raw.demandId
 				? await this.db('demands').select('id', 'name', 'dead_line as deadline').where({ id: raw.demandId }).first()
 				: undefined;
@@ -181,8 +211,9 @@ export class TaskService extends DatabaseService {
 			const plaintiff = raw.plaintiffId
 				? await this.db('plaintiffs').select('id', 'name').where({ id: raw.plaintiffId }).first()
 				: undefined;
+			const comments = (await this.getComments(raw.id, raw.tenancyId)) || [];
 
-			const comments = (await this.getComments(raw.id)) || [];
+			onLog('comments', comments);
 
 			const themes = await this.getThemes(raw.id);
 
@@ -196,12 +227,13 @@ export class TaskService extends DatabaseService {
 		try {
 			const fromDB = await this.db('tasks').where({ id }).andWhere('tenancy_id', tenancyId).first();
 
-			existsOrError(fromDB.id, fromDB);
+			existsOrError(fromDB?.id, { message: 'Task Not found', status: NOT_FOUND });
 			const raw = convertDataValues(fromDB, 'camel');
-			const toDisable = new Task({ ...raw, active: false }, Number(fromDB.id));
-			await this.db('tasks').where({ id }).andWhere('tenancy_id', tenancyId).update(convertDataValues(toDisable));
+			await this.db('users_tasks').where({ task_id: raw.id }).del();
+			await this.db('themes_tasks').where({ task_id: raw.id }).del();
+			await this.db('tasks').where({ id }).andWhere('tenancy_id', tenancyId).del();
 
-			return { message: 'Task disabled with success', data: toDisable };
+			return { message: 'Task deleted with success', data: new Task(raw) };
 		} catch (err) {
 			return err;
 		}
@@ -214,22 +246,29 @@ export class TaskService extends DatabaseService {
 
 			existsOrError(Array.isArray(themesIds), { message: 'Internal error', error: themesIds, status: INTERNAL_SERVER_ERROR });
 			const ids = themesIds.map(i => i['theme_id']);
+			onLog('tehmes id', ids);
 
 			for (const id of ids) {
-				const data = await this.db('themes').select('id', 'theme').where({ id }).first();
+				const data = await this.db('themes').select('id', ' name as theme').where({ id }).first();
 
 				existsOrError(data.id, { message: 'Internal error', error: data, status: INTERNAL_SERVER_ERROR });
 				res.push(convertDataValues(data, 'camel'));
 			}
+
+			return res;
 		} catch (err) {
 			return err;
 		}
 	}
 
-	private async getComments(taskId: number) {
-		return this.db('comments')
-			.select('id', 'comment', 'user', 'active')
-			.where('task_id', taskId)
+	private async getComments(taskId: number, tenancyId: number) {
+		return this.db({ c: 'comments', u: 'users' })
+			.select(
+				{ id: 'c.id', comment: 'c.comment', active: 'c.active' },
+				{ user_id: 'u.id', user_first_name: 'u.first_name', user_last_name: 'u.last_name', user_email: 'u.email' }
+			)
+			.where('c.task_id', taskId)
+			.andWhere('c.tenancy_id', tenancyId)
 			.then(res => {
 				existsOrError(Array.isArray(res), { message: 'Internal Error', error: res, status: INTERNAL_SERVER_ERROR });
 				return res.map(i => convertDataValues(i, 'camel'));
@@ -241,6 +280,7 @@ export class TaskService extends DatabaseService {
 		try {
 			const usersIds = await this.db('users_tasks').select('user_id').where({ task_id: taskId });
 			const ids = clearDuplicateItems([userId, ...usersIds.map(i => i['user_id'])]);
+			onLog('users ids', ids);
 			const res = [];
 
 			for (const id of ids) {
@@ -274,11 +314,13 @@ export class TaskService extends DatabaseService {
 	private async setPlaintiffId(data: TaskModel) {
 		try {
 			if (data?.plaintiffId || data?.plaintiff?.id) return data.plaintiff?.id || data.plaintiffId;
-			const fromDB = await this.plaintiffService.getPlaintiff(data.plaintiff?.name as string, data.tenancyId);
+			const fromDB = await this.plaintiffService.getPlaintiff(data.plaintiff?.cpfCnpj as string, data.tenancyId);
 
-			if (fromDB.id) return fromDB.id;
+			onLog('plaintiff fom db to Task', fromDB);
+
+			if (fromDB?.id) return fromDB.id;
 			const dataSave = (await this.plaintiffService.create(data.plaintiff as PlaintiffModel)) as any;
-
+			onLog('plaintiff to save', dataSave);
 			return Number(dataSave.data.id);
 		} catch (err) {
 			return err;
@@ -287,11 +329,16 @@ export class TaskService extends DatabaseService {
 
 	private async setThemes(themes: string[], taskId: number) {
 		try {
+			onLog('themes to set', themes);
+			onLog('task to set theme', taskId);
+
 			await this.db('themes_tasks').where('task_id', taskId).del();
 			for (const theme of themes) {
-				const fromDB = await this.db('themes').where({ name: theme }).select('theme_id as themeId').first();
+				onLog('theme in for', theme);
+				const fromDB = await this.db('themes').where({ name: theme }).select('id as themeId').first();
+				onLog('search theme', fromDB);
 
-				if (fromDB.themeId) {
+				if (fromDB?.themeId) {
 					const { themeId } = fromDB;
 					await this.db('themes_tasks').insert(convertDataValues({ themeId, taskId }));
 				} else {

@@ -59,7 +59,7 @@ export class ServicesFactory {
 		this.revenueService = new RevenueService(this.setServiceOptions());
 		this.originService = new OriginService(this.setServiceOptions());
 		this.propositionService = new PropositionService(this.setServiceOptions());
-		this.taskService = new TaskService(this.setServiceOptions());
+		this.taskService = new TaskService(this.setServiceOptions(), this.plaintiffService);
 	}
 
 	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client });

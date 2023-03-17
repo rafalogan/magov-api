@@ -9,6 +9,7 @@ export class TaskViewModel {
 	start: Date;
 	end: Date;
 	level: number;
+	responsible: string;
 	status: number;
 	users: ITaskUsers[];
 	unit: ITaskUnit;
@@ -29,6 +30,7 @@ export class TaskViewModel {
 		this.level = Number(data.level);
 		this.status = Number(data.status);
 		this.users = this.setUsers(data.users);
+		this.responsible = this.users[0].name;
 		this.unit = data.unit;
 		this.tenancyId = Number(data.tenancyId);
 		this.proposition = this.setProposition(data.proposition);
