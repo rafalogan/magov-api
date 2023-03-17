@@ -21,3 +21,4 @@ export * from './propositions-read-options.model';
 export * from './task.model';
 export * from './unit-expense-view.model';
 export * from './task-view.model';
+export * from './comment.model';
