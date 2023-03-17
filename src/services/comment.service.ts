@@ -121,7 +121,7 @@ export class CommentService extends DatabaseService {
 			const raw = fromDB.map(i => convertDataValues(i, 'camel'));
 			onLog('comments raw', raw);
 
-			const res = this.setComments(raw).map(i => new CommentModel(i));
+			const res = this.setComments(raw).map((i: ICommentModel) => new CommentModel(i));
 			const pagination = !taskId ? new PaginationModel({ page, limit, total }) : null;
 
 			return taskId ? res : { data: res, pagination };
