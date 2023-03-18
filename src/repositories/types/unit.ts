@@ -7,6 +7,16 @@ export interface IUnit extends IID {
 	cnpj: string;
 	phone: string;
 	tenancyId: number;
+	planId: number;
 	active: boolean;
 	address: IAddress;
+}
+
+export interface IUnitModel extends IUnit {
+	plan: IUnitPlan;
+}
+
+export interface IUnitPlan {
+	id: number;
+	name: string;
 }

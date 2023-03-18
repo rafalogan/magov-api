@@ -9,6 +9,7 @@ export class PropositionsReadOptionsModel {
 	tenancyId?: number;
 	all?: boolean;
 	unitId?: number;
+
 	constructor(options: IPropositionsReadOptions) {
 		this.page = Number(options.page) || 1;
 		this.limit = Number(options.limit) || 10;

@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { Controller } from 'src/core/controllers';
 import { setAddress, requiredFields, notExistisOrError, equalsOrError, setUserImage, deleteField } from 'src/utils';
 import { UserService } from 'src/services';
-import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
+import { getTenancyByToken, onLog, ResponseHandle } from 'src/core/handlers';
 import { ReadOptionsModel, UserModel } from 'src/repositories/models';
 
 export class UserController extends Controller {
@@ -44,7 +44,7 @@ export class UserController extends Controller {
 	}
 
 	list(req: Request, res: Response) {
-		const tenancyId = req.query.tenancyId ? Number(req.query.tenancyId) : getTenancyByToken(req) || undefined;
+		const tenancyId = getTenancyByToken(req) || Number(req.query.tenancyId);
 		const options = new ReadOptionsModel({ ...req.query, tenancyId });
 		const { id } = req.params;
 
@@ -67,6 +67,7 @@ export class UserController extends Controller {
 	}
 
 	private async isUserValid(req: Request) {
+		onLog('body', req.body);
 		const { firstName, lastName, email, office, password, confirmPassword, cpf, phone, level } = req.body;
 		const { cep, street, district, city, uf } = setAddress(req);
 		const requireds = requiredFields([
@@ -86,7 +87,7 @@ export class UserController extends Controller {
 			{ field: uf, message: 'address.uf' },
 		]);
 
-		notExistisOrError(requireds, { message: `${requireds?.join(' is required \n')} is required`, status: BAD_REQUEST });
+		notExistisOrError(requireds, { message: `${requireds?.join(' is required \n ')} is required`, status: BAD_REQUEST });
 		equalsOrError(password, confirmPassword, { message: 'confirmPassword should be equal to password', status: BAD_REQUEST });
 	}
 }

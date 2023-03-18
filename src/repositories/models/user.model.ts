@@ -1,7 +1,8 @@
-import { clearString, hashString } from 'src/utils';
+import { clearString, hashString, setInstanceId } from 'src/utils';
 
 import { IUserModel } from '../types';
 import { Address, FileEntity } from 'src/repositories/entities';
+import { UnitModel } from './unit.model';
 
 export class UserModel {
 	id?: number;
@@ -19,10 +20,11 @@ export class UserModel {
 	userRules: number[];
 	address: Address;
 	planId?: number;
+	unit?: UnitModel;
 	image?: FileEntity;
 
 	constructor(data: IUserModel, id?: number) {
-		this.id = Number(id || data.id) || undefined;
+		this.id = setInstanceId(id || data.id);
 		this.firstName = data.firstName.trim();
 		this.lastName = data.lastName.trim();
 		this.email = data.email.toLowerCase();
@@ -32,11 +34,12 @@ export class UserModel {
 		this.office = data.office.trim();
 		this.active = data.active || true;
 		this.level = Number(data.level);
-		this.unitId = Number(data.unitId) || undefined;
-		this.tenancyId = Number(data.tenancyId) || undefined;
+		this.unitId = setInstanceId(data.unitId);
+		this.tenancyId = setInstanceId(data.tenancyId);
 		this.userRules = data.userRules?.map(Number) || [];
 		this.address = new Address(data.address);
-		this.planId = Number(data.planId) || undefined;
+		this.planId = setInstanceId(data.planId);
+		this.unit = this.planId && data.unit ? new UnitModel({ ...data.unit, plan: { id: this.planId, name: '' } }) : undefined;
 		this.image = data.image ? new FileEntity(data.image) : undefined;
 	}
 }

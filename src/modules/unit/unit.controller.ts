@@ -21,7 +21,7 @@ export class UnitController extends Controller {
 		}
 		const tenancyId = Number(req.body.tenantId) || getTenancyByToken(req);
 		const address = setAddress(req);
-		const unit = new UnitModel({ ...req.body, address, tenancyId });
+		const unit = new UnitModel({ ...req.body, address, tenancyId, plan: { id: req.body.planId } });
 
 		this.unitService
 			.save(unit)
@@ -32,7 +32,15 @@ export class UnitController extends Controller {
 	edit(req: Request, res: Response) {
 		const { id } = req.params;
 		const address = setAddress(req);
-		const unit = new UnitModel({ ...req.body, address }, Number(id));
+		const tenancyId = getTenancyByToken(req) || Number(req.body.tenancyId || req.query.tenancyId);
+
+		try {
+			existsOrError(tenancyId, { message: isRequired('tenancyId'), status: BAD_REQUEST });
+		} catch (err) {
+			return ResponseHandle.onError({ res, err });
+		}
+
+		const unit = new UnitModel({ ...req.body, address, plan: req.body.plan || { id: req.body.planId }, tenancyId }, Number(id));
 		onLog('Unit to update', unit);
 
 		this.unitService
@@ -64,25 +72,35 @@ export class UnitController extends Controller {
 
 	remove(req: Request, res: Response) {
 		const { id } = req.params;
+		const tenancyId = getTenancyByToken(req) || Number(req.query.tenancyId);
+
+		try {
+			existsOrError(tenancyId, { message: isRequired('tenancyId'), status: BAD_REQUEST });
+		} catch (err) {
+			return ResponseHandle.onError({ res, err });
+		}
 
 		this.unitService
-			.desactve(Number(id))
+			.desactve(Number(id), tenancyId)
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err, message: err.message, status: err.status }));
 	}
 
 	private isValidRequest(req: Request) {
-		const { name, cnpj, phone } = req.body;
+		const { name, cnpj, phone, planId } = req.body;
 		const { cep, street, district, city, uf } = setAddress(req);
+		const tenancyId = getTenancyByToken(req) || Number(req.body.tenancyId);
 		const requireds = requiredFields([
 			{ field: name, message: 'name' },
 			{ field: cnpj, message: 'cnpj' },
 			{ field: phone, message: 'phone' },
+			{ field: planId, message: 'planId' },
 			{ field: cep, message: 'cep' },
 			{ field: street, message: 'street' },
 			{ field: district, message: 'district' },
 			{ field: city, message: 'city' },
 			{ field: uf, message: 'uf' },
+			{ field: tenancyId, message: 'tenancyId' },
 		]);
 
 		notExistisOrError(requireds, requireds?.map(f => isRequired(f)).join('\n ') as string);

@@ -23,3 +23,5 @@ export * from './propositions-type';
 export * from './revenue';
 export * from './proposition';
 export * from './task';
+export * from './unit-expense';
+export * from './comment';

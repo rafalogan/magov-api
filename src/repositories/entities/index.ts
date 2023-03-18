@@ -16,3 +16,5 @@ export * from './revenue.entity';
 export * from './origin.entity';
 export * from './proposition.entity';
 export * from './task.entity';
+export * from './comment.entity';
+export * from './unit-expense.entity';

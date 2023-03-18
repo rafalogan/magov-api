@@ -1,8 +1,7 @@
 import { Multer } from 'multer';
 
-import { Credentials, UserModel, UserViewModel } from 'src/repositories/models';
+import { Credentials, UserViewModel } from 'src/repositories/models';
 import { User } from 'src/repositories/entities';
-import { RouteOptions } from 'src/repositories/types/route';
 import { IUserRule, IUserUnit } from './user';
 import { ModuleOptions } from './module';
 

@@ -4,6 +4,7 @@
 		"transpileOnly": true
 	},
 	"compilerOptions": {
+		"ignoreDeprecations": "5.0",
 		"target": "ESNext",
 		"moduleResolution": "Node",
 		"module": "CommonJS",

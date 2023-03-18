@@ -133,3 +133,5 @@ export const setAddress = (req: Request): IAddress => {
 };
 
 export const setInstanceId = (id?: number) => Number(id) || undefined;
+
+export const clearDuplicateItems = (value: any[]) => value.filter((item, index) => value.indexOf(item) === index);
