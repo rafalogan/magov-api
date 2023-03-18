@@ -48,6 +48,7 @@ export class AuthService {
 
 	async verifyCredentials(credentials: Credentials) {
 		const userFromDb = (await this.userService.getUser(credentials.email)) as UserViewModel;
+		onLog('user verification db', userFromDb);
 
 		existsOrError(userFromDb, 'User not found');
 		existsOrError(userFromDb.active, 'User desactivated');

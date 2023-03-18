@@ -1,6 +1,7 @@
 import { IPlantiffModel } from './plantiff';
 import { IID } from './shared';
 import { IUnitExpense } from './unit-expense';
+import { IComment } from 'src/repositories/types/comment';
 
 export interface ITask extends IID {
 	title: string;
@@ -24,7 +25,7 @@ export interface ITaskModel extends ITask {
 	plaintiff?: IPlantiffModel;
 	users: number[];
 	themes: string[];
-	comments?: ITaskComment[];
+	comments?: IComment[];
 }
 
 export interface ITaskViewModel extends IID {

@@ -6,8 +6,9 @@ export async function up(knex: Knex): Promise<void> {
 		table.string('name', 50).notNullable();
 		table.binary('description').nullable();
 		table.string('cnpj', 50).notNullable();
-		table.boolean('active').notNullable().defaultTo(true);
 		table.string('phone', 45).notNullable();
+		table.boolean('active').notNullable().defaultTo(true);
+		table.integer('plan_id').unsigned().references('id').inTable('plans').notNullable();
 		table.integer('tenancy_id').unsigned().references('id').inTable('tenancies').notNullable();
 	});
 }

@@ -1,9 +1,9 @@
-import { FORBIDDEN } from 'http-status';
+import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { ReadOptionsModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { IAddress, IServiceOptions, ITenancy, IUser, IUserViewModel } from 'src/repositories/types';
-import { convertDataValues, deleteField, notExistisOrError } from 'src/utils';
+import { convertDataValues, deleteField, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 
 export class UserService extends DatabaseService {
@@ -11,23 +11,26 @@ export class UserService extends DatabaseService {
 		super(options);
 	}
 
-	async create(data: UserModel): Promise<any> {
+	async create(data: UserModel) {
 		try {
 			const fromDB = (await this.getUser(data.email)) as UserViewModel;
 
-			notExistisOrError(fromDB.id, { message: 'User already exists', status: FORBIDDEN });
+			notExistisOrError(fromDB?.id, { message: 'User already exists', status: FORBIDDEN });
 
 			const tenancyId = data.planId ? await this.createTenancy(data.planId) : data.tenancyId;
 			onLog('tenancyId', tenancyId);
-			const [userId] = await this.db('users').insert(convertDataValues({ ...new User({ ...data, tenancyId } as IUser) }));
+			const toSave = new User({ ...data, tenancyId } as IUser);
 
-			if (data.address) await this.saveAddress(data.address, userId);
+			const [userId] = await this.db('users').insert(convertDataValues(toSave));
+			existsOrError(Number(userId), { messages: 'Internal', error: userId, status: INTERNAL_SERVER_ERROR });
+
+			await this.saveAddress(data.address, userId);
 			if (data.userRules?.length) await this.saveUserRules(data.userRules, userId);
 			if (data.image) await this.setUserImage(data.image, userId);
 
 			deleteField(data, 'password');
 
-			return { message: 'User save with success', user: { ...data, tenancyId } };
+			return { message: 'User save with success', user: { ...data, tenancyId, id: userId } };
 		} catch (err) {
 			return err;
 		}
@@ -39,26 +42,23 @@ export class UserService extends DatabaseService {
 
 	async update(data: UserModel, id: number): Promise<any> {
 		try {
-			const userFromDb = await this.getUser(id);
+			const userFromDb = (await this.getUser(id)) as UserViewModel;
 
-			if (userFromDb) {
-				if (data.userRules) await this.userRulesUpdate(data.userRules, id);
-				if (data.image) await this.setUserImage(data.image, id);
-				if (data.address) await this.saveAddress(data.address, id);
+			existsOrError(userFromDb?.id, userFromDb);
+			const user = new User({ ...userFromDb, ...data, tenancyId: userFromDb.tenancyId } as IUser);
 
-				const user = new User({ ...userFromDb, ...data } as IUser);
+			if (data.userRules) await this.userRulesUpdate(data.userRules, id);
+			if (data.image) await this.setUserImage(data.image, id);
+			if (data.address) await this.saveAddress(data.address, id);
 
-				await this.db('users')
-					.where({ id })
-					.update({ ...convertDataValues(user) });
+			await this.db('users')
+				.where({ id })
+				.update({ ...convertDataValues(user) });
 
-				const res = { ...userFromDb, ...data };
-				deleteField(res, 'password');
+			const res = { ...userFromDb, ...data };
+			deleteField(res, 'password');
 
-				return { message: 'User update with success', data: res };
-			}
-
-			return { message: 'User not found' };
+			return { message: 'User update with success', data: res };
 		} catch (err) {
 			return err;
 		}
@@ -82,22 +82,104 @@ export class UserService extends DatabaseService {
 
 	async getUser(filter: number | string) {
 		try {
-			const user =
+			const fromDb =
 				typeof filter === 'number'
-					? convertDataValues(await this.db('users').where({ id: filter }).first(), 'camel')
-					: convertDataValues(await this.db('users').where({ email: filter }).first(), 'camel');
+					? await this.db({ u: 'users', a: 'adresses' })
+							.select(
+								{
+									id: 'u.id',
+									first_name: 'u.first_name',
+									last_name: 'u.last_name',
+									office: 'u.office',
+									email: 'u.email',
+									password: 'u.password',
+									cpf: 'u.cpf',
+									phone: 'u.phone',
+									active: 'u.active',
+									level: 'u.level',
+									tenancy_id: 'u.tenancy_id',
+									unit_id: 'u.unit_id',
+								},
+								{
+									cep: 'a.cep',
+									street: 'a.street',
+									number: 'a.number',
+									complement: 'a.complement',
+									district: 'a.district',
+									city: 'a.city',
+									uf: 'a.uf',
+								}
+							)
+							.where('u.id', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first()
+					: await this.db({ u: 'users', a: 'adresses' })
+							.select(
+								{
+									id: 'u.id',
+									first_name: 'u.first_name',
+									last_name: 'u.last_name',
+									office: 'u.office',
+									email: 'u.email',
+									password: 'u.password',
+									cpf: 'u.cpf',
+									phone: 'u.phone',
+									active: 'u.active',
+									level: 'u.level',
+									tenancy_id: 'u.tenancy_id',
+								},
+								{
+									cep: 'a.cep',
+									street: 'a.street',
+									number: 'a.number',
+									complement: 'a.complement',
+									district: 'a.district',
+									city: 'a.city',
+									uf: 'a.uf',
+								}
+							)
+							.where('u.email', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first();
 
-			if (!user) return {};
+			existsOrError(fromDb?.id, { message: 'User not found', status: NOT_FOUND });
+			const raw = convertDataValues(fromDb, 'camel');
+			const { id } = raw;
+			onLog('raw', raw);
 
-			const { id } = user;
-			const unit = user.unitId ? await this.db('units').select('id', 'name').where({ id: user.unitId }).first() : {};
-			const rulesIds = (await this.db('users_rules').select('rule_id as ruleId').where({ user_id: id })) || [];
-			const rules = rulesIds?.length ? rulesIds.map(id => this.db('rules').select('id', 'name').where({ id }).first()) : [];
-			const address = convertDataValues(await this.db('adresses').where({ user_id: id }).first(), 'camel') || {};
-			const image = convertDataValues(await this.db('files').where({ user_id: id }).first(), 'camel');
+			const unitAndPlan: any = await this.getUnitAndPlan(raw.unitId);
 
-			deleteField(user, 'unitId');
-			return new UserViewModel({ ...user, unit, rules, address, image } as IUserViewModel);
+			onLog('unit and plan', unitAndPlan);
+			const rules = await this.getValues({
+				tableIds: 'users_rules',
+				fieldIds: 'rule_id',
+				whereIds: 'user_id',
+				value: id,
+				table: 'rules',
+				fields: ['id', 'name'],
+			});
+
+			const image = await this.getflie(id);
+
+			const plans = !raw.unitId
+				? await this.getValues({
+						tableIds: 'tenancies_plans',
+						fieldIds: 'plan_id',
+						whereIds: 'tenancy_id',
+						value: raw.tenancyId,
+						table: 'plans',
+						fields: ['id', 'name'],
+				  })
+				: undefined;
+
+			return new UserViewModel({
+				...raw,
+				...unitAndPlan,
+				rules,
+				address: { ...raw },
+				image,
+				plans,
+			} as IUserViewModel);
 		} catch (err) {
 			return err;
 		}
@@ -124,6 +206,34 @@ export class UserService extends DatabaseService {
 		}
 	}
 
+	private async getflie(id: number) {
+		try {
+			const fromDB = await this.db('files').select('title', 'alt', 'name', 'filename', 'type', 'url').where('user_id', id).first();
+
+			if (!fromDB?.url) return {};
+			return { ...convertDataValues(fromDB, 'camel') };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getUnitAndPlan(id?: number) {
+		try {
+			if (!id) return { unit: {}, plan: {} };
+
+			const fromDB = await this.db({ u: 'units', p: 'plans' })
+				.select({ unit_id: 'u.id', unit_name: 'u.name' }, { plan_id: 'p.id', plan_name: 'p.name' })
+				.where('u.id', id)
+				.whereRaw('p.id = u.plan_id')
+				.first();
+			const raw = convertDataValues(fromDB, 'camel');
+
+			return { unit: { id: raw.unitId, name: raw.unitName }, plan: { id: raw.planId, name: raw.planName } };
+		} catch (err) {
+			return err;
+		}
+	}
+
 	private async createTenancy(planId: number) {
 		try {
 			const tenacy = new Tenancy({ totalUsers: 1, active: true } as ITenancy);
@@ -141,11 +251,11 @@ export class UserService extends DatabaseService {
 			const fromDb = await this.db('adresses').where({ user_id: userId }).first();
 			onLog('adress from db', fromDb);
 
-			const data = fromDb ? new Address({ ...fromDb, ...address } as IAddress) : new Address({ ...address, userId } as IAddress);
+			const data = fromDb ? new Address({ ...fromDb, ...address } as IAddress) : new Address({ ...address } as IAddress);
 			onLog('data to save', data);
 
 			if (!fromDb) {
-				const [id] = await this.db('adresses').insert(convertDataValues(data));
+				const [id] = await this.db('adresses').insert(convertDataValues({ ...data, userId }));
 				const res = { ...data, id };
 				return res;
 			}

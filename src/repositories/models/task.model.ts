@@ -1,4 +1,4 @@
-import { ITaskComment, ITaskModel, IUnitExpense } from '../types';
+import { IComment, ITaskModel, IUnitExpense } from '../types';
 import { Comment, UnitExpense } from 'src/repositories/entities';
 import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToDadaBase } from 'src/utils';
 import { PlaintiffModel } from './plaintiff.model';
@@ -64,7 +64,7 @@ export class TaskModel {
 		});
 	}
 
-	private setComents(value?: ITaskComment[]) {
+	private setComents(value?: IComment[]) {
 		if (!value) return undefined;
 		return value.map(item => new Comment({ ...item }));
 	}

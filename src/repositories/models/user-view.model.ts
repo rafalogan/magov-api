@@ -1,5 +1,5 @@
 import { Address, FileEntity } from '../entities';
-import { IUserRule, IUserUnit, IUserViewModel } from '../types';
+import { IUserPlan, IUserRule, IUserUnit, IUserViewModel } from '../types';
 
 export class UserViewModel {
 	id: number;
@@ -16,6 +16,8 @@ export class UserViewModel {
 	tenancyId?: number;
 	address?: Address;
 	unit: IUserUnit;
+	plan: IUserPlan;
+	plans?: IUserPlan[];
 	image?: FileEntity;
 
 	constructor(data: IUserViewModel) {
@@ -33,6 +35,8 @@ export class UserViewModel {
 		this.tenancyId = Number(data.tenancyId) || undefined;
 		this.address = data.address ? new Address(data.address) : undefined;
 		this.unit = data.unit;
+		this.plan = data.plan;
 		this.image = data.image ? new FileEntity(data.image) : undefined;
+		this.plans = data.plans;
 	}
 }

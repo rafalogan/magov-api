@@ -68,7 +68,7 @@ export abstract class DatabaseService extends CacheService {
 			.catch(err => err);
 	}
 
-	async setAddress(address: Address, where: string, value: any) {
+	async setAddress(address: any, where: string, value: any) {
 		try {
 			const fromDb = await this.db('adresses').where(camelToSnake(where), value).first();
 			onLog('adress from db', fromDb);

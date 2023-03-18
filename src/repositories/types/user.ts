@@ -1,6 +1,7 @@
 import { IAddress } from './address';
 import { IFile } from './file';
 import { IID } from './shared';
+import { IUnitModel } from './unit';
 
 export interface IUser extends IID {
 	firstName: string;
@@ -31,6 +32,7 @@ export interface IUserModel extends IUser {
 	userRules: number[];
 	address: IAddress;
 	planId?: number;
+	unit?: IUnitModel;
 	image?: IFile;
 }
 
@@ -38,7 +40,14 @@ export interface IUserViewModel extends IUser {
 	userRules: IUserRule[];
 	address: IAddress;
 	unit: IUserUnit;
+	plan: IUserPlan;
 	image?: IFile;
+	plans?: IUserPlan[];
+}
+
+export interface IUserPlan {
+	id: number;
+	name: string;
 }
 
 export interface IUserRecovery {

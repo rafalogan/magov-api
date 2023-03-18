@@ -1,6 +1,6 @@
 import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { Keyword, Theme } from '../entities';
-import { IDemandViewModel, IKeyword, IPlantiffModel, ITheme } from '../types';
+import { IDemandViewModel, IKeyword, ITheme } from '../types';
 import { PlaintiffModel } from './plaintiff.model';
 
 export class DemandViewModel {
