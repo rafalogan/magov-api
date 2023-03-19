@@ -19,6 +19,6 @@ export * from './proposition.model';
 export * from './proposition-view.model';
 export * from './propositions-read-options.model';
 export * from './task.model';
-export * from './unit-expense-view.model';
+export * from './unit-expense.model';
 export * from './task-view.model';
 export * from './comment.model';
