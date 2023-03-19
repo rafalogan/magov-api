@@ -1,5 +1,5 @@
-import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToDadaBase } from 'src/utils';
-import { IUnitExpense } from '../types';
+import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
+import { IUnitExpenseModel } from '../types';
 
 export class UnitExpense {
 	id?: number;
@@ -7,25 +7,23 @@ export class UnitExpense {
 	description?: string;
 	dueDate: Date;
 	amount: number;
-	value: number;
-	installments: number;
+	active: boolean;
 	supplierId?: number;
+	expenseTypeId?: number;
 	taskId?: number;
-	paymentId?: number;
 	unitId: number;
 	tenancyId: number;
 
-	constructor(data: IUnitExpense, id?: number) {
+	constructor(data: IUnitExpenseModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
 		this.expense = data.expense.trim();
 		this.description = convertBlobToString(data.description);
 		this.dueDate = convertToDate(data.dueDate);
 		this.amount = Number(data.amount) || 1;
-		this.value = setValueNumberToDadaBase(data.value) as number;
-		this.installments = data.installments;
+		this.active = !!data.active;
 		this.supplierId = setInstanceId(data.supplierId);
+		this.expenseTypeId = setInstanceId(data.expenseTypeId);
 		this.taskId = setInstanceId(data.taskId);
-		this.paymentId = setInstanceId(data.paymentId);
 		this.unitId = Number(data.unitId);
 		this.tenancyId = Number(data.tenancyId);
 	}

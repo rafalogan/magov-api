@@ -19,3 +19,4 @@ export * from './task.entity';
 export * from './comment.entity';
 export * from './unit-expense.entity';
 export * from './supplier.entity';
+export * from './unit-expense-payment.entity';

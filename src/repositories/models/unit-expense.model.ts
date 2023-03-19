@@ -1,5 +1,6 @@
+import { IUnitExpenseModel, IUnitExpensePayment } from 'src/repositories/types';
 import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
-import { IUnitExpenseModel, IUnitExpenseSupplier, IUnitExpenseTask } from '../types';
+import { FileEntity, UnitExpensePayment } from '../entities';
 
 export class UnitExpenseModel {
 	id?: number;
@@ -7,36 +8,34 @@ export class UnitExpenseModel {
 	description?: string;
 	dueDate: Date;
 	amount: number;
-	value: number;
-	installments: number;
-	type?: string;
-	supplier?: IUnitExpenseSupplier;
-	task?: IUnitExpenseTask;
+	active?: boolean;
+	expenseTypeId?: number;
+	supplierId?: number;
+	taskId?: number;
 	unitId: number;
 	tenancyId: number;
+	invoice: FileEntity;
+	payments?: UnitExpensePayment[];
 
-	constructor(data: IUnitExpenseModel, id?: number) {
+	constructor(data: IUnitExpenseModel, id: number) {
 		this.id = setInstanceId(id || data.id);
-		this.expense = data.expense.trim();
+		this.expense = data.expense;
 		this.description = convertBlobToString(data.description);
 		this.dueDate = convertToDate(data.dueDate);
 		this.amount = Number(data.amount);
-		this.value = Number.isInteger(data.value) ? data.value / 100 : data.value;
-		this.installments = Number(data.installments);
-		this.type = data.type?.trim();
-		this.supplier = this.setSupplier(data?.supplier);
-		this.task = this.setTask(data?.task);
+		this.expenseTypeId = setInstanceId(data.expenseTypeId);
+		this.active = data.active || undefined;
+		this.supplierId = setInstanceId(data.supplierId);
+		this.taskId = setInstanceId(data.taskId);
 		this.unitId = Number(data.unitId);
 		this.tenancyId = Number(data.tenancyId);
+		this.invoice = new FileEntity(data.invoice);
+		this.payments = this.setPayments(data.payments);
 	}
 
-	private setSupplier(value?: IUnitExpenseSupplier) {
-		if (!value) return undefined;
+	private setPayments(data?: IUnitExpensePayment[]) {
+		if (!data) return undefined;
 
-		return { id: setInstanceId(value?.id), name: value?.name?.trim() };
-	}
-
-	private setTask(value?: IUnitExpenseTask) {
-		return !value ? undefined : { id: setInstanceId(value.id), title: value.title.trim() };
+		return data.map(i => new UnitExpensePayment({ ...i, unitExpenseId: this.id }));
 	}
 }
