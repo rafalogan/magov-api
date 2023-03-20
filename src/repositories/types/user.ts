@@ -31,9 +31,14 @@ export interface IUserUnit {
 export interface IUserModel extends IUser {
 	userRules: number[];
 	address: IAddress;
-	planId?: number;
+	plans: IUserPlan[];
 	unit?: IUnitModel;
 	image?: IFile;
+}
+
+export interface IUserPlan {
+	id: number;
+	amount: number;
 }
 
 export interface IUserViewModel extends IUser {

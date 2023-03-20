@@ -5,14 +5,16 @@ export class PlanModel {
 	id?: number;
 	name: string;
 	description?: string | Blob;
-	usersLimit?: number;
-	unitaryValue: number;
+	limit?: number;
+	value: number;
+	active: boolean;
 
 	constructor(data: Plan) {
 		this.id = setInstanceId(data.id);
 		this.name = data.name;
 		this.description = convertBlobToString(data.description);
-		this.usersLimit = Number(data.usersLimit) || undefined;
-		this.unitaryValue = data.unitaryValue / 100;
+		this.limit = Number(data.limit) || undefined;
+		this.value = data.value / 100;
+		this.active = !!data.active;
 	}
 }

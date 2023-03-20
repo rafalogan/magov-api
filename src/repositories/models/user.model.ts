@@ -1,6 +1,6 @@
 import { clearString, hashString, setInstanceId } from 'src/utils';
 
-import { IUserModel } from '../types';
+import { IUserModel, IUserPlan } from '../types';
 import { Address, FileEntity } from 'src/repositories/entities';
 import { UnitModel } from './unit.model';
 
@@ -19,7 +19,7 @@ export class UserModel {
 	tenancyId?: number;
 	userRules: number[];
 	address: Address;
-	planId?: number;
+	plans?: IUserPlan[];
 	unit?: UnitModel;
 	image?: FileEntity;
 
@@ -38,8 +38,12 @@ export class UserModel {
 		this.tenancyId = setInstanceId(data.tenancyId);
 		this.userRules = data.userRules?.map(Number) || [];
 		this.address = new Address(data.address);
-		this.planId = setInstanceId(data.planId);
-		this.unit = this.planId && data.unit ? new UnitModel({ ...data.unit, plan: { id: this.planId, name: '' } }) : undefined;
+		this.plans = this.setUserPlans(data.plans);
+		this.unit = this.plans?.length && data.unit ? new UnitModel({ ...data.unit, plan: { id: this.plans[0].id, name: '' } }) : undefined;
 		this.image = data.image ? new FileEntity(data.image) : undefined;
+	}
+
+	private setUserPlans(plans?: IUserPlan[]) {
+		return !plans?.length ? undefined : plans.map(i => ({ id: Number(i.id), amount: Number(i.amount) } as IUserPlan));
 	}
 }

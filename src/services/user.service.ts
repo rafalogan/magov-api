@@ -2,12 +2,13 @@ import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { ReadOptionsModel, UserModel, UserViewModel } from 'src/repositories/models';
-import { IAddress, IServiceOptions, ITenancy, IUser, IUserViewModel } from 'src/repositories/types';
+import { IAddress, IServiceOptions, ITenancy, IUnitPlan, IUser, IUserViewModel } from 'src/repositories/types';
 import { convertDataValues, deleteField, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
+import { UnitService } from './unit.service';
 
 export class UserService extends DatabaseService {
-	constructor(options: IServiceOptions) {
+	constructor(options: IServiceOptions, private unitService: UnitService) {
 		super(options);
 	}
 
@@ -17,8 +18,10 @@ export class UserService extends DatabaseService {
 
 			notExistisOrError(fromDB?.id, { message: 'User already exists', status: FORBIDDEN });
 
-			const tenancyId = data.planId ? await this.createTenancy(data.planId) : data.tenancyId;
-			onLog('tenancyId', tenancyId);
+			const tenancyId = data.plans ? await this.createTenancy() : data.tenancyId;
+			existsOrError(Number(tenancyId), { message: 'Internal error', error: tenancyId, status: INTERNAL_SERVER_ERROR });
+			if (data.plans?.length) await this.setTenancyPlans(data.plans, Number(tenancyId));
+
 			const toSave = new User({ ...data, tenancyId } as IUser);
 
 			const [userId] = await this.db('users').insert(convertDataValues(toSave));
@@ -27,10 +30,11 @@ export class UserService extends DatabaseService {
 			await this.saveAddress(data.address, userId);
 			if (data.userRules?.length) await this.saveUserRules(data.userRules, userId);
 			if (data.image) await this.setUserImage(data.image, userId);
+			const unit = data.unit ? await this.unitService.save(data.unit) : undefined;
 
 			deleteField(data, 'password');
 
-			return { message: 'User save with success', user: { ...data, tenancyId, id: userId } };
+			return { message: 'User save with success', user: { ...data, tenancyId, id: userId, unit } };
 		} catch (err) {
 			return err;
 		}
@@ -234,13 +238,30 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async createTenancy(planId: number) {
+	private async createTenancy() {
 		try {
-			const tenacy = new Tenancy({ totalUsers: 1, active: true } as ITenancy);
-			const [tenancyId] = await this.db('tenancies').insert(convertDataValues(tenacy));
+			const tenancy = new Tenancy({ totalUsers: 1, active: true } as ITenancy);
+			const [tenancyId] = await this.db('tenancies').insert(convertDataValues(tenancy));
 
-			await this.db('tenancies_plans').insert({ plan_id: planId, tenancy_id: tenancyId });
+			existsOrError(Number(tenancyId), { message: 'Internal error', error: tenancyId, status: INTERNAL_SERVER_ERROR });
+
 			return tenancyId;
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setTenancyPlans(plans: IUnitPlan[], tenancyId: number) {
+		try {
+			existsOrError(Number(tenancyId), { message: 'Internal error', error: tenancyId, status: INTERNAL_SERVER_ERROR });
+
+			for (const plan of plans) {
+				const fromDB = await this.db('tenancies_plans').where('plan_id', plan.id).andWhere('tenancy_id', tenancyId).first();
+
+				if (!fromDB.plan_id) {
+					await this.db('tenancies_plans').insert(convertDataValues({ ...plan, planId: plan.id, tenancyId }));
+				}
+			}
 		} catch (err) {
 			return err;
 		}

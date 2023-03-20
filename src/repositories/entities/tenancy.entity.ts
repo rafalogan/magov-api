@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { ITenancy } from '../types';
-import { convertToDate, setInstanceId } from 'src/utils';
+import { setInstanceId } from 'src/utils';
 
 export class Tenancy {
 	id?: number;
@@ -14,7 +14,6 @@ export class Tenancy {
 		this.id = setInstanceId(id || data.id);
 		this.tenancyKey = data.tenancyKey || randomUUID();
 		this.totalUsers = data.totalUsers;
-		this.dueDate = data.dueDate ? convertToDate(data.dueDate) : new Date();
 		this.active = data.active;
 	}
 }
