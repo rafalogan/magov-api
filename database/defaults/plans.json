@@ -37,6 +37,6 @@
 		"plan": false,
 		"limit": 0,
 		"value": 1500000,
-		activetrue
+		"active": true
 	}
 ]

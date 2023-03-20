@@ -8,6 +8,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.boolean('plan').notNullable().defaultTo(false);
 		table.integer('limit').nullable();
 		table.integer('value').notNullable();
+		table.boolean('active').notNullable().defaultTo(true);
 	});
 }
 
