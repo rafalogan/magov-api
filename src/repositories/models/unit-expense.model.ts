@@ -17,14 +17,14 @@ export class UnitExpenseModel {
 	invoice: FileEntity;
 	payments?: UnitExpensePayment[];
 
-	constructor(data: IUnitExpenseModel, id: number) {
+	constructor(data: IUnitExpenseModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
 		this.expense = data.expense;
 		this.description = convertBlobToString(data.description);
 		this.dueDate = convertToDate(data.dueDate);
 		this.amount = Number(data.amount);
 		this.expenseTypeId = setInstanceId(data.expenseTypeId);
-		this.active = data.active || undefined;
+		this.active = !!data.active;
 		this.supplierId = setInstanceId(data.supplierId);
 		this.taskId = setInstanceId(data.taskId);
 		this.unitId = Number(data.unitId);
