@@ -22,3 +22,4 @@ export * from './task.model';
 export * from './unit-expense-view.model';
 export * from './task-view.model';
 export * from './comment.model';
+export * from './unit-expense.model';

@@ -25,3 +25,4 @@ export * from './proposition';
 export * from './task';
 export * from './unit-expense';
 export * from './comment';
+export * from './supplier';
