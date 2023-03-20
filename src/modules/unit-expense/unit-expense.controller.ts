@@ -14,6 +14,7 @@ export class UnitExpenseController extends Controller {
 	}
 
 	save(req: Request, res: Response) {
+		const { paymentForm, value, installments } = req.body;
 		try {
 			this.validateRequest(req);
 		} catch (err) {
@@ -22,7 +23,9 @@ export class UnitExpenseController extends Controller {
 
 		const invoice = setFileToSave(req);
 		const tenancyId = getTenancyByToken(req) || Number(req.body.tenancyId);
-		const unitExpense = new UnitExpenseModel({ ...req.body, invoice, tenancyId });
+		const payments = req.body.payments ?? [{ paymentForm, value, installments }];
+
+		const unitExpense = new UnitExpenseModel({ ...req.body, invoice, tenancyId, payments });
 
 		this.unitExpenseService
 			.save(unitExpense)
@@ -33,6 +36,7 @@ export class UnitExpenseController extends Controller {
 	edit(req: Request, res: Response) {
 		const { id } = req.params;
 		const tenancyId = getTenancyByToken(req) || Number(req.body.tenancyId);
+		const { paymentForm, value, installments } = req.body;
 
 		try {
 			existsOrError(tenancyId, { message: isRequired('tenancyId'), status: BAD_REQUEST });
@@ -40,7 +44,9 @@ export class UnitExpenseController extends Controller {
 			return ResponseHandle.onError({ res, err });
 		}
 
-		const unitExpense = new UnitExpenseModel({ ...req.body, tenancyId }, Number(id));
+		const payments = req.body.payments ?? [{ paymentForm, value, installments }];
+		const invoice = setFileToSave(req) || undefined;
+		const unitExpense = new UnitExpenseModel({ ...req.body, tenancyId, payments, invoice }, Number(id));
 
 		this.unitExpenseService
 			.save(unitExpense)
@@ -70,8 +76,9 @@ export class UnitExpenseController extends Controller {
 	}
 
 	private validateRequest(req: Request) {
-		const { expense, dueDate, amount, payments } = req.body;
+		const { expense, dueDate, amount, paymentForm, value, installments } = req.body;
 		const tenancyId = getTenancyByToken(req) || Number(req.body.tenancyId);
+		const payments = req.body?.payments?.length ? req.body?.payments : [{ paymentForm, value, installments }];
 		const requireds = requiredFields([
 			{ field: expense, message: isRequired('expense') },
 			{ field: dueDate, message: isRequired('dueDate') },
@@ -80,7 +87,7 @@ export class UnitExpenseController extends Controller {
 			{ field: tenancyId, message: isRequired('tenancyId') },
 		]);
 
-		const paymnentValidate = payments.length ? this.requiredPayment(payments) : undefined;
+		const paymnentValidate = payments?.length ? this.requiredPayment(payments) : undefined;
 
 		if (paymnentValidate?.length) paymnentValidate?.forEach(i => (typeof i === 'string' ? requireds?.push(i) : undefined));
 
@@ -88,7 +95,7 @@ export class UnitExpenseController extends Controller {
 	}
 
 	private requiredPayment(payments: IUnitExpensePayment[]) {
-		return payments.map((item, index) => {
+		return payments?.map((item, index) => {
 			const { paymentId, value } = item;
 			const requireds = requiredFields([
 				{ field: paymentId, message: isRequired('paymentId') },

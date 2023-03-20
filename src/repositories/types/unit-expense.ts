@@ -15,13 +15,15 @@ export interface IUnitExpense extends IID {
 }
 
 export interface IUnitExpensePayment {
-	paymentId: number;
+	paymentId?: number;
+	paymentForm?: string;
 	unitExpenseId?: number;
 	value: number;
 	installments: number;
 }
 
 export interface IUnitExpenseModel extends IUnitExpense {
+	supplier: string;
 	invoice: IFile;
 	payments: IUnitExpensePayment[];
 }
@@ -36,6 +38,7 @@ export interface IUnitExpenseViewModel extends IID {
 	supplier?: IUnitExpenseSupplier;
 	task?: IUnitExpenseTask;
 	unitId: number;
+	invoice: IFile;
 	tenancyId: number;
 	payments: IUnitExpensePaymentModel[];
 }

@@ -10,7 +10,7 @@ export class UnitExpenseModel {
 	amount: number;
 	active?: boolean;
 	expenseTypeId?: number;
-	supplierId?: number;
+	supplier: string;
 	taskId?: number;
 	unitId: number;
 	tenancyId: number;
@@ -25,7 +25,7 @@ export class UnitExpenseModel {
 		this.amount = Number(data.amount);
 		this.expenseTypeId = setInstanceId(data.expenseTypeId);
 		this.active = !!data.active;
-		this.supplierId = setInstanceId(data.supplierId);
+		this.supplier = data.supplier.trim();
 		this.taskId = setInstanceId(data.taskId);
 		this.unitId = Number(data.unitId);
 		this.tenancyId = Number(data.tenancyId);

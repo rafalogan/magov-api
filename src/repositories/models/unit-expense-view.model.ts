@@ -1,5 +1,6 @@
 import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { IUnitExpensePaymentModel, IUnitExpenseSupplier, IUnitExpenseTask, IUnitExpenseViewModel } from '../types';
+import { FileEntity } from '../entities';
 
 export class UnitExpenseViewModel {
 	id?: number;
@@ -13,6 +14,7 @@ export class UnitExpenseViewModel {
 	active: boolean;
 	unitId: number;
 	tenancyId: number;
+	invoice: FileEntity;
 	paymants?: IUnitExpensePaymentModel[];
 
 	constructor(data: IUnitExpenseViewModel, id?: number) {
@@ -26,6 +28,7 @@ export class UnitExpenseViewModel {
 		this.supplier = this.setSupplier(data?.supplier);
 		this.task = this.setTask(data?.task);
 		this.unitId = Number(data.unitId);
+		this.invoice = new FileEntity(data.invoice);
 		this.tenancyId = Number(data.tenancyId);
 		this.paymants = this.setPaymants(data.payments);
 	}

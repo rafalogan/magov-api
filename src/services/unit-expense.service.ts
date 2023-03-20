@@ -3,8 +3,9 @@ import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { IServiceOptions, IUnitExpenseModel, IUnitExpensePayment } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { ReadOptionsModel, UnitExpenseModel, UnitExpenseViewModel } from 'src/repositories/models';
-import { convertDataValues, convertToDate, existsOrError, isRequired } from 'src/utils';
+import { convertBlobToString, convertDataValues, convertToDate, deleteField, existsOrError, isRequired } from 'src/utils';
 import { FileEntity, UnitExpense, UnitExpensePayment } from 'src/repositories/entities';
+import { onLog } from 'src/core/handlers';
 
 export class UnitExpenseService extends DatabaseService {
 	constructor(options: IServiceOptions) {
@@ -13,7 +14,9 @@ export class UnitExpenseService extends DatabaseService {
 
 	async create(data: UnitExpenseModel) {
 		try {
-			const toSave = new UnitExpense({ ...data, active: true } as IUnitExpenseModel);
+			onLog('data to save', data);
+			const supplierId = data.supplier ? await this.setSupplier(data.supplier, data.tenancyId) : undefined;
+			const toSave = new UnitExpense({ ...data, active: true, supplierId } as IUnitExpenseModel);
 			const [id] = await this.db('units_expenses').insert(convertDataValues(toSave));
 
 			existsOrError(Number(id), { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
@@ -28,6 +31,7 @@ export class UnitExpenseService extends DatabaseService {
 
 	async update(data: UnitExpenseModel, id: number) {
 		try {
+			onLog('id to update', id);
 			const fromDB = (await this.getExpense(id, data.tenancyId)) as UnitExpenseViewModel;
 
 			existsOrError(fromDB?.id, fromDB);
@@ -54,7 +58,9 @@ export class UnitExpenseService extends DatabaseService {
 			const expenses = await this.db('units_expenses').select('id', 'expense', 'description', 'due_date').where('tenancy_id', tenancyId);
 			existsOrError(Array.isArray(expenses), { message: 'Internal error', error: expenses, status: INTERNAL_SERVER_ERROR });
 
-			return expenses.map(i => convertDataValues({ ...i, due_date: convertToDate(i.due_date) }, 'camel'));
+			return expenses.map(i =>
+				convertDataValues({ ...i, due_date: convertToDate(i.due_date), description: convertBlobToString(i.description) }, 'camel')
+			);
 		} catch (err) {
 			return err;
 		}
@@ -67,7 +73,9 @@ export class UnitExpenseService extends DatabaseService {
 			.andWhere('tenancy_id', tenancyId)
 			.then(res => {
 				existsOrError(Array.isArray(res), { message: 'Internal error', error: res, status: INTERNAL_SERVER_ERROR });
-				return res.map(i => convertDataValues({ ...i, due_date: convertToDate(i.due_date) }, 'camel'));
+				return res.map(i =>
+					convertDataValues({ ...i, due_date: convertToDate(i.due_date), description: convertBlobToString(i.description) }, 'camel')
+				);
 			})
 			.catch(err => err);
 	}
@@ -98,8 +106,8 @@ export class UnitExpenseService extends DatabaseService {
 						url: 'f.url',
 					}
 				)
-				.where({ id })
-				.andWhere('tenancy_id', tenancyId)
+				.where('ue.id', id)
+				.andWhere('ue.tenancy_id', tenancyId)
 				.andWhereRaw('f.unit_expense_id = ue.id')
 				.first();
 
@@ -148,7 +156,7 @@ export class UnitExpenseService extends DatabaseService {
 					value: 'uep.value',
 					installments: 'uep.installments',
 				},
-				{ payment_form: 'p,from' }
+				{ payment_form: 'p.form' }
 			)
 			.where('uep.unit_expense_id', id)
 			.andWhereRaw('p.id = uep.payment_id')
@@ -162,20 +170,26 @@ export class UnitExpenseService extends DatabaseService {
 		try {
 			const res = [];
 			for (const item of data) {
+				onLog('payment to save', item);
+				const paymentId = Number(item.paymentId) || (await this.setPaymentForm(item.paymentForm as string));
+				onLog('paymentId', paymentId);
+
 				const fromDB = await this.db('units_expenses_payments')
-					.where('payment_id', item.paymentId)
+					.where('payment_id', paymentId as number)
 					.andWhere('unit_expense_id', unitExpenseId)
 					.first();
 
-				if (fromDB.id) {
-					const toUpdate = new UnitExpensePayment({ ...convertDataValues(fromDB, 'camel'), ...data });
+				if (fromDB?.id) {
+					const toUpdate = new UnitExpensePayment({ ...convertDataValues(fromDB, 'camel'), ...data, paymentId });
+					deleteField(toUpdate, 'paymentForm');
 					await this.db('units_expenses_payments')
-						.where('payment_id', item.paymentId)
+						.where('payment_id', paymentId as number)
 						.andWhere('unit_expense_id', unitExpenseId)
 						.update(convertDataValues(toUpdate));
 					res.push(toUpdate);
 				} else {
-					const toSave = new UnitExpensePayment({ ...item, unitExpenseId });
+					const toSave = new UnitExpensePayment({ ...item, unitExpenseId, paymentId: Number(paymentId) });
+					deleteField(toSave, 'paymentForm');
 					await this.db('units_expenses_payments').insert(convertDataValues(toSave));
 					res.push(toSave);
 				}
@@ -201,6 +215,35 @@ export class UnitExpenseService extends DatabaseService {
 			const [id] = await this.db('files').insert(convertDataValues({ ...data, unitExpenseId }));
 
 			return { ...data, unitExpenseId, id };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setSupplier(name: string, tenancyId: number) {
+		try {
+			const fromDB = await this.db('suppliers').where({ name }).andWhere('tenancy_id', tenancyId).first();
+
+			if (fromDB?.id) return Number(fromDB?.id);
+
+			const [id] = await this.db('supplier').insert(convertDataValues({ name, tenancyId }));
+
+			existsOrError(Number(id), { message: 'internal error', error: id, status: INTERNAL_SERVER_ERROR });
+			return Number(id);
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setPaymentForm(form: string) {
+		try {
+			const fromDB = await this.db('payments').where({ form }).first();
+			if (fromDB?.id) return Number(fromDB?.id);
+
+			const [id] = await this.db('payments').insert(convertDataValues({ form }));
+			existsOrError(Number(id), { message: 'internal error', error: id, status: INTERNAL_SERVER_ERROR });
+
+			return Number(id);
 		} catch (err) {
 			return err;
 		}
