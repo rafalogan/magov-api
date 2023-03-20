@@ -5,7 +5,6 @@ export async function up(knex: Knex): Promise<void> {
 		table.increments('id').primary();
 		table.string('tenancy_key', 255).notNullable().unique();
 		table.integer('total_users').nullable();
-		table.timestamp('due_date').notNullable();
 		table.boolean('active').notNullable().defaultTo(true);
 	});
 }

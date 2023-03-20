@@ -1,15 +1,16 @@
 import { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
-	return knex.schema.createTable('plans', (table: Knex.TableBuilder) => {
+	return knex.schema.createTable('products', (table: Knex.TableBuilder) => {
 		table.increments('id').primary();
 		table.string('name', 50).notNullable().unique();
 		table.binary('description').nullable();
-		table.integer('users_limit').nullable();
-		table.integer('unitary_value').notNullable();
+		table.boolean('plan').notNullable().defaultTo(false);
+		table.integer('limit').nullable();
+		table.integer('value').notNullable();
 	});
 }
 
 export async function down(knex: Knex): Promise<void> {
-	return knex.schema.dropTable('plans');
+	return knex.schema.dropTable('products');
 }
