@@ -26,6 +26,7 @@ import { CommentModule } from 'src/modules/comment';
 import { UnitExpenseModule } from 'src/modules/unit-expense';
 import { SaleModule } from 'src/modules/sale';
 import { ProductModule } from 'src/modules/product';
+import { GovernmentExpensesModule } from 'src/modules/government-expenses';
 
 export class ModulesFactory {
 	private authModule: AuthModule;
@@ -48,6 +49,7 @@ export class ModulesFactory {
 	private unitExpenseModule: UnitExpenseModule;
 	private saleModule: SaleModule;
 	private productModule: ProductModule;
+	private governmentExpenseModule: GovernmentExpensesModule;
 
 	constructor(private app: Application, private auth: AuthConfig, services: ServicesFactory, upload: Multer) {
 		this.authModule = new AuthModule({ ...this.getRouteOptions(), service: services.authService, upload });
@@ -73,6 +75,7 @@ export class ModulesFactory {
 		this.unitExpenseModule = new UnitExpenseModule({ ...this.getRouteOptions(), service: services.unitExpenseService }, upload);
 		this.saleModule = new SaleModule({ ...this.getRouteOptions(), service: services.saleService }, upload);
 		this.productModule = new ProductModule({ ...this.getRouteOptions(), service: services.productService });
+		this.governmentExpenseModule = new GovernmentExpensesModule({ ...this.getRouteOptions(), service: services.governmentExpenseService });
 	}
 
 	exec() {
@@ -96,6 +99,7 @@ export class ModulesFactory {
 		this.unitExpenseModule.exec();
 		this.saleModule.exec();
 		this.productModule.exec();
+		this.governmentExpenseModule.exec();
 		this.app.use('/media', express.static(resolve(__dirname, '../..', 'tmp', 'uploads')));
 		this.app.use(notfoundRoute);
 	}
