@@ -20,3 +20,4 @@ export * from './task.service';
 export * from './comment.service';
 export * from './unit-expense.service';
 export * from './sale.service';
+export * from './product.service';

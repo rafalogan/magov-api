@@ -2,14 +2,14 @@ import { BAD_REQUEST, UNAUTHORIZED } from 'http-status';
 import { Request, Response } from 'express';
 
 import { Controller } from 'src/core/controllers';
-import { PlanService } from 'src/services';
-import { isRequired, notExistisOrError, requiredFields } from 'src/utils';
-import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
+import { ProductService } from 'src/services';
 import { Plan } from 'src/repositories/entities';
+import { ResponseHandle, getTenancyByToken } from 'src/core/handlers';
 import { ReadOptionsModel } from 'src/repositories/models';
+import { isRequired, notExistisOrError, requiredFields } from 'src/utils';
 
-export class PlanController extends Controller {
-	constructor(private planService: PlanService) {
+export class ProductController extends Controller {
+	constructor(private productService: ProductService) {
 		super();
 	}
 
@@ -23,7 +23,7 @@ export class PlanController extends Controller {
 
 		const plan = new Plan(req.body);
 
-		this.planService
+		this.productService
 			.save(plan)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
@@ -35,7 +35,7 @@ export class PlanController extends Controller {
 		const { id } = req.params;
 		const plan = new Plan(req.body, Number(id));
 
-		this.planService
+		this.productService
 			.save(plan)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
@@ -45,7 +45,7 @@ export class PlanController extends Controller {
 		const { id } = req.params;
 		const options = new ReadOptionsModel(req.query);
 
-		this.planService
+		this.productService
 			.read(options, Number(id))
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
@@ -55,7 +55,7 @@ export class PlanController extends Controller {
 		if (getTenancyByToken(req)) return ResponseHandle.onError({ message: 'User Unauthorized', status: UNAUTHORIZED, res });
 		const { id } = req.params;
 
-		this.planService
+		this.productService
 			.delete(Number(id))
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));

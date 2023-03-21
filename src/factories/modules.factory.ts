@@ -25,6 +25,7 @@ import { TaskModule } from 'src/modules/task';
 import { CommentModule } from 'src/modules/comment';
 import { UnitExpenseModule } from 'src/modules/unit-expense';
 import { SaleModule } from 'src/modules/sale';
+import { ProductModule } from 'src/modules/product';
 
 export class ModulesFactory {
 	private authModule: AuthModule;
@@ -46,6 +47,7 @@ export class ModulesFactory {
 	private commentModule: CommentModule;
 	private unitExpenseModule: UnitExpenseModule;
 	private saleModule: SaleModule;
+	private productModule: ProductModule;
 
 	constructor(private app: Application, private auth: AuthConfig, services: ServicesFactory, upload: Multer) {
 		this.authModule = new AuthModule({ ...this.getRouteOptions(), service: services.authService, upload });
@@ -70,6 +72,7 @@ export class ModulesFactory {
 		this.commentModule = new CommentModule({ ...this.getRouteOptions(), service: services.commentService });
 		this.unitExpenseModule = new UnitExpenseModule({ ...this.getRouteOptions(), service: services.unitExpenseService }, upload);
 		this.saleModule = new SaleModule({ ...this.getRouteOptions(), service: services.saleService }, upload);
+		this.productModule = new ProductModule({ ...this.getRouteOptions(), service: services.productService });
 	}
 
 	exec() {
@@ -92,6 +95,7 @@ export class ModulesFactory {
 		this.commentModule.exec();
 		this.unitExpenseModule.exec();
 		this.saleModule.exec();
+		this.productModule.exec();
 		this.app.use('/media', express.static(resolve(__dirname, '../..', 'tmp', 'uploads')));
 		this.app.use(notfoundRoute);
 	}
