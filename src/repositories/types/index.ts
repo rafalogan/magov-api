@@ -27,3 +27,4 @@ export * from './unit-expense';
 export * from './comment';
 export * from './supplier';
 export * from './sale';
+export * from './government-expenses';
