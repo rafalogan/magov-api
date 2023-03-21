@@ -1,11 +1,12 @@
 import { Knex } from 'knex';
+import { INTERNAL_SERVER_ERROR } from 'http-status';
+
 import { onLog } from 'src/core/handlers';
 import { PaginationModel, ReadOptionsModel } from 'src/repositories/models';
-
 import { IAddress, IGetValuesOptions, IServiceOptions } from 'src/repositories/types';
-import { camelToSnake, convertDataValues } from 'src/utils';
+import { camelToSnake, convertDataValues, existsOrError } from 'src/utils';
 import { CacheService } from './abistract-cache.service';
-import { Address } from 'src/repositories/entities';
+import { Address, FileEntity } from 'src/repositories/entities';
 
 export abstract class DatabaseService extends CacheService {
 	protected db: Knex;
@@ -83,6 +84,44 @@ export abstract class DatabaseService extends CacheService {
 
 			await this.db('adresses').where(camelToSnake(where), value).update(convertDataValues(data));
 			return data;
+		} catch (err) {
+			return err;
+		}
+	}
+
+	protected async setPayment(form: string) {
+		try {
+			const fromDb = await this.db('payments').where({ form }).first();
+			if (Number(fromDb?.id)) return Number(fromDb.id);
+
+			const [id] = await this.db('payments').insert(convertDataValues({ form }));
+			existsOrError(Number(id), { message: 'Internal Error', err: id, status: INTERNAL_SERVER_ERROR });
+
+			return Number(id);
+		} catch (err) {
+			return err;
+		}
+	}
+
+	protected async setFile(data: any, where: string, value: any) {
+		try {
+			const fromDb = await this.db('files').where(convertDataValues(where), value).first();
+
+			if (fromDb?.id) {
+				const toUpdate = new FileEntity(data);
+				toUpdate[where] = value;
+				await this.db('files').update(convertDataValues(toUpdate)).where(convertDataValues(where), value);
+
+				return toUpdate;
+			}
+
+			const toSave = new FileEntity(data);
+			toSave[where] = value;
+
+			const [id] = await this.db('files').insert(convertDataValues(toSave));
+			existsOrError(Number(id), { message: 'Internal Error', err: id, status: INTERNAL_SERVER_ERROR });
+
+			return { ...toSave, id };
 		} catch (err) {
 			return err;
 		}

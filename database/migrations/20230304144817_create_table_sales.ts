@@ -12,7 +12,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.integer('unit_id').unsigned().references('id').inTable('units').notNullable();
 		table.integer('tenancy_id').unsigned().references('id').inTable('tenancies').notNullable();
 		table.integer('user_id').unsigned().references('id').inTable('users').notNullable();
-		table.integer('seller_id').unsigned().references('id').inTable('sellers').notNullable();
+		table.integer('sale_id').unsigned().references('id').inTable('sellers').notNullable();
 	});
 }
 
