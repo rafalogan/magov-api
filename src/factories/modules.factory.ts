@@ -24,6 +24,7 @@ import { PropositionModule } from 'src/modules/proposition';
 import { TaskModule } from 'src/modules/task';
 import { CommentModule } from 'src/modules/comment';
 import { UnitExpenseModule } from 'src/modules/unit-expense';
+import { SaleModule } from 'src/modules/sale';
 
 export class ModulesFactory {
 	private authModule: AuthModule;
@@ -44,6 +45,7 @@ export class ModulesFactory {
 	private taskModule: TaskModule;
 	private commentModule: CommentModule;
 	private unitExpenseModule: UnitExpenseModule;
+	private saleModule: SaleModule;
 
 	constructor(private app: Application, private auth: AuthConfig, services: ServicesFactory, upload: Multer) {
 		this.authModule = new AuthModule({ ...this.getRouteOptions(), service: services.authService, upload });
@@ -67,6 +69,7 @@ export class ModulesFactory {
 		this.taskModule = new TaskModule({ ...this.getRouteOptions(), service: services.taskService });
 		this.commentModule = new CommentModule({ ...this.getRouteOptions(), service: services.commentService });
 		this.unitExpenseModule = new UnitExpenseModule({ ...this.getRouteOptions(), service: services.unitExpenseService }, upload);
+		this.saleModule = new SaleModule({ ...this.getRouteOptions(), service: services.saleService }, upload);
 	}
 
 	exec() {
@@ -88,6 +91,7 @@ export class ModulesFactory {
 		this.taskModule.exec();
 		this.commentModule.exec();
 		this.unitExpenseModule.exec();
+		this.saleModule.exec();
 		this.app.use('/media', express.static(resolve(__dirname, '../..', 'tmp', 'uploads')));
 		this.app.use(notfoundRoute);
 	}
