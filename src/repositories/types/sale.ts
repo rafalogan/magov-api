@@ -83,6 +83,8 @@ export interface ISale extends IID {
 
 export interface IProduct {
 	productId: number;
+	name?: string;
+	limit?: number;
 	amount: number;
 	value: number;
 }

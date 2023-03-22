@@ -14,7 +14,7 @@ export class SalePaymentService extends DatabaseService {
 	async create(data: SalePaymentModel) {
 		const toSave = new SalePayment(data);
 
-		this.db('sales_payments')
+		return this.db('sales_payments')
 			.insert(convertDataValues(toSave))
 			.then(([id]) => {
 				try {
@@ -43,8 +43,10 @@ export class SalePaymentService extends DatabaseService {
 		}
 	}
 
-	async read(saleId?: number) {
+	async read(saleId?: number, id?: number) {
 		try {
+			if (Number(id)) return this.getSalePayment(id as number);
+
 			const FromDB = Number(saleId) ? await this.db('sales_payments').where('sale_id', saleId) : await this.db('sales_payments');
 			existsOrError(Array.isArray(FromDB), { message: 'Internal error', err: FromDB, status: INTERNAL_SERVER_ERROR });
 

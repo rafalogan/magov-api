@@ -1,6 +1,6 @@
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
-import { IProduct, ISale, IServiceOptions } from 'src/repositories/types';
+import { IProduct, ISale, IServiceOptions, IUnitModel, IUserModel } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
 import { UserService } from './user.service';
@@ -8,6 +8,7 @@ import { PaginationModel, ReadOptionsModel, SaleModel, SaleViewModel, UnitModel,
 import { FileEntity, Sale, Seller } from 'src/repositories/entities';
 import { convertDataValues, deleteField, existsOrError } from 'src/utils';
 import { SalePaymentService } from './sale-payment.service';
+import { onLog } from 'src/core/handlers';
 
 export class SaleService extends DatabaseService {
 	constructor(
@@ -21,18 +22,24 @@ export class SaleService extends DatabaseService {
 
 	async create(data: SaleModel) {
 		try {
-			const user = (await this.setUser(data.user as UserModel)) as UserModel;
-			existsOrError(Number(user.id), user);
+			const user = (await this.setUser(new UserModel(data.user as IUserModel))) as UserModel;
+			existsOrError(Number(user?.id), user);
 			const { id: userId, tenancyId } = user;
+			onLog('new tenancy', tenancyId);
 
-			const unit = (await this.setUnit({ ...data.unit, tenancyId } as UnitModel)) as UnitModel;
-			existsOrError(Number(unit.id), unit);
-			const { id: unitId } = unit;
+			const unit = Number(tenancyId)
+				? ((await this.setUnit(new UnitModel({ ...data.unit, tenancyId } as IUnitModel))) as UnitModel)
+				: undefined;
+			existsOrError(Number(unit?.id), unit);
+			onLog('unit to use', unit);
+			const { id: unitId } = unit as UnitModel;
 
 			const sellerId = (await this.setSeller(data.seller)) as number;
+			onLog('seler Id form db', sellerId);
 			existsOrError(Number(sellerId), sellerId);
 
 			const paymentId = (await this.setPayment(data.paymentForm)) as number;
+			onLog('payment Id form db', paymentId);
 			existsOrError(Number(paymentId), paymentId);
 
 			const toSave = new Sale({
@@ -45,8 +52,10 @@ export class SaleService extends DatabaseService {
 			} as ISale);
 			const [id] = await this.db('sales').insert(convertDataValues(toSave));
 			existsOrError(Number(id), { message: 'Internal Error', err: id, status: INTERNAL_SERVER_ERROR });
+
 			await this.setProduct(data.products, id);
 			const contract = (await this.setFile(data.contract, 'saleId', id)) as FileEntity;
+
 			existsOrError(Number(contract?.id), { message: 'Internal Error', err: contract, status: INTERNAL_SERVER_ERROR });
 
 			return { message: 'Sale successifuly saved', data: { ...toSave, id, contract } };
@@ -57,15 +66,17 @@ export class SaleService extends DatabaseService {
 
 	async update(data: SaleModel, id: number) {
 		try {
+			onLog('product to update', data);
 			const fromDB = (await this.getSale(id)) as SaleViewModel;
+			onLog('sale from db', fromDB);
 			existsOrError(fromDB?.id, fromDB);
 			const sellerId = (await this.setSeller(fromDB.seller || data.seller)) as number;
-			const unit = (await this.setUnit({ ...data.unit, tenancyId: fromDB.tenancyId })) as UnitModel;
 			const userId = Number(fromDB?.user.id);
-			const unitId = Number(unit.id);
+			const unitId = Number(fromDB.unit.id);
+			const tenancyId = Number(fromDB?.tenancyId);
 			const paymentId = data.paymentForm ? await this.setPayment(data.paymentForm) : fromDB.payment.id;
 
-			const toUpdate = new Sale({ ...fromDB, ...data, userId, unitId, sellerId, paymentId } as ISale);
+			const toUpdate = new Sale({ ...fromDB, ...data, userId, unitId, sellerId, paymentId, tenancyId } as ISale);
 			await this.db('sales').where({ id }).update(convertDataValues(toUpdate));
 
 			const contract = data.contract ? await this.setFile(data.contract, 'saleId', id) : undefined;
@@ -84,7 +95,7 @@ export class SaleService extends DatabaseService {
 			const total = await this.getCount('sales');
 			const pagination = new PaginationModel({ page, limit, total });
 
-			const fromDB = await this.db({ s: 'sales', u: 'units', us: 'users', sr: 'seller', a: 'adresses' })
+			const fromDB = await this.db({ s: 'sales', u: 'units', us: 'users', sr: 'sellers', a: 'adresses' })
 				.select(
 					{
 						id: 's.id',
@@ -102,8 +113,12 @@ export class SaleService extends DatabaseService {
 						uf: 'a.uf',
 					},
 					{ email: 'us.email' },
-					{ seller: 'u.seller' }
+					{ seller: 'sr.seller' }
 				)
+				.whereRaw('u.id = s.unit_id')
+				.andWhereRaw('a.unit_id = u.id')
+				.andWhereRaw('us.id = s.user_id')
+				.andWhereRaw('sr.id = s.seller_id')
 				.limit(limit)
 				.offset(page * limit - limit)
 				.orderBy(orderBy || 'id', order || 'asc');
@@ -113,7 +128,7 @@ export class SaleService extends DatabaseService {
 			const raw = fromDB.map(i => {
 				const { street, number, complement, district, city, uf } = i;
 
-				i.address = `${street} ${number ? number + ',' : ''} ${complement || ''} ${district}, ${city} - ${uf}`;
+				i.address = `${street} ${number ? number + ', ' : ''}${complement + ' ' || ''}${district}, ${city} - ${uf}`;
 				deleteField(i, 'street');
 				deleteField(i, 'number');
 				deleteField(i, 'complement');
@@ -176,9 +191,9 @@ export class SaleService extends DatabaseService {
 				.where('s.id', id)
 				.andWhereRaw('p.id = s.payment_id')
 				.andWhereRaw('u.id = s.unit_id')
+				.andWhereRaw('a.unit_id = u.id')
 				.andWhereRaw('us.id = s.user_id')
 				.andWhereRaw('sr.id = s.seller_id')
-				.andWhereRaw('a.unit_id = s.unit_id')
 				.andWhereRaw('f.sale_id = s.id')
 				.first();
 
@@ -186,13 +201,17 @@ export class SaleService extends DatabaseService {
 			const raw = convertDataValues(fromDB, 'camel');
 			const products = await this.getProducs(raw.id);
 			const payments = (await this.salePaymentService.read(raw.id)) || [];
+			const unit = { id: raw.unitId, name: raw.unitName, cnpj: raw.cnpj, phone: raw.phone };
+			const user = { id: raw.userId, name: `${raw.firstName} ${raw.lastName}`, email: raw.email };
+
+			onLog('product to use', products);
 
 			return new SaleViewModel({
 				...raw,
 				products,
-				unit: { ...raw, id: raw.unitId, name: raw.unitName },
-				user: { ...raw, id: raw.userId, name: `${raw.firstName} ${raw.lastName}` },
-				saller: { ...raw, id: raw.sellerId },
+				unit,
+				user,
+				seller: { id: raw.sellerId, seller: raw.seller, cpf: raw.cpf },
 				contract: { ...raw, name: raw.originalName },
 				payments,
 			});
@@ -222,6 +241,7 @@ export class SaleService extends DatabaseService {
 	private async setSeller(data: Seller) {
 		try {
 			const fromDB = await this.db('sellers').where('cpf', data.cpf).first();
+			onLog('seller From db', fromDB);
 
 			if (Number(fromDB?.id)) return Number(fromDB?.id);
 			const [id] = await this.db('sellers').insert(convertDataValues(data));
@@ -236,9 +256,11 @@ export class SaleService extends DatabaseService {
 	private async setUser(data: UserModel) {
 		try {
 			const fromDB = (await this.userService.getUser(data.email)) as UserViewModel;
+			onLog('user From db', fromDB);
 			if (fromDB?.id) return fromDB as UserViewModel;
 
 			const user = (await this.userService.create(data)) as any;
+			onLog('save User', user);
 			existsOrError(Number(user.data.id), user);
 
 			return user.data as UserViewModel;
@@ -249,12 +271,20 @@ export class SaleService extends DatabaseService {
 
 	private async setUnit(data: UnitModel) {
 		try {
-			const fromDB = (await this.unitService.getUnit(Number(data?.id), data.tenancyId)) as UnitModel;
-			if (fromDB?.id) return fromDB;
+			const fromDB = data?.id
+				? ((await this.unitService.getUnit(data.id as number, data.tenancyId)) as UnitModel)
+				: ((await this.db('units').select('id').where('name', data.name).andWhere('tenancy_id', data.tenancyId).first()) as any);
+
+			const res = data?.id ? fromDB : ({ ...data, ...fromDB } as UnitModel);
+			onLog('unit From db to sale', res);
+			if (res?.id) return res;
+
+			onLog('data to save', data);
 
 			const unit = (await this.unitService.create(data)) as any;
+			onLog('save new unit', unit);
 
-			existsOrError(unit.data.id, unit);
+			existsOrError(unit?.data.id, unit);
 
 			return unit.data as UnitModel;
 		} catch (err) {
@@ -263,34 +293,37 @@ export class SaleService extends DatabaseService {
 	}
 
 	private async getProducs(id: number) {
-		return this.db({ ps: 'products_sales', p: 'products' })
-			.select(
-				{ amaount: 'ps.amaount' },
-				{
-					id: 'p.id',
-					name: 'p.name',
-					limit: 'p.limit',
-					value: 'p.value',
-				}
-			)
-			.where('ps.sale_id', id)
-			.andWhereRaw('p.id = ps.product_id')
-			.then(res => {
-				try {
-					existsOrError(Array.isArray(res), { message: 'Internal Error', error: res, status: INTERNAL_SERVER_ERROR });
-				} catch (err) {
-					return err;
-				}
+		try {
+			const res: any[] = [];
 
-				return res.map(i => convertDataValues(i, 'camel'));
-			});
+			const products = await this.db('products_sales').where('sale_id', id);
+			existsOrError(Array.isArray(products), { message: 'Internal Error', error: products, status: INTERNAL_SERVER_ERROR });
+
+			for (const product of products) {
+				onLog('product to sale', product);
+				const fromDB = await this.db('products').select('id', 'name', 'limit', 'value').where('id', product.product_id).first();
+
+				existsOrError(fromDB?.id, { message: 'Internal Error', error: fromDB, status: INTERNAL_SERVER_ERROR });
+
+				res.push(convertDataValues({ ...fromDB, productId: fromDB.id, amount: product.amount }, 'camel'));
+			}
+
+			return res;
+		} catch (err) {
+			return err;
+		}
 	}
 
 	private async setProduct(products: IProduct[], saleId: number) {
 		try {
 			await this.db('products_sales').where('sale_id', saleId).del();
+
 			for (const product of products) {
-				await this.db('products_sales').insert(convertDataValues({ ...product, saleId }));
+				const { productId, amount } = product;
+				onLog('to save products', { productId, amount, saleId });
+
+				const res = await this.db('products_sales').insert(convertDataValues({ productId, amount, saleId }));
+				onLog('save products', res);
 			}
 		} catch (err) {
 			return err;

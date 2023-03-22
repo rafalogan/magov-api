@@ -105,12 +105,12 @@ export abstract class DatabaseService extends CacheService {
 
 	protected async setFile(data: any, where: string, value: any) {
 		try {
-			const fromDb = await this.db('files').where(convertDataValues(where), value).first();
+			const fromDb = await this.db('files').where(camelToSnake(where), value).first();
 
 			if (fromDb?.id) {
 				const toUpdate = new FileEntity(data);
 				toUpdate[where] = value;
-				await this.db('files').update(convertDataValues(toUpdate)).where(convertDataValues(where), value);
+				await this.db('files').update(convertDataValues(toUpdate)).where(camelToSnake(where), value);
 
 				return toUpdate;
 			}

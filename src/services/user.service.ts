@@ -172,7 +172,7 @@ export class UserService extends DatabaseService {
 						fieldIds: 'plan_id',
 						whereIds: 'tenancy_id',
 						value: raw.tenancyId,
-						table: 'plans',
+						table: 'products',
 						fields: ['id', 'name'],
 				  })
 				: undefined;
@@ -226,7 +226,7 @@ export class UserService extends DatabaseService {
 		try {
 			if (!id) return { unit: {}, plan: {} };
 
-			const fromDB = await this.db({ u: 'units', p: 'plans' })
+			const fromDB = await this.db({ u: 'units', p: 'products' })
 				.select({ unit_id: 'u.id', unit_name: 'u.name' }, { plan_id: 'p.id', plan_name: 'p.name' })
 				.where('u.id', id)
 				.whereRaw('p.id = u.plan_id')

@@ -3,7 +3,7 @@ import { BAD_REQUEST } from 'http-status';
 
 import { Controller } from 'src/core/controllers';
 import { SalePaymentService, SaleService } from 'src/services';
-import { IProduct, IUserModel } from 'src/repositories/types';
+import { IProduct, IUnitModel, IUserModel } from 'src/repositories/types';
 import { isRequired, notExistisOrError, requiredFields, setAddress, setFileToSave } from 'src/utils';
 import { ResponseHandle } from 'src/core/handlers';
 import { ReadOptionsModel, SaleModel, SalePaymentModel } from 'src/repositories/models';
@@ -14,7 +14,11 @@ export class SaleController extends Controller {
 	}
 
 	save(req: Request, res: Response) {
-		const products = req.body.products || [{ productId: req.body.productId, amount: req.body.amount, value: req.body.productValue }];
+		const unit = this.setUnit(req);
+		const user = this.setUser(req);
+		const seller = this.setSeller(req);
+		const products = this.setProducts(req);
+
 		try {
 			this.verifyRequest(req);
 			this.verifyProducts(products);
@@ -23,11 +27,8 @@ export class SaleController extends Controller {
 			return ResponseHandle.onError({ res, err });
 		}
 
-		const address = setAddress(req.body.unit.address || req.body.address || req.body);
-		const user = { ...req.body.user, address, planId: products[0].id };
-		const unit = { ...req.body.unit, address };
 		const contract = setFileToSave(req);
-		const sale = new SaleModel({ ...req.body, user, unit, contract });
+		const sale = new SaleModel({ ...req.body, user, unit, contract, products, seller });
 
 		this.saleService
 			.save(sale)
@@ -52,12 +53,12 @@ export class SaleController extends Controller {
 
 	edit(req: Request, res: Response) {
 		const { id } = req.params;
-		const products = req.body.products || [{ productId: req.body.productId, amount: req.body.amount, value: req.body.productValue }];
-		const address = setAddress(req.body.unit.address || req.body.address || req.body);
-		const user = { ...req.body.user, address, planId: products[0].id };
-		const unit = { ...req.body.unit, address };
+		const unit = this.setUnit(req);
+		const user = this.setUser(req);
+		const seller = this.setSeller(req);
+		const products = this.setProducts(req);
 		const contract = setFileToSave(req).url ? setFileToSave(req) : undefined;
-		const sale = new SaleModel({ ...req.body, user, unit, contract }, Number(id));
+		const sale = new SaleModel({ ...req.body, user, unit, contract, products, seller }, Number(id));
 
 		this.saleService
 			.save(sale)
@@ -86,11 +87,13 @@ export class SaleController extends Controller {
 	}
 
 	listPayments(req: Request, res: Response) {
+		const { id } = req.params;
 		const { saleId } = req.query;
+
 		this.salePaymentService
-			.read(Number(saleId))
+			.read(Number(saleId), Number(id))
 			.then(data => ResponseHandle.onSuccess({ res, data }))
-			.then(err => ResponseHandle.onError({ res, err }));
+			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
 	remove(req: Request, res: Response) {
@@ -111,10 +114,25 @@ export class SaleController extends Controller {
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
+	private setProducts(req: Request) {
+		if (req.body.products) return req.body.products;
+		const { productId, amount, productValue: value } = req.body;
+
+		return [{ productId, amount, value }] as IProduct[];
+	}
+
+	private setSeller(req: Request) {
+		if (req.body.seller) return req.body.seller;
+		const { sellerName: seller, sellerCpf: cpf } = req.body;
+
+		return { seller, cpf };
+	}
+
 	private verifyRequest(req: Request) {
-		const { seller, dueDate, value, commissionValue, installments, paymentForm } = req.body;
-		const { name, cnpj, plan } = req.body.unit;
-		const { street, district, cep, city, uf } = setAddress(req.body.unit.address || req.body.address || req.body);
+		const { dueDate, value, commissionValue, installments, paymentForm } = req.body;
+		const seller = this.setSeller(req);
+		const { name, cnpj, plan, address } = this.setUnit(req);
+		const { street, district, cep, city, uf } = address;
 
 		const requireds = requiredFields([
 			{ field: seller, message: isRequired('seller') },
@@ -153,6 +171,27 @@ export class SaleController extends Controller {
 		notExistisOrError(requireds, { message: requireds?.join('\n '), status: BAD_REQUEST });
 	}
 
+	private setUnit(req: Request) {
+		if (req.body.unit) return req.body.unit;
+		const { unitId, unitName, description, cnpj, phone } = req.body;
+		const { productId: id, amount } = this.setProducts(req)[0];
+
+		const address = setAddress(req);
+		const plan = { id, amount };
+
+		return { id: unitId, name: unitName, description, cnpj, phone, address, plan } as IUnitModel;
+	}
+
+	private setUser(req: Request) {
+		if (req.body.user) return req.body.user;
+		const { userId: id, firstName, lastName, email, password, cpf, office, level, phone } = req.body;
+		const { productId, amount } = this.setProducts(req)[0];
+		const address = setAddress(req);
+
+		const plans = [{ id: productId, amount }];
+		return { id, firstName, lastName, password, confirmPassword: password, email, cpf, office, address, plans, level, phone } as IUserModel;
+	}
+
 	private verifyUser(user: IUserModel) {
 		const { firstName, lastName, email, password, cpf, phone, office, level } = user;
 
@@ -175,7 +214,7 @@ export class SaleController extends Controller {
 		const requireds = requiredFields([
 			{ field: payDate, message: isRequired('payDate') },
 			{ field: value, message: isRequired('value') },
-			{ field: commission, message: isRequired('commission') },
+			{ field: commission !== undefined, message: isRequired('commission') },
 			{ field: saleId, message: isRequired('saleId') },
 		]);
 

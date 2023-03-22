@@ -38,6 +38,6 @@ export class SaleViewModel {
 	}
 
 	private setProducts(data: IProduct[]) {
-		return data.map(i => new ProductViewModel(i, i.productId));
+		return data.map(i => new ProductViewModel({ ...i }));
 	}
 }
