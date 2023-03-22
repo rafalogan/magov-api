@@ -31,6 +31,7 @@ export interface ISaleViewModel extends IID {
 	seller: ISeller;
 	contract: IFile;
 	tenancyId: number;
+	payments: ISalePayment[];
 }
 
 export interface IContractView {
@@ -89,4 +90,11 @@ export interface IProduct {
 export interface ISeller extends IID {
 	seller: string;
 	cpf: string;
+}
+
+export interface ISalePayment extends IID {
+	payDate: Date | string;
+	value: number;
+	commission: boolean;
+	saleId: number;
 }

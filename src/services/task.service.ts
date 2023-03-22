@@ -70,33 +70,36 @@ export class TaskService extends DatabaseService {
 			await this.setUsers(data.users, id);
 			await this.setThemes(data.themes, id);
 
-			if (data.cost && !data.unitExpense) {
-				await this.governmentExpenseService.create(
-					new GovernmentExpensesModel({
-						expense: data.title,
-						tenancyId: data.tenancyId,
-						dueDate: data.end,
-						value: data.cost,
-						task: { id, title: data.title },
-					} as IGovernmentExpensesModel)
-				);
-			}
+			const governmentExpense =
+				data.cost && !data.unitExpense
+					? await this.governmentExpenseService.create(
+							new GovernmentExpensesModel({
+								expense: data.title,
+								tenancyId: data.tenancyId,
+								dueDate: data.end,
+								value: data.cost,
+								task: { id, title: data.title },
+							} as IGovernmentExpensesModel)
+					  )
+					: undefined;
 
-			if (data.cost && data.unitExpense) {
-				await this.unitExpenseService.create(
-					new UnitExpenseModel({
-						expense: data.title,
-						tenancyId: data.tenancyId,
-						dueDate: data.end,
-						taskId: id,
-						unitId: data.unitId,
-					} as IUnitExpenseModel)
-				);
-			}
+			const unitExpense =
+				data.cost && data.unitExpense
+					? await this.unitExpenseService.create(
+							new UnitExpenseModel({
+								expense: data.title,
+								tenancyId: data.tenancyId,
+								dueDate: data.end,
+								taskId: id,
+								unitId: data.unitId,
+								payments: [{ paymentForm: 'boleto', amount: 1, installments: 1, value: data.cost }],
+							} as IUnitExpenseModel)
+					  )
+					: undefined;
 
 			return {
 				message: 'Task saved with success',
-				data: { ...data, id },
+				data: { ...data, id, governmentExpense, unitExpense },
 			};
 		} catch (err) {
 			return err;

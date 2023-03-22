@@ -27,3 +27,4 @@ export * from './sale.model';
 export * from './sale-view.model';
 export * from './product-view.model';
 export * from './government-expenses.model';
+export * from './sale-payment.model';

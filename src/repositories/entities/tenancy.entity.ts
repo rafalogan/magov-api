@@ -7,7 +7,6 @@ export class Tenancy {
 	id?: number;
 	tenancyKey?: string;
 	totalUsers?: number;
-	dueDate: Date;
 	active: boolean;
 
 	constructor(data: ITenancy, id?: number) {

@@ -135,3 +135,10 @@ export const setAddress = (req: Request): IAddress => {
 export const setInstanceId = (id?: number) => Number(id) || undefined;
 
 export const clearDuplicateItems = (value: any[]) => value.filter((item, index) => value.indexOf(item) === index);
+
+export const setPlansToUser = (req: Request) => {
+	if (req.body.plans?.length) return req.body.plans;
+	if (req.body?.planId) return [{ id: setInstanceId(req.body.planId) }];
+
+	return undefined;
+};

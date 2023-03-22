@@ -20,6 +20,7 @@ import {
 	PropositionsTypeService,
 	RevenueService,
 	RuleService,
+	SalePaymentService,
 	SaleService,
 	TaskService,
 	ThemeService,
@@ -51,6 +52,7 @@ export class ServicesFactory {
 	saleService: SaleService;
 	productService: ProductService;
 	governmentExpenseService: GovernmentExpensesService;
+	salePaymentService: SalePaymentService;
 
 	constructor(private conn: Knex, private client: RedisClientType, private mailConfig: MailerConfig) {
 		this.unitService = new UnitService({ ...this.setServiceOptions() });
@@ -72,7 +74,8 @@ export class ServicesFactory {
 		this.propositionService = new PropositionService(this.setServiceOptions(), this.governmentExpenseService);
 		this.commentService = new CommentService(this.setServiceOptions());
 		this.unitExpenseService = new UnitExpenseService(this.setServiceOptions());
-		this.saleService = new SaleService(this.setServiceOptions(), this.unitService, this.userService);
+		this.salePaymentService = new SalePaymentService(this.setServiceOptions());
+		this.saleService = new SaleService(this.setServiceOptions(), this.unitService, this.userService, this.salePaymentService);
 		this.productService = new ProductService(this.setServiceOptions());
 		this.taskService = new TaskService(
 			this.setServiceOptions(),

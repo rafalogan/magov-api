@@ -22,6 +22,13 @@ export interface IGovernmentExpensesModel extends IID {
 	proposition?: IPropositionGovExpense;
 	task?: ITaskGovExpense;
 	tenancyId: number;
+	budgets: IGExpenseBudget[];
+}
+
+export interface IGExpenseBudget {
+	id: number;
+	revenue?: string;
+	value?: number;
 }
 
 export interface IPropositionGovExpense {

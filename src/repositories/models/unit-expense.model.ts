@@ -10,11 +10,11 @@ export class UnitExpenseModel {
 	amount: number;
 	active?: boolean;
 	expenseTypeId?: number;
-	supplier: string;
+	supplier?: string;
 	taskId?: number;
 	unitId: number;
 	tenancyId: number;
-	invoice: FileEntity;
+	invoice?: FileEntity;
 	payments?: UnitExpensePayment[];
 
 	constructor(data: IUnitExpenseModel, id?: number) {
@@ -25,11 +25,11 @@ export class UnitExpenseModel {
 		this.amount = Number(data.amount);
 		this.expenseTypeId = setInstanceId(data.expenseTypeId);
 		this.active = !!data.active;
-		this.supplier = data.supplier.trim();
+		this.supplier = data.supplier?.trim();
 		this.taskId = setInstanceId(data.taskId);
 		this.unitId = Number(data.unitId);
 		this.tenancyId = Number(data.tenancyId);
-		this.invoice = new FileEntity(data.invoice);
+		this.invoice = data.invoice ? new FileEntity(data?.invoice) : undefined;
 		this.payments = this.setPayments(data.payments);
 	}
 

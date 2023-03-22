@@ -19,4 +19,5 @@ export interface IUnitModel extends IUnit {
 export interface IUnitPlan {
 	id: number;
 	name: string;
+	amount?: number;
 }

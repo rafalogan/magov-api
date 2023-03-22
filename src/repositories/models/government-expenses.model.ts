@@ -1,5 +1,5 @@
 import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
-import { IGovernmentExpensesModel, IPropositionGovExpense, ITaskGovExpense } from '../types';
+import { IGovernmentExpensesModel, IPropositionGovExpense, ITaskGovExpense, IGExpenseBudget } from '../types';
 
 export class GovernmentExpensesModel {
 	id?: number;
@@ -12,6 +12,7 @@ export class GovernmentExpensesModel {
 	proposition?: IPropositionGovExpense;
 	task?: ITaskGovExpense;
 	tenancyId: number;
+	budgets?: IGExpenseBudget[];
 
 	constructor(data: IGovernmentExpensesModel, id?: number) {
 		this.id = setInstanceId(id || data?.id);
@@ -24,5 +25,6 @@ export class GovernmentExpensesModel {
 		this.proposition = data?.proposition;
 		this.task = data?.task;
 		this.tenancyId = Number(data.tenancyId);
+		this.budgets = data.budgets;
 	}
 }

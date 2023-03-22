@@ -23,8 +23,8 @@ export interface IUnitExpensePayment {
 }
 
 export interface IUnitExpenseModel extends IUnitExpense {
-	supplier: string;
-	invoice: IFile;
+	supplier?: string;
+	invoice?: IFile;
 	payments: IUnitExpensePayment[];
 }
 

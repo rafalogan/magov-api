@@ -73,7 +73,7 @@ export class ModulesFactory {
 		this.taskModule = new TaskModule({ ...this.getRouteOptions(), service: services.taskService });
 		this.commentModule = new CommentModule({ ...this.getRouteOptions(), service: services.commentService });
 		this.unitExpenseModule = new UnitExpenseModule({ ...this.getRouteOptions(), service: services.unitExpenseService }, upload);
-		this.saleModule = new SaleModule({ ...this.getRouteOptions(), service: services.saleService }, upload);
+		this.saleModule = new SaleModule({ ...this.getRouteOptions(), service: services.saleService }, upload, services.salePaymentService);
 		this.productModule = new ProductModule({ ...this.getRouteOptions(), service: services.productService });
 		this.governmentExpenseModule = new GovernmentExpensesModule({ ...this.getRouteOptions(), service: services.governmentExpenseService });
 	}

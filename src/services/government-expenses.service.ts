@@ -1,6 +1,6 @@
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
-import { IServiceOptions } from 'src/repositories/types';
+import { IGExpenseBudget, IGovernmentExpensesModel, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { GovernmentExpensesModel, ReadOptionsModel } from 'src/repositories/models';
 import { convertDataValues, existsOrError, isRequired, notExistisOrError, setValueNumberToView } from 'src/utils';
@@ -15,10 +15,11 @@ export class GovernmentExpensesService extends DatabaseService {
 		try {
 			const fromDB = (await this.getExpense(data.expense, data.tenancyId)) as GovernmentExpensesModel;
 			notExistisOrError(fromDB?.id, fromDB);
-			const toSave = new GovernmentExpenses({ ...data, active: true });
+			const toSave = new GovernmentExpenses({ ...data, active: true } as IGovernmentExpensesModel);
 			const [id] = await this.db('government_expenses').insert(convertDataValues(toSave));
+			const budgets = data.budgets ? await this.setBudgets(data.budgets, id, data.dueDate) : undefined;
 
-			return { message: 'Government Expense successfully saved', data: { ...toSave, id } };
+			return { message: 'Government Expense successfully saved', data: { ...toSave, id, budgets } };
 		} catch (err) {
 			return err;
 		}
@@ -28,7 +29,7 @@ export class GovernmentExpensesService extends DatabaseService {
 		try {
 			const fromDB = (await this.getExpense(id, data.tenancyId)) as GovernmentExpenses;
 			existsOrError(fromDB?.id, fromDB);
-			const toUpdate = new GovernmentExpenses({ ...fromDB, ...data, tenancyId: fromDB.tenancyId });
+			const toUpdate = new GovernmentExpenses({ ...fromDB, ...data, tenancyId: fromDB.tenancyId } as IGovernmentExpensesModel);
 			await this.db('government_expenses').update(convertDataValues(toUpdate)).where({ id }).andWhere('tenancy_id', fromDB.tenancyId);
 
 			return { message: 'Government expense successfully updated', data: toUpdate };
@@ -59,7 +60,7 @@ export class GovernmentExpensesService extends DatabaseService {
 			const fromDB = await this.db('government_expenses')
 				.where('id', filter)
 				.andWhere('tenancy_id', tenancyId)
-				.orWhere('title', filter)
+				.orWhere('expense', filter)
 				.first();
 
 			existsOrError(fromDB, { message: 'Expense Not Found', status: NOT_FOUND });
@@ -80,11 +81,31 @@ export class GovernmentExpensesService extends DatabaseService {
 		try {
 			const fromDB = (await this.getExpense(id, tenancyId)) as GovernmentExpensesModel;
 			existsOrError(fromDB?.id, fromDB);
+			existsOrError(fromDB.active, { message: 'Expense already disabled', status: FORBIDDEN });
 
-			const toDisabled = new GovernmentExpenses({ ...fromDB, active: false });
+			const toDisabled = new GovernmentExpenses({ ...fromDB, active: false } as IGovernmentExpensesModel);
 			await this.db('government_expenses').where({ id }).andWhere('tenancy_id', tenancyId).update(convertDataValues(toDisabled));
 
 			return { message: 'Government expense successfully disabled', data: toDisabled };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setBudgets(budgets: IGExpenseBudget[], governmentExpanseId: number, date: Date) {
+		try {
+			const res: any[] = [];
+			for (const item of budgets) {
+				const revenue = await this.db('revenues').where({ id: item.id }).first();
+				const { id: revenueId, value } = revenue;
+				const toSave = { governmentExpanseId, revenueId, value, date };
+
+				await this.db('government_expenses_payment').insert(convertDataValues(toSave));
+
+				res.push(toSave);
+			}
+
+			return res;
 		} catch (err) {
 			return err;
 		}

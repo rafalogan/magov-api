@@ -17,6 +17,21 @@ export class SaleRoute extends Routes {
 			.all(methodNotAllowed);
 
 		this.app
+			.route('/sales/payments')
+			.all(this.auth?.exec().authenticate())
+			.get(this.saleController.listPayments.bind(this.saleController))
+			.post(this.saleController.savePayment.bind(this.saleController))
+			.all(methodNotAllowed);
+
+		this.app
+			.route('/sales/payments/:id')
+			.all(this.auth?.exec().authenticate())
+			.get(this.saleController.listPayments.bind(this.saleController))
+			.put(this.saleController.editPayment.bind(this.saleController))
+			.delete(this.saleController.removePayment.bind(this.saleController))
+			.all(methodNotAllowed);
+
+		this.app
 			.route('/sales/:id')
 			.all(this.auth?.exec().authenticate())
 			.get(this.saleController.list.bind(this.saleController))

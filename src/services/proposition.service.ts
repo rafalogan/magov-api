@@ -25,19 +25,22 @@ export class PropositionService extends DatabaseService {
 			if (data.keywords.length !== 0) await this.setKeywords(data.keywords, id);
 			if (data.themes.length !== 0) await this.setThemes(data.themes, id);
 			if (data.demands?.length !== 0) await this.setDemands(data.demands as number[], id);
-			if (data.expense)
-				await this.governmentExpenseService.create(
-					new GovernmentExpensesModel({
-						expense: data.title,
-						description: data.menu,
-						dueDate: data.deadline,
-						value: data.expense,
-						proposition: { id, title: data.title },
-					} as IGovernmentExpensesModel)
-				);
+			const governmentExpense = data.expense
+				? await this.governmentExpenseService.create(
+						new GovernmentExpensesModel({
+							expense: data.title,
+							description: data.menu,
+							dueDate: data.deadline,
+							value: data.expense,
+							proposition: { id, title: data.title },
+							budgets: data.budgets?.map(i => ({ id: Number(i) })),
+							tenancyId: data.tenancyId,
+						} as IGovernmentExpensesModel)
+				  )
+				: undefined;
 			await this.setTasks(data.tasks, id);
 
-			return { message: 'Proposition saved with success', data: { ...data, id } };
+			return { message: 'Proposition saved with success', data: { ...data, id, governmentExpense } };
 		} catch (err) {
 			return err;
 		}

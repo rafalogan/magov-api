@@ -44,6 +44,6 @@ export class UserModel {
 	}
 
 	private setUserPlans(plans?: IUserPlan[]) {
-		return !plans?.length ? undefined : plans.map(i => ({ id: Number(i.id), amount: Number(i.amount) } as IUserPlan));
+		return !plans?.length ? undefined : plans.map(i => ({ id: Number(i.id), amount: Number(i.amount) || 1 } as IUserPlan));
 	}
 }

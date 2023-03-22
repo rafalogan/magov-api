@@ -1,3 +1,5 @@
+import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+
 import { IProduct, ISale, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
@@ -5,11 +7,15 @@ import { UserService } from './user.service';
 import { PaginationModel, ReadOptionsModel, SaleModel, SaleViewModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { FileEntity, Sale, Seller } from 'src/repositories/entities';
 import { convertDataValues, deleteField, existsOrError } from 'src/utils';
-import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
-import { error } from 'console';
+import { SalePaymentService } from './sale-payment.service';
 
 export class SaleService extends DatabaseService {
-	constructor(options: IServiceOptions, private unitService: UnitService, private userService: UserService) {
+	constructor(
+		options: IServiceOptions,
+		private unitService: UnitService,
+		private userService: UserService,
+		private salePaymentService: SalePaymentService
+	) {
 		super(options);
 	}
 
@@ -104,7 +110,7 @@ export class SaleService extends DatabaseService {
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal Error', error: fromDB, status: INTERNAL_SERVER_ERROR });
 
-			const data = fromDB.map(i => {
+			const raw = fromDB.map(i => {
 				const { street, number, complement, district, city, uf } = i;
 
 				i.address = `${street} ${number ? number + ',' : ''} ${complement || ''} ${district}, ${city} - ${uf}`;
@@ -117,6 +123,14 @@ export class SaleService extends DatabaseService {
 
 				return convertDataValues(i, 'camel');
 			});
+
+			const data: any[] = [];
+
+			for (const item of raw) {
+				const payments = (await this.salePaymentService.read(item.id)) || [];
+
+				data.push({ ...item, payments });
+			}
 
 			return { data, pagination };
 		} catch (err) {
@@ -171,6 +185,7 @@ export class SaleService extends DatabaseService {
 			existsOrError(fromDB.id, { message: 'not found', status: NOT_FOUND });
 			const raw = convertDataValues(fromDB, 'camel');
 			const products = await this.getProducs(raw.id);
+			const payments = (await this.salePaymentService.read(raw.id)) || [];
 
 			return new SaleViewModel({
 				...raw,
@@ -179,6 +194,7 @@ export class SaleService extends DatabaseService {
 				user: { ...raw, id: raw.userId, name: `${raw.firstName} ${raw.lastName}` },
 				saller: { ...raw, id: raw.sellerId },
 				contract: { ...raw, name: raw.originalName },
+				payments,
 			});
 		} catch (err) {
 			return err;
@@ -203,7 +219,7 @@ export class SaleService extends DatabaseService {
 		}
 	}
 
-	async setSeller(data: Seller) {
+	private async setSeller(data: Seller) {
 		try {
 			const fromDB = await this.db('sellers').where('cpf', data.cpf).first();
 
@@ -217,7 +233,7 @@ export class SaleService extends DatabaseService {
 		}
 	}
 
-	async setUser(data: UserModel) {
+	private async setUser(data: UserModel) {
 		try {
 			const fromDB = (await this.userService.getUser(data.email)) as UserViewModel;
 			if (fromDB?.id) return fromDB as UserViewModel;
@@ -231,7 +247,7 @@ export class SaleService extends DatabaseService {
 		}
 	}
 
-	async setUnit(data: UnitModel) {
+	private async setUnit(data: UnitModel) {
 		try {
 			const fromDB = (await this.unitService.getUnit(Number(data?.id), data.tenancyId)) as UnitModel;
 			if (fromDB?.id) return fromDB;

@@ -15,8 +15,8 @@ export class UserViewModel {
 	userRules: IUserRule[];
 	tenancyId?: number;
 	address?: Address;
-	unit: IUserUnit;
-	plan: IUserPlan;
+	unit?: IUserUnit;
+	plan?: IUserPlan;
 	plans?: IUserPlan[];
 	image?: FileEntity;
 

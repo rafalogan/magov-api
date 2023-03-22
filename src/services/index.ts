@@ -22,3 +22,4 @@ export * from './unit-expense.service';
 export * from './sale.service';
 export * from './product.service';
 export * from './government-expenses.service';
+export * from './sale-payment.service';

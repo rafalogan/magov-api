@@ -14,16 +14,17 @@ export class UserService extends DatabaseService {
 
 	async create(data: UserModel) {
 		try {
+			onLog('data to Save', data);
 			const fromDB = (await this.getUser(data.email)) as UserViewModel;
 
-			notExistisOrError(fromDB?.id, { message: 'User already exists', status: FORBIDDEN });
+			notExistisOrError(fromDB?.id, fromDB);
 
-			const tenancyId = data.plans ? await this.createTenancy() : data.tenancyId;
+			const tenancyId = data.plans || data.tenancyId ? await this.setTenancy(data.tenancyId) : undefined;
 			existsOrError(Number(tenancyId), { message: 'Internal error', error: tenancyId, status: INTERNAL_SERVER_ERROR });
+
 			if (data.plans?.length) await this.setTenancyPlans(data.plans, Number(tenancyId));
 
 			const toSave = new User({ ...data, tenancyId } as IUser);
-
 			const [userId] = await this.db('users').insert(convertDataValues(toSave));
 			existsOrError(Number(userId), { messages: 'Internal', error: userId, status: INTERNAL_SERVER_ERROR });
 
@@ -238,8 +239,24 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async createTenancy() {
+	private async setTenancy(id?: number) {
 		try {
+			if (Number(id)) {
+				const plans = (await this.getPlansBytenancy(id as number)) as any[];
+				existsOrError(Array.isArray(plans), plans);
+
+				const fromDB = await this.db('tenancies').where({ id }).first();
+				existsOrError(fromDB?.id, { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+				const raw = convertDataValues(fromDB, 'camel');
+
+				const userLimit = plans.map(i => i.limit).reduce((total, limit) => total + limit, 0);
+				existsOrError(raw.totalUsers < userLimit, { message: 'User limit reached', status: FORBIDDEN });
+				await this.db('tenancies')
+					.where({ id })
+					.update(convertDataValues(new Tenancy({ ...raw, totalUsers: raw.totalUsers + 1 })));
+				return Number(id);
+			}
+
 			const tenancy = new Tenancy({ totalUsers: 1, active: true } as ITenancy);
 			const [tenancyId] = await this.db('tenancies').insert(convertDataValues(tenancy));
 
@@ -251,15 +268,35 @@ export class UserService extends DatabaseService {
 		}
 	}
 
+	private async getPlansBytenancy(tenancyId: number) {
+		try {
+			const fromDB = await this.db({ tp: 'tenancies_plans', p: 'products' })
+				.select({ amount: 'tp.amount' }, { id: 'p.id', name: 'p.name', limit: 'p.limit' })
+				.where('tp.tenancy_id', tenancyId)
+				.andWhereRaw('p.id = tp.plan_id')
+				.andWhereRaw('p.plan = 1');
+
+			existsOrError(Array.isArray(fromDB), { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			return fromDB.map(i => convertDataValues(i, 'camel'));
+		} catch (err) {
+			return err;
+		}
+	}
+
 	private async setTenancyPlans(plans: IUnitPlan[], tenancyId: number) {
 		try {
-			existsOrError(Number(tenancyId), { message: 'Internal error', error: tenancyId, status: INTERNAL_SERVER_ERROR });
-
 			for (const plan of plans) {
+				onLog('plan to save', plan);
 				const fromDB = await this.db('tenancies_plans').where('plan_id', plan.id).andWhere('tenancy_id', tenancyId).first();
 
-				if (!fromDB.plan_id) {
-					await this.db('tenancies_plans').insert(convertDataValues({ ...plan, planId: plan.id, tenancyId }));
+				onLog('from DB tenancies_plans', fromDB);
+				if (!fromDB?.plan_id) {
+					onLog('toSave plan', convertDataValues({ planId: plan.id, tenancyId, amount: plan.amount }));
+					await this.db('tenancies_plans').insert(convertDataValues({ planId: plan.id, tenancyId, amount: plan.amount }));
+				} else {
+					const amount = fromDB.amount !== plan.amount ? plan.amount : fromDB.amount;
+					await this.db('tenancies_plans').insert(convertDataValues({ planId: plan.id, tenancyId, amount }));
 				}
 			}
 		} catch (err) {

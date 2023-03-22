@@ -1,7 +1,8 @@
 import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
 import { FileEntity } from '../entities';
-import { IPaymentView, ISaleUnitView, ISaleUserView, ISeller, ISaleViewModel, IProduct, IFile } from '../types';
+import { IPaymentView, ISaleUnitView, ISaleUserView, ISeller, ISaleViewModel, IProduct, IFile, ISalePayment } from '../types';
 import { ProductViewModel } from './product-view.model';
+import { SalePaymentModel } from './sale-payment.model';
 
 export class SaleViewModel {
 	id?: number;
@@ -17,6 +18,7 @@ export class SaleViewModel {
 	seller: ISeller;
 	contract: FileEntity;
 	tenancyId: number;
+	payments: SalePaymentModel[];
 
 	constructor(data: ISaleViewModel) {
 		this.id = setInstanceId(data.id);
@@ -32,6 +34,7 @@ export class SaleViewModel {
 		this.seller = data.seller;
 		this.contract = new FileEntity(data.contract as IFile);
 		this.tenancyId = Number(data.tenancyId);
+		this.payments = data.payments.map((i: ISalePayment) => new SalePaymentModel(i)) || [];
 	}
 
 	private setProducts(data: IProduct[]) {
