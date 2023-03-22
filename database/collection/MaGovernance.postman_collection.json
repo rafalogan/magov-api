@@ -116,16 +116,16 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "/Users/rafaelcandeira/Pictures/wallpapers/horizon-forbidden-west-screenshot-07-disclaimer-02oct20.jpeg"
+									"src": "/Users/rafaelcandeira/Pictures/wallpapers/6058b37ce377b.jpg"
 								},
 								{
 									"key": "firstName",
-									"value": "Maira ",
+									"value": "Silvana ",
 									"type": "text"
 								},
 								{
 									"key": "lastName",
-									"value": "Silva",
+									"value": "pereira",
 									"type": "text"
 								},
 								{
@@ -210,6 +210,11 @@
 								},
 								{
 									"key": "imageAlt",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "unitId",
 									"value": "",
 									"type": "text"
 								}
@@ -472,6 +477,16 @@
 						"disableBodyPruning": true
 					},
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [
 							{
@@ -481,13 +496,8 @@
 							}
 						],
 						"body": {
-							"mode": "raw",
-							"raw": "{}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"mode": "formdata",
+							"formdata": []
 						},
 						"url": {
 							"raw": "{{mg_host_api}}/users",
@@ -507,6 +517,16 @@
 						"disableBodyPruning": true
 					},
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [
 							{
@@ -622,12 +642,10 @@
 							]
 						},
 						"url": {
-							"raw": "https://localhost:3000/users",
-							"protocol": "https",
+							"raw": "{{mg_host_api}}/users",
 							"host": [
-								"localhost"
+								"{{mg_host_api}}"
 							],
-							"port": "3000",
 							"path": [
 								"users"
 							]
@@ -983,6 +1001,16 @@
 						"disableBodyPruning": true
 					},
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
 						"header": [
 							{
@@ -3039,7 +3067,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"title\": \"Tarefa de teste 11\",\n    \"description\": \"Decription é opcional, pode ser string ou null\",\n    \"cost\": null,\n    \"start\": \"2023-03-16T18:02:00\",\n    \"end\": \"2023-03-22T09:00:00\",\n    \"level\": 5,\n    \"status\": 3,\n    \"userId\": null,\n    \"unitId\": 1,\n    \"tenancyId\": null,\n    \"propositionId\": null,\n    \"demandId\": 5,\n    \"plaintiffId\": null,\n    \"plaintiff\": {\n        \"name\": \"Pamela Vikers\",\n        \"birthday\": \"1988-07-18T00:00:00\",\n        \"institute\": \"Ong de testes\",\n        \"active\": true,\n        \"cpfCnpj\": \"253.478.400-56\",\n        \"relationshipType\": null,\n        \"observation\": \"Campo opcional\",\n        \"relative\": null,\n        \"voterRegistration\": \"862204780108\",\n        \"phone\": \"09786789876\",\n        \"email\": \"demandante@d.com\",\n        \"instituteTypeId\": 1,\n        \"address\": {\n            \"cep\": \"48912-970\",\n            \"street\": \"Praça Central\",\n            \"number\": null,\n            \"complement\": null,\n            \"district\": \"Centro\",\n            \"city\": \"Abóbora\",\n            \"uf\": \"BA\"\n        }\n    },\n    \"users\": [\n        3,\n        4\n    ],\n    \"themes\": [\n        \"Celular\"\n    ],\n    \"unitExpense\": false\n}",
+							"raw": "{\n    \"title\": \"Tarefa de teste 14\",\n    \"description\": \"Decription é opcional, pode ser string ou null\",\n    \"cost\": 57350.30,\n    \"start\": \"2023-03-16T18:02:00\",\n    \"end\": \"2023-03-22T09:00:00\",\n    \"level\": 5,\n    \"status\": 3,\n    \"userId\": null,\n    \"unitId\": 1,\n    \"tenancyId\": null,\n    \"propositionId\": null,\n    \"demandId\": 2,\n    \"plaintiffId\": null,\n    \"plaintiff\": {\n        \"name\": \"Pamela Vikers\",\n        \"birthday\": \"1988-07-18T00:00:00\",\n        \"institute\": \"Ong de testes\",\n        \"active\": true,\n        \"cpfCnpj\": \"253.478.400-56\",\n        \"relationshipType\": null,\n        \"observation\": \"Campo opcional\",\n        \"relative\": null,\n        \"voterRegistration\": \"862204780108\",\n        \"phone\": \"09786789876\",\n        \"email\": \"demandante@d.com\",\n        \"instituteTypeId\": 1,\n        \"address\": {\n            \"cep\": \"48912-970\",\n            \"street\": \"Praça Central\",\n            \"number\": null,\n            \"complement\": null,\n            \"district\": \"Centro\",\n            \"city\": \"Abóbora\",\n            \"uf\": \"BA\"\n        }\n    },\n    \"users\": [\n        3,\n        4\n    ],\n    \"themes\": [\n        \"Celular\"\n    ],\n    \"unitExpense\": false\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3790,6 +3818,1022 @@
 							"path": [
 								"unit-expenses",
 								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "government-expenses",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\t\n\t\"expense\": \"Gasto Governamental de teste\",\n\t\"description\": \"Campo opcional\",\n\t\"dueDate\": \"2023-03-22T18:00:00\",\n\t\"value\": 2537.87,\n\t\"observations\": \"Campo opicional\",\n\t\"proposition\": null,\n\t\"task\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/government-expenses",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-expenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "government-expenses",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/government-expenses",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-expenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "government-expense",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/government-expenses/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-expenses",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\t\n\t\"expense\": \"Gasto Governamental de teste editado\",\n\t\"description\": \"Campo opcional\",\n\t\"dueDate\": \"2023-03-22T18:00:00\",\n\t\"value\": 2537.87,\n\t\"observations\": \"Campo opicional\",\n\t\"proposition\": null,\n\t\"task\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/government-expenses/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-expenses",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\t\n\t\"expense\": \"Gasto Governamental de teste editado\",\n\t\"description\": \"Campo opcional\",\n\t\"dueDate\": \"2023-03-22T18:00:00\",\n\t\"value\": 2537.87,\n\t\"observations\": \"Campo opicional\",\n\t\"proposition\": null,\n\t\"task\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/government-expenses/2",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-expenses",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sales",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Desktop/output000.txt"
+								},
+								{
+									"key": "unitId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "unitName",
+									"value": "Gabinete Brasilia",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "campo opicional",
+									"type": "text"
+								},
+								{
+									"key": "cnpj",
+									"value": "43.983.372/0001-98",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "(86) 9 9787-9889",
+									"type": "text"
+								},
+								{
+									"key": "cep",
+									"value": "34545-360",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "Rua São Cristóvão",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "complement",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "district",
+									"value": "Santo Antônio (Roça Grande)",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Sabará",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "MG",
+									"type": "text"
+								},
+								{
+									"key": "userId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "firstName",
+									"value": "Tania",
+									"type": "text"
+								},
+								{
+									"key": "lastName",
+									"value": "Carvalho",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "ttania@novogabinete.com.br",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345@",
+									"type": "text"
+								},
+								{
+									"key": "cpf",
+									"value": "278.992.600-00",
+									"type": "text"
+								},
+								{
+									"key": "office",
+									"value": "Deputada",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "userRules",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "productId",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "productValue",
+									"value": "300.00",
+									"type": "text"
+								},
+								{
+									"key": "sellerName",
+									"value": "Marcos Jr",
+									"type": "text"
+								},
+								{
+									"key": "sellerCpf",
+									"value": "001.597.730-75",
+									"type": "text"
+								},
+								{
+									"key": "dueDate",
+									"value": "2023-03-22T10:00:00",
+									"type": "text"
+								},
+								{
+									"key": "value",
+									"value": "600.00",
+									"type": "text"
+								},
+								{
+									"key": "commissionValue",
+									"value": "90.00",
+									"type": "text"
+								},
+								{
+									"key": "installments",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "paymentForm",
+									"value": "Cartão de Credito",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sales",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/sales",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sale",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/sales",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Desktop/output000.txt"
+								},
+								{
+									"key": "unitId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "unitName",
+									"value": "Gabinete Brasilia editado",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "campo opicional",
+									"type": "text"
+								},
+								{
+									"key": "cnpj",
+									"value": "43.983.372/0001-98",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "(86) 9 9787-9889",
+									"type": "text"
+								},
+								{
+									"key": "cep",
+									"value": "34545-360",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "Rua São Cristóvão",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "complement",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "district",
+									"value": "Santo Antônio (Roça Grande)",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Sabará",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "MG",
+									"type": "text"
+								},
+								{
+									"key": "userId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "firstName",
+									"value": "Tania",
+									"type": "text"
+								},
+								{
+									"key": "lastName",
+									"value": "Carvalho",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "ttania@novogabinete.com.br",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345@",
+									"type": "text"
+								},
+								{
+									"key": "cpf",
+									"value": "278.992.600-00",
+									"type": "text"
+								},
+								{
+									"key": "office",
+									"value": "Deputada",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "userRules",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "productId",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "productValue",
+									"value": "300.00",
+									"type": "text"
+								},
+								{
+									"key": "sellerName",
+									"value": "Marcos Jr",
+									"type": "text"
+								},
+								{
+									"key": "sellerCpf",
+									"value": "001.597.730-75",
+									"type": "text"
+								},
+								{
+									"key": "dueDate",
+									"value": "2023-03-22T10:00:00",
+									"type": "text"
+								},
+								{
+									"key": "value",
+									"value": "600.00",
+									"type": "text"
+								},
+								{
+									"key": "commissionValue",
+									"value": "90.00",
+									"type": "text"
+								},
+								{
+									"key": "installments",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "paymentForm",
+									"value": "Cartão de Credito",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Desktop/output000.txt"
+								},
+								{
+									"key": "unitId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "unitName",
+									"value": "Gabinete Brasilia editado",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "campo opicional",
+									"type": "text"
+								},
+								{
+									"key": "cnpj",
+									"value": "43.983.372/0001-98",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "(86) 9 9787-9889",
+									"type": "text"
+								},
+								{
+									"key": "cep",
+									"value": "34545-360",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "Rua São Cristóvão",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "complement",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "district",
+									"value": "Santo Antônio (Roça Grande)",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Sabará",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "MG",
+									"type": "text"
+								},
+								{
+									"key": "userId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "firstName",
+									"value": "Tania",
+									"type": "text"
+								},
+								{
+									"key": "lastName",
+									"value": "Carvalho",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "ttania@novogabinete.com.br",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345@",
+									"type": "text"
+								},
+								{
+									"key": "cpf",
+									"value": "278.992.600-00",
+									"type": "text"
+								},
+								{
+									"key": "office",
+									"value": "Deputada",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "userRules",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "productId",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "productValue",
+									"value": "300.00",
+									"type": "text"
+								},
+								{
+									"key": "sellerName",
+									"value": "Marcos Jr",
+									"type": "text"
+								},
+								{
+									"key": "sellerCpf",
+									"value": "001.597.730-75",
+									"type": "text"
+								},
+								{
+									"key": "dueDate",
+									"value": "2023-03-22T10:00:00",
+									"type": "text"
+								},
+								{
+									"key": "value",
+									"value": "600.00",
+									"type": "text"
+								},
+								{
+									"key": "commissionValue",
+									"value": "90.00",
+									"type": "text"
+								},
+								{
+									"key": "installments",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "paymentForm",
+									"value": "Cartão de Credito",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales/6",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payments/create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"payDate\": \"2023-03-27T10:00:00\",\n\t\"value\": 60000,\n\t\"commission\": false,\n\t\"saleId\": 7\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payments/list",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payment?saleId=",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments?saleId=1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments"
+							],
+							"query": [
+								{
+									"key": "saleId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments?saleId=1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments"
+							],
+							"query": [
+								{
+									"key": "saleId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payments/edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"payDate\": \"2023-03-27T10:00:00\",\n\t\"value\": 30000,\n\t\"commission\": true,\n\t\"saleId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payments/delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"payDate\": \"2023-03-27T10:00:00\",\n\t\"value\": 30000,\n\t\"commission\": true,\n\t\"saleId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments",
+								"1"
 							]
 						}
 					},
