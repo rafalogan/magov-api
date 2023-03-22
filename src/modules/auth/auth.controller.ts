@@ -1,7 +1,7 @@
 import { BAD_REQUEST, UNAUTHORIZED } from 'http-status';
 import { Request, Response } from 'express';
 
-import { equalsOrError, isRequired, notExistisOrError, requiredFields, setAddress, setUserImage } from 'src/utils';
+import { equalsOrError, isRequired, notExistisOrError, requiredFields, setAddress, setPlansToUser, setUserImage } from 'src/utils';
 import { AuthService } from 'src/services';
 import { onLog, ResponseHandle } from 'src/core/handlers';
 import { Credentials, RecoveryModel, UserModel } from 'src/repositories/models';
@@ -32,17 +32,18 @@ export class AuthController {
 	}
 
 	signup(req: Request, res: Response) {
-		onLog('body', setAddress(req));
 		const address = setAddress(req);
+		const plans = setPlansToUser(req);
 
 		try {
-			this.authService.validateSignupData({ ...req.body, address });
+			this.authService.validateSignupData({ ...req.body, address, plans });
 		} catch (message: any) {
 			return ResponseHandle.onError({ res, message, status: BAD_REQUEST });
 		}
 
 		const image = this.setUserImage(req);
-		const user = new UserModel({ ...req.body, address, image });
+		const user = new UserModel({ ...req.body, address, image, plans });
+		onLog('User to signup', user);
 
 		this.authService
 			.signupOnApp(user)

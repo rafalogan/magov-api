@@ -47,7 +47,7 @@ export class PlanController extends Controller {
 
 		this.planService
 			.read(options, Number(id))
-			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
+			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
@@ -61,7 +61,7 @@ export class PlanController extends Controller {
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
-	validRequest(req: Request) {
+	private validRequest(req: Request) {
 		const { name, usersLimit, unitaryValue } = req.body;
 
 		const requireds = requiredFields([

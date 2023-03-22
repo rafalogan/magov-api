@@ -1,7 +1,9 @@
 export interface IPlan {
 	id: number;
 	name: string;
+	plan?: boolean;
 	description?: Blob;
-	usersLimit?: number;
-	unitaryValue: number;
+	limit?: number;
+	value: number;
+	active: boolean;
 }

@@ -1,8 +1,15 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Task } from 'src/repositories/entities';
-import { PlaintiffModel, ReadOptionsModel, TaskModel, TaskViewModel } from 'src/repositories/models';
-import { IServiceOptions } from 'src/repositories/types';
+import {
+	GovernmentExpensesModel,
+	PlaintiffModel,
+	ReadOptionsModel,
+	TaskModel,
+	TaskViewModel,
+	UnitExpenseModel,
+} from 'src/repositories/models';
+import { IGovernmentExpensesModel, IServiceOptions, IUnitExpenseModel } from 'src/repositories/types';
 import {
 	clearDuplicateItems,
 	convertBlobToString,
@@ -14,6 +21,8 @@ import {
 } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { PlaintiffService } from './plaintiff.service';
+import { GovernmentExpensesService } from './government-expenses.service';
+import { UnitExpenseService } from './unit-expense.service';
 
 export class TaskService extends DatabaseService {
 	fieldsToList = [
@@ -37,7 +46,12 @@ export class TaskService extends DatabaseService {
 
 	tablesToList = { t: 'tasks', u: 'users', un: 'units' };
 
-	constructor(options: IServiceOptions, private plaintiffService: PlaintiffService) {
+	constructor(
+		options: IServiceOptions,
+		private plaintiffService: PlaintiffService,
+		private governmentExpenseService: GovernmentExpensesService,
+		private unitExpenseService: UnitExpenseService
+	) {
 		super(options);
 	}
 
@@ -56,9 +70,36 @@ export class TaskService extends DatabaseService {
 			await this.setUsers(data.users, id);
 			await this.setThemes(data.themes, id);
 
+			const governmentExpense =
+				data.cost && !data.unitExpense
+					? await this.governmentExpenseService.create(
+							new GovernmentExpensesModel({
+								expense: data.title,
+								tenancyId: data.tenancyId,
+								dueDate: data.end,
+								value: data.cost,
+								task: { id, title: data.title },
+							} as IGovernmentExpensesModel)
+					  )
+					: undefined;
+
+			const unitExpense =
+				data.cost && data.unitExpense
+					? await this.unitExpenseService.create(
+							new UnitExpenseModel({
+								expense: data.title,
+								tenancyId: data.tenancyId,
+								dueDate: data.end,
+								taskId: id,
+								unitId: data.unitId,
+								payments: [{ paymentForm: 'boleto', amount: 1, installments: 1, value: data.cost }],
+							} as IUnitExpenseModel)
+					  )
+					: undefined;
+
 			return {
 				message: 'Task saved with success',
-				data: { ...data, id },
+				data: { ...data, id, governmentExpense, unitExpense },
 			};
 		} catch (err) {
 			return err;
@@ -232,6 +273,8 @@ export class TaskService extends DatabaseService {
 			await this.db('users_tasks').where({ task_id: raw.id }).del();
 			await this.db('themes_tasks').where({ task_id: raw.id }).del();
 			await this.db('tasks').where({ id }).andWhere('tenancy_id', tenancyId).del();
+
+			if (fromDB.cost) await this.db('government_expenses').where({ task_id: id }).andWhere({ tenancy_id: tenancyId }).del();
 
 			return { message: 'Task deleted with success', data: new Task(raw) };
 		} catch (err) {

@@ -16,7 +16,7 @@ export class UnitExpense {
 
 	constructor(data: IUnitExpenseModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
-		this.expense = data.expense.trim();
+		this.expense = data.expense?.trim();
 		this.description = convertBlobToString(data.description);
 		this.dueDate = convertToDate(data.dueDate);
 		this.amount = Number(data.amount) || 1;

@@ -20,3 +20,7 @@ export * from './comment.entity';
 export * from './unit-expense.entity';
 export * from './supplier.entity';
 export * from './unit-expense-payment.entity';
+export * from './sale.entity';
+export * from './seller.entity';
+export * from './government-expenses.entity';
+export * from './sale-payment.entity';

@@ -71,7 +71,7 @@ export class UnitService extends DatabaseService {
 
 	async getUnit(id: number, tenancyId: number) {
 		try {
-			const unit = await this.db({ u: 'units', p: 'plans', a: 'adresses' })
+			const unit = await this.db({ u: 'units', p: 'products', a: 'adresses' })
 				.select(
 					{
 						id: 'u.id',

@@ -1,13 +1,14 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Proposition, Task } from 'src/repositories/entities';
-import { PropositionModel, PropositionsReadOptionsModel, PropositionViewModel } from 'src/repositories/models';
-import { IProposition, IServiceOptions } from 'src/repositories/types';
+import { GovernmentExpensesModel, PropositionModel, PropositionsReadOptionsModel, PropositionViewModel } from 'src/repositories/models';
+import { IGovernmentExpensesModel, IProposition, IServiceOptions } from 'src/repositories/types';
 import { convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
+import { GovernmentExpensesService } from './government-expenses.service';
 
 export class PropositionService extends DatabaseService {
-	constructor(options: IServiceOptions) {
+	constructor(options: IServiceOptions, private governmentExpenseService: GovernmentExpensesService) {
 		super(options);
 	}
 
@@ -24,9 +25,22 @@ export class PropositionService extends DatabaseService {
 			if (data.keywords.length !== 0) await this.setKeywords(data.keywords, id);
 			if (data.themes.length !== 0) await this.setThemes(data.themes, id);
 			if (data.demands?.length !== 0) await this.setDemands(data.demands as number[], id);
+			const governmentExpense = data.expense
+				? await this.governmentExpenseService.create(
+						new GovernmentExpensesModel({
+							expense: data.title,
+							description: data.menu,
+							dueDate: data.deadline,
+							value: data.expense,
+							proposition: { id, title: data.title },
+							budgets: data.budgets?.map(i => ({ id: Number(i) })),
+							tenancyId: data.tenancyId,
+						} as IGovernmentExpensesModel)
+				  )
+				: undefined;
 			await this.setTasks(data.tasks, id);
 
-			return { message: 'Proposition saved with success', data: { ...data, id } };
+			return { message: 'Proposition saved with success', data: { ...data, id, governmentExpense } };
 		} catch (err) {
 			return err;
 		}
@@ -159,6 +173,9 @@ export class PropositionService extends DatabaseService {
 
 			const toDesabled = new Proposition({ ...fromDB, active: false });
 			await this.db('propositions').where({ id }).andWhere({ tenancy_id: tenancyId }).update(convertDataValues(toDesabled));
+			if (fromDB.expense) {
+				await this.db('government_expenses').where('proposition_id', id).andWhere('tenancy_id', fromDB.tenancyId).update({ active: false });
+			}
 
 			return { message: 'Proposition disabled with success', data: { ...fromDB, ...toDesabled } };
 		} catch (err) {

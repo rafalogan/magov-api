@@ -23,3 +23,8 @@ export * from './unit-expense-view.model';
 export * from './task-view.model';
 export * from './comment.model';
 export * from './unit-expense.model';
+export * from './sale.model';
+export * from './sale-view.model';
+export * from './product-view.model';
+export * from './government-expenses.model';
+export * from './sale-payment.model';

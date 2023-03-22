@@ -2,19 +2,41 @@
 	{
 		"name": "Essencial",
 		"description": "Conteudo plano esseicial",
-		"users_limit": 20,
-		"unitary_value": 10000
+		"limit": 20,
+		"plan": true,
+		"value": 10000,
+		"active": true
 	},
 	{
 		"name": "Explorer",
 		"description": "Conteudo plano explorer",
-		"users_limit": 70,
-		"unitary_value": 30000
+		"plan": true,
+		"limit": 70,
+		"value": 30000,
+		"active": true
 	},
 	{
 		"name": "Master",
 		"description": "Conteudo plano Master",
-		"users_limit": 100,
-		"unitary_value": 55000
+		"plan": true,
+		"limit": 100,
+		"value": 55000,
+		"active": true
+	},
+	{
+		"name": "Crédito para 500 disparos/mês R$ 150,00",
+		"description": "Conteudo plano Master",
+		"plan": false,
+		"limit": 500,
+		"value": 15000,
+		"active": true
+	},
+	{
+		"name": "Consultoria de Marketing R$ 15.000,00",
+		"description": "Conteudo plano Master",
+		"plan": false,
+		"limit": 0,
+		"value": 1500000,
+		"active": true
 	}
 ]

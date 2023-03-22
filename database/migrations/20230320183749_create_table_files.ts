@@ -18,6 +18,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.integer('government_expanse_id').unsigned().references('id').inTable('government_expenses').nullable();
 		table.integer('unit_expense_id').unsigned().references('id').inTable('units_expenses').nullable();
 		table.integer('tenancy_id').unsigned().references('id').inTable('tenancies').nullable();
+		table.integer('sale_id').unsigned().references('id').inTable('sales').nullable();
 	});
 }
 

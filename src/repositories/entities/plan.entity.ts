@@ -5,14 +5,18 @@ export class Plan {
 	id?: number;
 	name: string;
 	description?: string;
-	usersLimit?: number;
-	unitaryValue: number;
+	plan?: boolean;
+	limit?: number;
+	value: number;
+	active: boolean;
 
 	constructor(data: IPlan, id?: number) {
 		this.id = setInstanceId(id || data.id);
 		this.name = data.name;
 		this.description = data.description ? convertBlobToString(data.description) : undefined;
-		this.usersLimit = data.usersLimit || 0;
-		this.unitaryValue = Number.isInteger(data.unitaryValue) ? Number(data.unitaryValue) : Number(data.unitaryValue) * 100;
+		this.plan = !!data.plan;
+		this.limit = data.limit || 0;
+		this.value = Number.isInteger(data.value) ? Number(data.value) : Number(data.value) * 100;
+		this.active = !!data.active;
 	}
 }

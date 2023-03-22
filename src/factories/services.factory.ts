@@ -8,16 +8,20 @@ import {
 	CommentService,
 	ContactService,
 	DemandService,
+	GovernmentExpensesService,
 	InstituteTypeService,
 	KeywordService,
 	MailService,
 	OriginService,
 	PlaintiffService,
 	PlanService,
+	ProductService,
 	PropositionService,
 	PropositionsTypeService,
 	RevenueService,
 	RuleService,
+	SalePaymentService,
+	SaleService,
 	TaskService,
 	ThemeService,
 	UnitExpenseService,
@@ -45,12 +49,17 @@ export class ServicesFactory {
 	taskService: TaskService;
 	commentService: CommentService;
 	unitExpenseService: UnitExpenseService;
+	saleService: SaleService;
+	productService: ProductService;
+	governmentExpenseService: GovernmentExpensesService;
+	salePaymentService: SalePaymentService;
 
 	constructor(private conn: Knex, private client: RedisClientType, private mailConfig: MailerConfig) {
-		this.userService = new UserService({ ...this.setServiceOptions() });
+		this.unitService = new UnitService({ ...this.setServiceOptions() });
+		this.userService = new UserService({ ...this.setServiceOptions() }, this.unitService);
+		this.governmentExpenseService = new GovernmentExpensesService(this.setServiceOptions());
 		this.mailService = new MailService(this.mailConfig);
 		this.authService = new AuthService(this.userService, this.mailService);
-		this.unitService = new UnitService({ ...this.setServiceOptions() });
 		this.keywordService = new KeywordService(this.setServiceOptions());
 		this.themeService = new ThemeService(this.setServiceOptions());
 		this.planService = new PlanService(this.setServiceOptions());
@@ -62,10 +71,18 @@ export class ServicesFactory {
 		this.propositionTypeService = new PropositionsTypeService(this.setServiceOptions());
 		this.revenueService = new RevenueService(this.setServiceOptions());
 		this.originService = new OriginService(this.setServiceOptions());
-		this.propositionService = new PropositionService(this.setServiceOptions());
-		this.taskService = new TaskService(this.setServiceOptions(), this.plaintiffService);
+		this.propositionService = new PropositionService(this.setServiceOptions(), this.governmentExpenseService);
 		this.commentService = new CommentService(this.setServiceOptions());
 		this.unitExpenseService = new UnitExpenseService(this.setServiceOptions());
+		this.salePaymentService = new SalePaymentService(this.setServiceOptions());
+		this.saleService = new SaleService(this.setServiceOptions(), this.unitService, this.userService, this.salePaymentService);
+		this.productService = new ProductService(this.setServiceOptions());
+		this.taskService = new TaskService(
+			this.setServiceOptions(),
+			this.plaintiffService,
+			this.governmentExpenseService,
+			this.unitExpenseService
+		);
 	}
 
 	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client });
