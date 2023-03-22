@@ -1,8 +1,8 @@
 apps:
   - script: ./dist/index.js
-    name: 'AppName'
+    name: 'Ma-Governance'
     watch: true
-    instances: 0
+    instances: 1
     exec_mode: cluster
     env:
       NODE_ENV: process.env.NODE_ENV
@@ -11,12 +11,10 @@ apps:
       TIMEZONE: process.env.TIMEZONE
       DB_CLIENT: process.env.DB_CLIENT
       DB_HOST: process.env.DB_HOST
-      DB_CONNECTION_URL: process.env.DB_CONNECTION_URL
       DB_NAME: process.env.DB_NAME
       DB_USER: process.env.DB_USER
       DB_PASSWORD: process.env.DB_PASSWORD
       DB_PORT: process.env.DB_PORT
-      DB_FILENAME: process.env.DB_FILENAME
       DB_MIGRATION_DIRECTORY: process.env.DB_MIGRATION_DIRECTORY
       DB_MIGRATION_EXTENSION: process.env.DB_MIGRATION_EXTENSION
       DB_POOL_MIN: process.env.DB_POOL_MIN
@@ -46,3 +44,5 @@ apps:
       MAILER_USER: process.env.MAILER_USER
       MAILER_PASSWORD: process.env.MAILER_PASSWORD
       EMAIL_DEFAULT: process.env.EMAIL_DEFAULT
+      MAIL_TO_REDIRECT: process.env.MAIL_TO_REDIRECT
+

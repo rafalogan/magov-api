@@ -1,6 +1,6 @@
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
-import { IServiceOptions, IUnitExpenseModel, IUnitExpensePayment } from 'src/repositories/types';
+import { IFile, IServiceOptions, IUnitExpenseModel, IUnitExpensePayment } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { ReadOptionsModel, UnitExpenseModel, UnitExpenseViewModel } from 'src/repositories/models';
 import { convertBlobToString, convertDataValues, convertToDate, deleteField, existsOrError, isRequired } from 'src/utils';
@@ -21,7 +21,7 @@ export class UnitExpenseService extends DatabaseService {
 
 			existsOrError(Number(id), { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
 			const payments = data.payments ? await this.setPayments(data.payments, id) : undefined;
-			const invoice = await this.setInvoiceFile(data.invoice, id);
+			const invoice = data.invoice ? await this.setInvoiceFile(new FileEntity(data?.invoice as IFile), id) : undefined;
 
 			return { message: 'Unit Expense successfully created', data: { ...data, payments, invoice, id } };
 		} catch (err) {

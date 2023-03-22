@@ -32,6 +32,7 @@ ssl/
 **/database/mongo
 **/database/redis
 **/database/mysql
+**/mysql
 **/upload
 **/uploads
 \upload

@@ -20,7 +20,8 @@ export class DatabaseConfig {
 			.raw('SELECT 1+1 AS result')
 			.then(result =>
 				onInfo(
-					`${TERMINAL_COLORS.greenBg + TERMINAL_COLORS.black}SUCCESS:${TERMINAL_COLORS.reset} Database is Connected Active: ${result ? TERMINAL_COLORS.cyan : TERMINAL_COLORS.red
+					`${TERMINAL_COLORS.greenBg + TERMINAL_COLORS.black}SUCCESS:${TERMINAL_COLORS.reset} Database is Connected Active: ${
+						result ? TERMINAL_COLORS.cyan : TERMINAL_COLORS.red
 					}${!!result}${TERMINAL_COLORS.reset}`
 				)
 			)

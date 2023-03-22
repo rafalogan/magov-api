@@ -1,4 +1,4 @@
-import { IComment, ITaskModel, IUnitExpense } from '../types';
+import { IComment, ITaskModel, IUnitExpenseModel } from '../types';
 import { Comment, UnitExpense } from 'src/repositories/entities';
 import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToDadaBase } from 'src/utils';
 import { PlaintiffModel } from './plaintiff.model';
@@ -45,23 +45,26 @@ export class TaskModel {
 		this.userId = Number(data.userId || data.users[0]);
 		this.comments = this.setComents(data.comments);
 		this.unitExpense =
-			data.setUnitExpense && this.cost ? this.setUnitExpense() : data.unitExpense ? this.setUnitExpense(data.unitExpense) : undefined;
+			data.setUnitExpense && this.cost
+				? this.setUnitExpense()
+				: data.unitExpense
+				? this.setUnitExpense(data.unitExpense as IUnitExpenseModel)
+				: undefined;
 		this.themes = data.themes;
 	}
 
-	private setUnitExpense(value?: IUnitExpense) {
+	private setUnitExpense(value?: IUnitExpenseModel) {
 		if (value) return new UnitExpense(value);
 		return new UnitExpense({
 			expense: this.title,
 			description: this.description,
 			dueDate: this.end,
 			amount: 1,
-			installments: 1,
-			value: Number(this.cost),
+
 			taskId: this.id,
 			unitId: this.unitId,
 			tenancyId: this.tenancyId,
-		});
+		} as IUnitExpenseModel);
 	}
 
 	private setComents(value?: IComment[]) {

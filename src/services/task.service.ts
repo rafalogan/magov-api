@@ -92,7 +92,9 @@ export class TaskService extends DatabaseService {
 								dueDate: data.end,
 								taskId: id,
 								unitId: data.unitId,
-								payments: [{ paymentForm: 'boleto', amount: 1, installments: 1, value: data.cost }],
+								amount: 1,
+								active: true,
+								payments: [{ paymentForm: 'boleto', installments: 1, value: data.cost }],
 							} as IUnitExpenseModel)
 					  )
 					: undefined;

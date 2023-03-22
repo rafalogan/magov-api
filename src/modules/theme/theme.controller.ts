@@ -38,7 +38,7 @@ export class ThemeController extends Controller {
 
 	list(req: Request, res: Response) {
 		const { id } = req.params;
-		const active = req.query?.active;
+		const active = String(req.query?.active);
 		const filter = Number(id) || id;
 
 		onLog('filter to read', filter);

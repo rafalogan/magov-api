@@ -8,7 +8,7 @@ export class Payload {
 	email: string;
 	userRules: IUserRule[];
 	tenancyId?: number | null;
-	unit: IUserUnit;
+	unit?: IUserUnit;
 	iat: number;
 	exp: number;
 
