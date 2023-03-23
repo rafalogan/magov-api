@@ -5,7 +5,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.increments('id').primary();
 		table.timestamp('pay_date').notNullable();
 		table.integer('value').notNullable();
-		table.boolean('commission').notNullable().defaultTo(true);
+		table.boolean('commission').notNullable().defaultTo(false);
 		table.integer('sale_id').unsigned().references('id').inTable('sales').notNullable();
 	});
 }
