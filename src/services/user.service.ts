@@ -1,7 +1,7 @@
 import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
-import { ReadOptionsModel, UserModel, UserViewModel } from 'src/repositories/models';
+import { PaginationModel, ReadOptionsModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { IAddress, IServiceOptions, ITenancy, IUnitPlan, IUser, IUserViewModel } from 'src/repositories/types';
 import { convertDataValues, deleteField, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
@@ -42,7 +42,7 @@ export class UserService extends DatabaseService {
 	}
 
 	async read(options: ReadOptionsModel, id?: number) {
-		return id ? this.getUser(id) : this.getUsers(options);
+		return id ? this.getUser(id) : options.unitId ? this.getUsersByUnit(options) : this.getUsers(options);
 	}
 
 	async update(data: UserModel, id: number): Promise<any> {
@@ -64,6 +64,33 @@ export class UserService extends DatabaseService {
 			deleteField(res, 'password');
 
 			return { message: 'User update with success', data: res };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	async getUsersByUnit(options: ReadOptionsModel) {
+		try {
+			const { page, limit, unitId, tenancyId, orderBy, order } = options;
+			const total = await this.getCount('users', tenancyId);
+			const pagination = new PaginationModel({ page, limit, total });
+
+			const fromDB = await this.db('users')
+				.where('unit_id', unitId)
+				.andWhere('tenancy_id', tenancyId)
+				.limit(limit)
+				.offset(page * limit - limit)
+				.orderBy(orderBy || 'id', order || 'asc');
+
+			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			const data = fromDB.map(i => {
+				deleteField(i, 'password');
+				i.active = !!i.active;
+				return convertDataValues(i, 'camel');
+			});
+
+			return { data, pagination };
 		} catch (err) {
 			return err;
 		}
