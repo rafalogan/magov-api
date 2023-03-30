@@ -138,7 +138,7 @@ export class DemandService extends DatabaseService {
 	async getDemands(options: ReadOptionsModel) {
 		try {
 			const { tenancyId: tenancy_id, order, orderBy } = options;
-			const demandsRaw = await this.db({ d: 'demands', p: 'plaintiffs', a: 'adresses', u: 'users' })
+			const fromDB = await this.db({ d: 'demands', p: 'plaintiffs', a: 'adresses', u: 'users' })
 				.select(
 					{
 						id: 'd.id',
@@ -161,9 +161,18 @@ export class DemandService extends DatabaseService {
 				.andWhereRaw('a.plaintiff_id = d.plaintiff_id')
 				.orderBy(orderBy || 'd.id', order || 'asc');
 
-			const demands = (await this.setTasksperDemands(demandsRaw)) as IDemands[];
+			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+			const raw = fromDB.map(item => convertDataValues(item, 'camel'));
+			const demands: any[] = [];
 
-			return demands.map(i => new DemandListModel(convertDataValues(i, 'camel')));
+			for (const item of raw) {
+				const keywords = await this.getKeywords(item.id);
+				const task = await this.setTasksperDemands(item.id);
+
+				demands.push({ ...raw, keywords, task });
+			}
+
+			return demands;
 		} catch (err) {
 			return err;
 		}
@@ -273,15 +282,35 @@ export class DemandService extends DatabaseService {
 		}
 	}
 
-	private async setTasksperDemands(demands: IDemands[]) {
+	private async getKeywords(demandId: number) {
 		try {
-			const result: any[] = [];
-			for (const demand of demands) {
-				const tasks = (await this.db('tasks').select('id', 'title').where({ demand_id: demand.id }).where({ demand_id: demand.id })) || [];
-				result.push({ ...demand, tasks });
+			const keysIds = await this.db('demands_keywords').select('keyword_id as id').where('demand_id', demandId);
+			existsOrError(Array.isArray(keysIds), { message: 'Internal error', err: keysIds, status: INTERNAL_SERVER_ERROR });
+			const ids = keysIds.map(({ id }) => id);
+
+			if (!ids?.length) return [];
+			const res: any[] = [];
+
+			for (const id of ids) {
+				const fromDB = await this.db('keywords').select('keyword').where({ id }).first();
+				const { keyword } = fromDB;
+
+				existsOrError(keyword, { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+				res.push(keyword);
 			}
 
-			return result as IDemands[];
+			return res;
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setTasksperDemands(demandId: number) {
+		try {
+			const fromDB = await this.db('tasks').select('id', 'title').where('demand_id', demandId);
+			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			return fromDB.map(i => convertDataValues(i, 'camel'));
 		} catch (err) {
 			return err;
 		}
