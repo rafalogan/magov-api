@@ -3,7 +3,7 @@ import { onLog } from 'src/core/handlers';
 import { Demand, Plaintiff } from 'src/repositories/entities';
 import { DemandListModel, DemandModel, DemandViewModel, ReadOptionsModel } from 'src/repositories/models';
 import { IDemand, IDemands, IPlantiff, IPlantiffModel, IServiceOptions, ITheme } from 'src/repositories/types';
-import { convertDataValues, equalsOrError, existsOrError, isDataInArray, isRequired } from 'src/utils';
+import { convertBlobToString, convertDataValues, equalsOrError, existsOrError, isDataInArray, isRequired } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { KeywordService } from './keyword.service';
 
@@ -112,9 +112,7 @@ export class DemandService extends DatabaseService {
 			if (id) return this.getDemand(id);
 
 			existsOrError(options.tenancyId, { message: isRequired('Param tenancyId'), status: BAD_REQUEST });
-			return this.getDemands(options)
-				.then(res => res)
-				.catch(err => err);
+			return this.getDemands(options);
 		} catch (err) {
 			return err;
 		}
@@ -163,13 +161,15 @@ export class DemandService extends DatabaseService {
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 			const raw = fromDB.map(item => convertDataValues(item, 'camel'));
+			onLog('raw demands', raw);
 			const demands: any[] = [];
 
 			for (const item of raw) {
+				item.description = convertBlobToString(item.description);
 				const keywords = await this.getKeywords(item.id);
 				const task = await this.setTasksperDemands(item.id);
 
-				demands.push({ ...raw, keywords, task });
+				demands.push({ ...item, keywords, task });
 			}
 
 			return demands;
