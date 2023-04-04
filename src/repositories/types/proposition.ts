@@ -7,6 +7,7 @@ export interface IProposition extends IID {
 	menu: string;
 	deadline: Date | string;
 	active: boolean;
+	favorite?: boolean;
 	expense?: number;
 	parentId?: number;
 	unitId: number;

@@ -7,6 +7,7 @@ export class Proposition {
 	menu: string;
 	deadline: Date;
 	active: boolean;
+	favorite?: boolean;
 	expense?: number;
 	parentId?: number;
 	unitId: number;
@@ -19,6 +20,7 @@ export class Proposition {
 		this.menu = convertBlobToString(data.menu) as string;
 		this.deadline = convertToDate(data.deadline);
 		this.active = !!data.active;
+		this.favorite = !!data.favorite;
 		this.expense = this.setExpense(data.expense);
 		this.parentId = setInstanceId(data.parentId);
 		this.unitId = Number(data.unitId);

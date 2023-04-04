@@ -47,7 +47,7 @@ export class PropositionController extends Controller {
 
 		this.propositionService
 			.read(options, Number(id))
-			.then(data => ResponseHandle.onSuccess({ res, data, status: data?.status }))
+			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 

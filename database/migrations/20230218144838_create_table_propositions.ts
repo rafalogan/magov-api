@@ -7,6 +7,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.binary('menu').notNullable();
 		table.timestamp('deadline').notNullable();
 		table.boolean('active').notNullable().defaultTo(true);
+		table.boolean('favorite').notNullable().defaultTo(false);
 		table.integer('expense').nullable();
 		table.integer('parent_id').unsigned().references('id').inTable('propositions').nullable();
 		table.integer('unit_id').unsigned().references('id').inTable('units').notNullable();

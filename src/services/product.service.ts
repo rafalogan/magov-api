@@ -1,9 +1,9 @@
-import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
 import { IPlan, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { Plan } from 'src/repositories/entities';
-import { convertDataValues, existsOrError } from 'src/utils';
+import { convertDataValues, existsOrError, notExistisOrError } from 'src/utils';
 import { PlanModel, ReadOptionsModel } from 'src/repositories/models';
 import { onLog } from 'src/core/handlers';
 
@@ -14,9 +14,10 @@ export class ProductService extends DatabaseService {
 
 	async create(data: Plan) {
 		try {
-			const fromDB = (await this.getPlan(data.name)) as Plan;
+			const fromDB = (await this.getProduct(data.name)) as Plan;
 
-			if (fromDB?.id) return { message: 'Plan already exists', status: BAD_REQUEST };
+			notExistisOrError(fromDB?.id, { message: 'Product already exists', status: FORBIDDEN });
+			notExistisOrError(fromDB, fromDB);
 			const [id] = await this.db('products').insert(convertDataValues({ ...data, active: true }));
 
 			return { message: 'Plan save with success', data: { ...data, id } };
@@ -27,7 +28,7 @@ export class ProductService extends DatabaseService {
 
 	async update(data: Plan, id: number) {
 		try {
-			const fromDB = await this.getPlan(id);
+			const fromDB = await this.getProduct(id);
 
 			if (!fromDB) return { message: 'Plan not found', status: BAD_REQUEST };
 			const plan = new Plan({ ...fromDB, ...data } as IPlan);
@@ -42,7 +43,7 @@ export class ProductService extends DatabaseService {
 
 	async read(options: ReadOptionsModel, id?: number) {
 		onLog('plans opitons', options);
-		if (id) return this.getPlan(id);
+		if (id) return this.getProduct(id);
 
 		return this.db('products')
 			.then(res => {
@@ -57,7 +58,7 @@ export class ProductService extends DatabaseService {
 			.catch(err => err);
 	}
 
-	async getPlan(filter: string | number) {
+	async getProduct(filter: string | number) {
 		try {
 			const fromDb = await this.db('products').where({ id: filter }).orWhere({ name: filter }).first();
 
@@ -71,7 +72,7 @@ export class ProductService extends DatabaseService {
 
 	async delete(id: number) {
 		try {
-			const fromDB = (await this.getPlan(id)) as Plan;
+			const fromDB = (await this.getProduct(id)) as Plan;
 
 			if (!fromDB?.id) return { message: 'Plan not found', status: NOT_FOUND };
 

@@ -3,7 +3,7 @@ import { onLog } from 'src/core/handlers';
 import { Proposition, Task } from 'src/repositories/entities';
 import { GovernmentExpensesModel, PropositionModel, PropositionsReadOptionsModel, PropositionViewModel } from 'src/repositories/models';
 import { IGovernmentExpensesModel, IProposition, IServiceOptions } from 'src/repositories/types';
-import { convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
+import { convertBlobToString, convertDataValues, existsOrError, isRequired, notExistisOrError, setValueNumberToView } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { GovernmentExpensesService } from './government-expenses.service';
 
@@ -90,26 +90,49 @@ export class PropositionService extends DatabaseService {
 			existsOrError(tenancyId, { message: isRequired('tenancyId'), status: BAD_REQUEST });
 			if (id) return this.getProprosition(id, tenancyId as number);
 
-			if (unitId) {
-				return this.db('propositions')
-					.select('id', 'title', 'deadline', 'active')
-					.where({ unit_id: unitId })
-					.andWhere({ tenancy_id: tenancyId })
-					.then(res => {
-						existsOrError(Array.isArray(res), { message: 'Internal error', error: res, status: INTERNAL_SERVER_ERROR });
-						return res.map(i => convertDataValues(i, 'camel'));
-					})
-					.catch(err => err);
+			const table = 'propositions';
+			const fields = ['id', 'title', 'deadline', 'active', 'menu', 'expense'];
+			const fromDB = unitId
+				? await this.db(table)
+						.select(...fields)
+						.where({ unit_id: unitId })
+						.andWhere({ tenancy_id: tenancyId })
+				: await this.db(table)
+						.select(...fields)
+						.where({ tenancy_id: tenancyId });
+
+			existsOrError(Array.isArray(fromDB), { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
+			const raw = fromDB.map((i: any) => convertDataValues(i, 'camel'));
+
+			const res: any[] = [];
+
+			for (const item of raw) {
+				const themesRaw = (await this.getValues({
+					value: item.id,
+					tableIds: 'propositions_themes',
+					fieldIds: 'theme_id',
+					whereIds: 'proposition_id',
+					table: 'themes',
+					fields: ['id', 'name'],
+				})) as any;
+				const keywordsRaw = (await this.getValues({
+					value: item.id,
+					tableIds: 'propositions_keywords',
+					fieldIds: 'keyword_id',
+					whereIds: 'proposition_id',
+					table: 'keywords',
+					fields: ['id', 'keyword'],
+				})) as any;
+
+				const themes = themesRaw.map((i: any) => i.name).join('/');
+				const keywords = keywordsRaw.map((i: any) => i.keyword).join(', ');
+				const expense = setValueNumberToView(item.expense);
+				const menu = convertBlobToString(item.menu);
+
+				res.push({ ...item, expense, themes, keywords, menu });
 			}
 
-			return this.db('propositions')
-				.select('id', 'title', 'deadline', 'active')
-				.andWhere({ tenancy_id: tenancyId })
-				.then(res => {
-					existsOrError(Array.isArray(res), { message: 'Internal error', error: res, status: INTERNAL_SERVER_ERROR });
-					return res.map(i => convertDataValues(i, 'camel'));
-				})
-				.catch(err => err);
+			return res;
 		} catch (err) {
 			return err;
 		}

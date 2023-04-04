@@ -62,7 +62,7 @@ export class ProductController extends Controller {
 	}
 
 	private validRequest(req: Request) {
-		const { name, usersLimit, unitaryValue } = req.body;
+		const { name, limit, unitaryValue } = req.body;
 
 		const requireds = requiredFields([
 			{ field: name, message: 'name' },
