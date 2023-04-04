@@ -121,5 +121,9 @@
 		"typescript": "^5.0.2",
 		"vite-tsconfig-paths": "^4.0.7",
 		"vitest": "^0.29.3"
+	},
+	"engines": {
+		"node": "18.15.0",
+		"npm": "6.x"
 	}
 }
