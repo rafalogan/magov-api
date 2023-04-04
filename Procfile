@@ -1,1 +1,1 @@
-web: npm i -f && NODE_ENV=homolog npm start
+web: npm i -f &&  npm start

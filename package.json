@@ -1,7 +1,7 @@
 {
-	"name": "base-api",
+	"name": "ma-governance-api",
 	"version": "1.0.0",
-	"description": "",
+	"description": "Project of api in Ma Governance API",
 	"main": "index.js",
 	"scripts": {
 		"start": "npx pm2-runtime start ecosystem.config.yml",
@@ -9,7 +9,7 @@
 		"start:dev:db": "docker-compose down && docker-compose up",
 		"stop": "npx pm2 kill",
 		"stop:dev:db": "docker-compose down",
-		"build": "rm -rf ./dist && npx tsc",
+		"build": "npm i -f && rm -rf ./dist && npx tsc",
 		"test": "npx vitest --config vite.config.ts",
 		"test:cov": "npx vitest --coverage --config vite.config.ts",
 		"knex:migrate:make": "npx knex migrate:make --knexfile knexfile.ts -x ts",
