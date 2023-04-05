@@ -27,7 +27,8 @@
 		"athon:c:t": "zsh bin/console/create-types.sh",
 		"athon:c:e": "zsh bin/console/create-entity.sh",
 		"athon:c:c": "zsh bin/console/create-config.sh",
-		"deploy:prod": "git push heroku main"
+		"deploy:prod": "git push heroku main",
+		"deploy:dev": "git push heroku develop"
 	},
 	"keywords": [
 		"API",
