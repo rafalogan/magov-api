@@ -4,7 +4,7 @@ import * as DefaultThemes from '../defaults/themes.json';
 
 export async function up(knex: Knex): Promise<void> {
 	if (isProd()) return;
-	const themes = DefaultThemes.map(t => t);
+	const themes = DefaultThemes?.map(t => t);
 	return knex.batchInsert('themes', themes);
 }
 

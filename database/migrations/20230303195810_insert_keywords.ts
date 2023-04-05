@@ -4,7 +4,7 @@ import * as DefaultKeywords from '../defaults/keykords.json';
 
 export async function up(knex: Knex): Promise<void> {
 	if (isProd()) return;
-	const keywords = DefaultKeywords.map(k => k);
+	const keywords = DefaultKeywords?.map(k => k);
 	return knex.batchInsert('keywords', keywords);
 }
 

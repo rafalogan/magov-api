@@ -2,7 +2,7 @@ import { Knex } from 'knex';
 import * as DefaultAdressesUsers from '../defaults/adrress-to-users.json';
 
 export async function up(knex: Knex): Promise<void> {
-	const adresses = DefaultAdressesUsers.map(i => i);
+	const adresses = DefaultAdressesUsers?.map(i => i);
 
 	return knex.batchInsert('adresses', adresses);
 }

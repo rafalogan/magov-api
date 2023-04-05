@@ -5,7 +5,7 @@ import * as DefaultPlans from '../defaults/plans.json';
 export async function up(knex: Knex): Promise<void> {
 	if (isProd()) return;
 
-	const products = DefaultPlans.map(item => item);
+	const products = DefaultPlans?.map(item => item);
 
 	return knex.batchInsert('products', products);
 }

@@ -3,7 +3,7 @@ import { hashString } from 'src/utils';
 import * as DefaultUsers from '../defaults/users.json';
 
 export async function up(knex: Knex): Promise<void> {
-	const users = DefaultUsers.map((user: any) => {
+	const users = DefaultUsers?.map((user: any) => {
 		user.password = hashString(user.password, Number(process.env.SALT_ROUNDS));
 		return user;
 	});
