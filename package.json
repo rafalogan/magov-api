@@ -4,7 +4,7 @@
 	"description": "Project of api in Ma Governance API",
 	"main": "index.js",
 	"scripts": {
-		"start": "npx pm2-runtime start ecosystem.config.yml",
+		"start": "npx pm2-runtime start ecosystem.config.js",
 		"start:dev": "npx tsx watch index.ts",
 		"start:dev:db": "docker-compose down && docker-compose up",
 		"stop": "npx pm2 kill",
