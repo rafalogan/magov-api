@@ -3,7 +3,7 @@ module.exports = {
 		{
 			name: 'Ma-Governance',
 			script: './dist/index.js',
-			watch: true,
+			watch: false,
 			autorestart: true,
 			instances: 0,
 			exec_mode: 'cluster',
