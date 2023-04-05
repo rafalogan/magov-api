@@ -1,7 +1,7 @@
 {
-	"name": "base-api",
+	"name": "ma-governance-api",
 	"version": "1.0.0",
-	"description": "",
+	"description": "Project of api in Ma Governance API",
 	"main": "index.js",
 	"scripts": {
 		"start": "npx pm2-runtime start ecosystem.config.yml",
@@ -121,5 +121,9 @@
 		"typescript": "^5.0.2",
 		"vite-tsconfig-paths": "^4.0.7",
 		"vitest": "^0.29.3"
+	},
+	"engines": {
+		"node": "18.15.0",
+		"npm": "9.6.3"
 	}
 }
