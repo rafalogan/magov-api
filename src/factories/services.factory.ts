@@ -13,6 +13,7 @@ import {
 	KeywordService,
 	MailService,
 	OriginService,
+	PaymentFormService,
 	PlaintiffService,
 	PlanService,
 	ProductService,
@@ -53,6 +54,7 @@ export class ServicesFactory {
 	productService: ProductService;
 	governmentExpenseService: GovernmentExpensesService;
 	salePaymentService: SalePaymentService;
+	paymentFormService: PaymentFormService;
 
 	constructor(private conn: Knex, private client: RedisClientType, private mailConfig: MailerConfig) {
 		this.unitService = new UnitService({ ...this.setServiceOptions() });
@@ -83,6 +85,7 @@ export class ServicesFactory {
 			this.governmentExpenseService,
 			this.unitExpenseService
 		);
+		this.paymentFormService = new PaymentFormService(this.setServiceOptions());
 	}
 
 	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client });
