@@ -1,9 +1,10 @@
 import { Knex } from 'knex';
+
 import { hashString } from 'src/utils';
-import * as DefaultUsers from '../defaults/users.json';
+import { defaultUsers } from '../defaults/users';
 
 export async function up(knex: Knex): Promise<void> {
-	const users = DefaultUsers?.map((user: any) => {
+	const users = defaultUsers.map((user: any) => {
 		user.password = hashString(user.password, Number(process.env.SALT_ROUNDS));
 		return user;
 	});
@@ -12,5 +13,5 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-	return DefaultUsers.forEach(({ email }) => knex('users').where({ email }).del());
+	return defaultUsers.forEach(({ email }) => knex('users').where({ email }).del());
 }

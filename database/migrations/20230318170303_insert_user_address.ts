@@ -1,12 +1,10 @@
 import { Knex } from 'knex';
-import * as DefaultAdressesUsers from '../defaults/adrress-to-users.json';
+import { defaultAddressUsers } from 'database/defaults/adrress-to-users';
 
 export async function up(knex: Knex): Promise<void> {
-	const adresses = DefaultAdressesUsers?.map(i => i);
-
-	return knex.batchInsert('adresses', adresses);
+	return knex.batchInsert('adresses', defaultAddressUsers);
 }
 
 export async function down(knex: Knex): Promise<void> {
-	return DefaultAdressesUsers.forEach(i => knex('adresses').where('user_id', i['user_id']).del());
+	return defaultAddressUsers.forEach(i => knex('adresses').where('user_id', i['user_id']).del());
 }
