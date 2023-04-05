@@ -10,6 +10,7 @@
 		"stop": "npx pm2 kill",
 		"stop:dev:db": "docker-compose down",
 		"build": "rm -rf ./dist && npx tsc",
+		"test:env": "npx pm2-runtime start ecosystem-test.config.js",
 		"test": "npx vitest --config vite.config.ts",
 		"test:cov": "npx vitest --coverage --config vite.config.ts",
 		"knex:migrate:make": "npx knex migrate:make --knexfile knexfile.ts -x ts",

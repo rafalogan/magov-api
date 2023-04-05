@@ -1,7 +1,27 @@
 import { Knex } from 'knex';
 
 import { isProd } from 'src/utils';
-import { defaultKeywords } from '../defaults/keykords';
+
+const defaultKeywords = [
+	{
+		keyword: 'simon',
+	},
+	{
+		keyword: 'burch',
+	},
+	{
+		keyword: 'woods',
+	},
+	{
+		keyword: 'mccoy',
+	},
+	{
+		keyword: 'jordan',
+	},
+	{
+		keyword: 'gutierrez',
+	},
+];
 
 export async function up(knex: Knex): Promise<void> {
 	if (isProd()) return;
