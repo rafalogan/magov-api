@@ -1,4 +1,4 @@
-import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
 import { IPlan, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
@@ -14,13 +14,12 @@ export class ProductService extends DatabaseService {
 
 	async create(data: Plan) {
 		try {
-			const fromDB = (await this.getProduct(data.name)) as Plan;
+			const fromDB = (await this.getProduct(data.name)) as any;
 
 			notExistisOrError(fromDB?.id, { message: 'Product already exists', status: FORBIDDEN });
-			notExistisOrError(fromDB, fromDB);
 			const [id] = await this.db('products').insert(convertDataValues({ ...data, active: true }));
 
-			return { message: 'Plan save with success', data: { ...data, id } };
+			return { message: 'Product successfully saved', data: { ...data, id } };
 		} catch (err) {
 			return err;
 		}
@@ -28,21 +27,21 @@ export class ProductService extends DatabaseService {
 
 	async update(data: Plan, id: number) {
 		try {
-			const fromDB = await this.getProduct(id);
+			const fromDB = (await this.getProduct(id)) as Plan;
 
-			if (!fromDB) return { message: 'Plan not found', status: BAD_REQUEST };
-			const plan = new Plan({ ...fromDB, ...data } as IPlan);
+			existsOrError(fromDB?.id, { message: 'Products not found', status: NOT_FOUND });
+			const plan = new Plan({ ...fromDB, ...data, active: !!data.active || true } as IPlan);
 
 			await this.db('products').where({ id }).update(convertDataValues(plan));
 
-			return { message: 'Plan update successfully', data: plan };
+			return { message: 'Products update successfully', data: new PlanModel(plan, id) };
 		} catch (err) {
 			return err;
 		}
 	}
 
 	async read(options: ReadOptionsModel, id?: number) {
-		onLog('plans opitons', options);
+		onLog('Products opitons', options);
 		if (id) return this.getProduct(id);
 
 		return this.db('products')
@@ -53,7 +52,7 @@ export class ProductService extends DatabaseService {
 					return err;
 				}
 
-				return res.map((p: any) => new PlanModel(p));
+				return res.map((p: any) => new PlanModel(convertDataValues(p, 'camel')));
 			})
 			.catch(err => err);
 	}
@@ -62,7 +61,7 @@ export class ProductService extends DatabaseService {
 		try {
 			const fromDb = await this.db('products').where({ id: filter }).orWhere({ name: filter }).first();
 
-			if (!fromDb?.id) return { message: 'Plan not found', status: NOT_FOUND };
+			existsOrError(fromDb?.id, { message: 'Product not found', status: NOT_FOUND });
 
 			return new PlanModel(convertDataValues(fromDb, 'camel'));
 		} catch (err) {
@@ -74,12 +73,12 @@ export class ProductService extends DatabaseService {
 		try {
 			const fromDB = (await this.getProduct(id)) as Plan;
 
-			if (!fromDB?.id) return { message: 'Plan not found', status: NOT_FOUND };
+			existsOrError(fromDB?.id, fromDB);
+			existsOrError(fromDB.active, { message: 'Product already desactivated', status: FORBIDDEN });
+			const toDisabled = new Plan({ ...convertDataValues(fromDB, 'camel'), active: false });
 
-			await this.db('products')
-				.where({ id })
-				.update(convertDataValues({ ...fromDB, active: false }));
-			return { message: 'Plan deleted successfully', data: { ...fromDB } };
+			await this.db('products').where({ id }).update(convertDataValues(toDisabled));
+			return { message: 'Plan deleted successfully', data: toDisabled };
 		} catch (err) {
 			return err;
 		}

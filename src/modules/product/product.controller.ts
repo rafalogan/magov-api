@@ -21,10 +21,10 @@ export class ProductController extends Controller {
 			return ResponseHandle.onError({ res, message, status: BAD_REQUEST });
 		}
 
-		const plan = new Plan(req.body);
+		const product = new Plan(req.body);
 
 		this.productService
-			.save(plan)
+			.save(product)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -62,12 +62,12 @@ export class ProductController extends Controller {
 	}
 
 	private validRequest(req: Request) {
-		const { name, limit, unitaryValue } = req.body;
+		const { name, limit, value } = req.body;
 
 		const requireds = requiredFields([
 			{ field: name, message: 'name' },
-			{ field: usersLimit, message: 'usersLimit' },
-			{ field: unitaryValue, message: 'unitaryValue' },
+			{ field: limit, message: 'limit' },
+			{ field: value, message: 'value' },
 		]);
 
 		notExistisOrError(requireds, requireds?.map(i => isRequired(i)).join('\n ') as string);

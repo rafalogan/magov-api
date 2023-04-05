@@ -1,4 +1,4 @@
-import { convertBlobToString, setInstanceId } from 'src/utils';
+import { convertBlobToString, setInstanceId, setValueNumberToDadaBase } from 'src/utils';
 import { IPlan } from '../types';
 
 export class Plan {
@@ -16,7 +16,7 @@ export class Plan {
 		this.description = data.description ? convertBlobToString(data.description) : undefined;
 		this.plan = !!data.plan;
 		this.limit = data.limit || 0;
-		this.value = Number.isInteger(data.value) ? Number(data.value) : Number(data.value) * 100;
+		this.value = setValueNumberToDadaBase(data.value) as number;
 		this.active = !!data.active;
 	}
 }

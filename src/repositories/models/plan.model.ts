@@ -1,5 +1,5 @@
 import { Plan } from 'src/repositories/entities';
-import { convertBlobToString, setInstanceId } from 'src/utils';
+import { convertBlobToString, setInstanceId, setValueNumberToView } from 'src/utils';
 
 export class PlanModel {
 	id?: number;
@@ -9,12 +9,12 @@ export class PlanModel {
 	value: number;
 	active: boolean;
 
-	constructor(data: Plan) {
-		this.id = setInstanceId(data.id);
+	constructor(data: Plan, id?: number) {
+		this.id = setInstanceId(id || data.id);
 		this.name = data.name;
 		this.description = convertBlobToString(data.description);
 		this.limit = Number(data.limit) || undefined;
-		this.value = data.value / 100;
+		this.value = setValueNumberToView(data.value) as number;
 		this.active = !!data.active;
 	}
 }
