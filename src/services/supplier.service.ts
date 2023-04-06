@@ -3,8 +3,9 @@ import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-s
 import { IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { ReadOptionsModel } from 'src/repositories/models';
-import { convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
+import { convertBlobToString, convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
 import { Supplier } from 'src/repositories/entities';
+import { onLog } from 'src/core/handlers';
 
 export class SupplierService extends DatabaseService {
 	constructor(options: IServiceOptions) {
@@ -46,10 +47,13 @@ export class SupplierService extends DatabaseService {
 
 			if (id) return this.getSupplier(id, tenancyId as number);
 
-			const fromDB = await this.db('suppliers').where('tenancy_id');
+			const fromDB = await this.db('suppliers').select('id', 'name', 'description').where('tenancy_id', tenancyId);
 			existsOrError(Array.isArray(fromDB), { message: 'internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
 
-			return fromDB.map(item => new Supplier(convertDataValues(item)));
+			return fromDB.map(item => {
+				const description = convertBlobToString(item.description);
+				return { ...convertDataValues(item, 'camel'), description };
+			});
 		} catch (err) {
 			return err;
 		}
@@ -57,7 +61,10 @@ export class SupplierService extends DatabaseService {
 
 	async getSupplier(filter: number | string, tenancyId: number) {
 		try {
-			const fromDB = await this.db('suppliers').where('tenancy_id', tenancyId).orWhere('id', filter).orWhere('name', filter).first();
+			const fromDB =
+				typeof filter === 'number'
+					? await this.db('suppliers').where('tenancy_id', tenancyId).andWhere('id', filter).first()
+					: await this.db('suppliers').where('tenancy_id', tenancyId).andWhere('name', filter).first();
 
 			existsOrError(fromDB?.id, { message: 'Supplier not found', status: NOT_FOUND });
 			notExistisOrError(fromDB.severity === 'ERROR', { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
