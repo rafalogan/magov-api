@@ -89,6 +89,21 @@ export abstract class DatabaseService extends CacheService {
 		}
 	}
 
+	protected async favoriteItem(tableName: string, id: number) {
+		try {
+			const fromDb = await this.db(tableName).where({ id }).first();
+
+			existsOrError(fromDb?.id, { message: 'Not Found', status: INTERNAL_SERVER_ERROR });
+			await this.db(tableName)
+				.where({ id })
+				.update({ ...fromDb, favorite: true });
+
+			return { message: `Register nº ${id} favorite` };
+		} catch (err) {
+			return err;
+		}
+	}
+
 	protected async setPayment(form: string) {
 		try {
 			const fromDb = await this.db('payments').where({ form }).first();

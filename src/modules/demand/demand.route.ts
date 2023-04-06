@@ -16,6 +16,12 @@ export class DemandRoute extends Routes {
 			.all(methodNotAllowed);
 
 		this.app
+			.route('/demands/favorite/:id')
+			.all(this.auth?.exec().authenticate())
+			.get(this.demandController.favorite.bind(this.demandController))
+			.all(methodNotAllowed);
+
+		this.app
 			.route('/demands/:id')
 			.all(this.auth?.exec().authenticate())
 			.get(this.demandController.list.bind(this.demandController))

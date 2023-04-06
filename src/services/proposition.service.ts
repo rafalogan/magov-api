@@ -91,7 +91,8 @@ export class PropositionService extends DatabaseService {
 			if (id) return this.getProprosition(id, tenancyId as number);
 
 			const table = 'propositions';
-			const fields = ['id', 'title', 'deadline', 'active', 'menu', 'expense'];
+			const fields = ['id', 'title', 'favorite', 'deadline', 'active', 'menu', 'expense'];
+
 			const fromDB = unitId
 				? await this.db(table)
 						.select(...fields)
@@ -124,12 +125,14 @@ export class PropositionService extends DatabaseService {
 					fields: ['id', 'keyword'],
 				})) as any;
 
+				const favorite = !!item.favorite;
+				const active = !!item.active;
 				const themes = themesRaw.map((i: any) => i.name).join('/');
 				const keywords = keywordsRaw.map((i: any) => i.keyword).join(', ');
 				const expense = setValueNumberToView(item.expense);
 				const menu = convertBlobToString(item.menu);
 
-				res.push({ ...item, expense, themes, keywords, menu });
+				res.push({ ...item, favorite, active, expense, themes, keywords, menu });
 			}
 
 			return res;
@@ -204,6 +207,13 @@ export class PropositionService extends DatabaseService {
 		} catch (err) {
 			return err;
 		}
+	}
+
+	async favorite(id: number) {
+		return super
+			.favoriteItem('propositions', id)
+			.then(res => res)
+			.catch(err => err);
 	}
 
 	private async setDemands(values: number[], propositionId: number) {

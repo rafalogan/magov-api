@@ -16,6 +16,12 @@ export class PropositionRoute extends Routes {
 			.all(methodNotAllowed);
 
 		this.app
+			.route('/propositions/favorite/:id')
+			.all(this.auth?.exec().authenticate())
+			.get(this.propositionController.favorite.bind(this.propositionController))
+			.all(methodNotAllowed);
+
+		this.app
 			.route('/propositions/:id')
 			.all(this.auth?.exec().authenticate())
 			.get(this.propositionController.list.bind(this.propositionController))

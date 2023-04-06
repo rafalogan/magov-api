@@ -61,6 +61,15 @@ export class PropositionController extends Controller {
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
+	favorite(req: Request, res: Response) {
+		const { id } = req.params;
+
+		this.propositionService
+			.favorite(Number(id))
+			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.catch(err => ResponseHandle.onError({ res, err }));
+	}
+
 	private validateRequest(req: Request) {
 		const { title, menu, deadline, unitId, typeId, themes, keywords, tasks } = req.body;
 		const tenancyId = getTenancyByToken(req) || Number(req.body.tenancyId);

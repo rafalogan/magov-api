@@ -1,8 +1,8 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Demand, Plaintiff } from 'src/repositories/entities';
-import { DemandListModel, DemandModel, DemandViewModel, ReadOptionsModel } from 'src/repositories/models';
-import { IDemand, IDemands, IPlantiff, IPlantiffModel, IServiceOptions, ITheme } from 'src/repositories/types';
+import { DemandModel, DemandViewModel, ReadOptionsModel } from 'src/repositories/models';
+import { IDemand, IPlantiff, IPlantiffModel, IServiceOptions, ITheme } from 'src/repositories/types';
 import { convertBlobToString, convertDataValues, equalsOrError, existsOrError, isDataInArray, isRequired } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { KeywordService } from './keyword.service';
@@ -166,6 +166,7 @@ export class DemandService extends DatabaseService {
 
 			for (const item of raw) {
 				item.description = convertBlobToString(item.description);
+				item.favorite = !!item.favorite;
 				const keywords = await this.getKeywords(item.id);
 				const task = await this.setTasksperDemands(item.id);
 
@@ -280,6 +281,13 @@ export class DemandService extends DatabaseService {
 		} catch (err) {
 			return err;
 		}
+	}
+
+	async favorite(id: number) {
+		return super
+			.favoriteItem('demands', id)
+			.then(res => res)
+			.catch(err => err);
 	}
 
 	private async getKeywords(demandId: number) {

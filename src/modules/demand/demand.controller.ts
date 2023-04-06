@@ -4,7 +4,7 @@ import { Request, Response } from 'express';
 import { Controller } from 'src/core/controllers';
 import { DemandService } from 'src/services';
 import { isRequired, notExistisOrError, requiredFields } from 'src/utils';
-import { getTenancyByToken, onLog, ResponseHandle } from 'src/core/handlers';
+import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
 import { DemandModel, ReadOptionsModel } from 'src/repositories/models';
 
 export class DemandController extends Controller {
@@ -58,6 +58,15 @@ export class DemandController extends Controller {
 			.disabled(Number(id), tenancyId)
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch((err: any) => ResponseHandle.onError({ res, err }));
+	}
+
+	favorite(req: Request, res: Response) {
+		const { id } = req.params;
+
+		this.demandService
+			.favorite(Number(id))
+			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
 	private validateRequest(req: Request) {
