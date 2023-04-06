@@ -23,6 +23,7 @@ import {
 	RuleService,
 	SalePaymentService,
 	SaleService,
+	SupplierService,
 	TaskService,
 	ThemeService,
 	UnitExpenseService,
@@ -55,6 +56,7 @@ export class ServicesFactory {
 	governmentExpenseService: GovernmentExpensesService;
 	salePaymentService: SalePaymentService;
 	paymentFormService: PaymentFormService;
+	supplierService: SupplierService;
 
 	constructor(private conn: Knex, private client: RedisClientType, private mailConfig: MailerConfig) {
 		this.unitService = new UnitService({ ...this.setServiceOptions() });
@@ -86,6 +88,7 @@ export class ServicesFactory {
 			this.unitExpenseService
 		);
 		this.paymentFormService = new PaymentFormService(this.setServiceOptions());
+		this.supplierService = new SupplierService(this.setServiceOptions());
 	}
 
 	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client });
