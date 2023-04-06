@@ -1,0 +1,28 @@
+export const defaultUsers = [
+	{
+		first_name: 'Root',
+		last_name: 'User',
+		office: 'root',
+		email: 'root@root.com',
+		password: '@Root2023',
+		cpf: '00000000000',
+		phone: '00000000000',
+		active: true,
+		level: 1000,
+		unit_id: null,
+		tenancy_id: null,
+	},
+	{
+		first_name: 'Test',
+		last_name: 'User',
+		office: 'test',
+		email: 'test@test.com',
+		password: '@test2023',
+		cpf: '00000000000',
+		phone: '00000000000',
+		active: true,
+		level: 1000,
+		unit_id: null,
+		tenancy_id: null,
+	},
+];

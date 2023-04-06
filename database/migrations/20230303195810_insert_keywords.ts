@@ -1,14 +1,34 @@
 import { Knex } from 'knex';
+
 import { isProd } from 'src/utils';
-import * as DefaultKeywords from '../defaults/keykords.json';
+
+const defaultKeywords = [
+	{
+		keyword: 'simon',
+	},
+	{
+		keyword: 'burch',
+	},
+	{
+		keyword: 'woods',
+	},
+	{
+		keyword: 'mccoy',
+	},
+	{
+		keyword: 'jordan',
+	},
+	{
+		keyword: 'gutierrez',
+	},
+];
 
 export async function up(knex: Knex): Promise<void> {
 	if (isProd()) return;
-	const keywords = DefaultKeywords.map(k => k);
-	return knex.batchInsert('keywords', keywords);
+	return knex.batchInsert('keywords', defaultKeywords);
 }
 
 export async function down(knex: Knex): Promise<void> {
 	if (isProd()) return;
-	return DefaultKeywords.forEach(({ keyword }) => knex('keywords').where({ keyword }).del());
+	return defaultKeywords.forEach(({ keyword }) => knex('keywords').where({ keyword }).del());
 }

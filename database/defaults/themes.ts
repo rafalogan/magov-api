@@ -1,8 +1,4 @@
-import { Knex } from 'knex';
-
-import { isProd } from 'src/utils';
-
-const defaultThemes = [
+export const defaultThemes = [
 	{
 		name: 'Bean',
 		description:
@@ -29,13 +25,3 @@ const defaultThemes = [
 			'Non fugiat excepteur ad in enim magna anim aute. Proident nostrud do amet nisi aute esse ut ad. Cupidatat aliquip aliquip velit aliqua ipsum ut nostrud laboris aliqua. Culpa velit ullamco aliquip elit esse ad fugiat tempor cupidatat laborum tempor. Aute laboris ullamco mollit fugiat duis laborum exercitation id aute commodo.',
 	},
 ];
-
-export async function up(knex: Knex): Promise<void> {
-	if (isProd()) return;
-	return knex.batchInsert('themes', defaultThemes);
-}
-
-export async function down(knex: Knex): Promise<void> {
-	if (isProd()) return;
-	return defaultThemes.forEach(({ name }) => knex('themes').where({ name }).del());
-}

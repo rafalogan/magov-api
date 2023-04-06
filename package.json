@@ -4,7 +4,7 @@
 	"description": "Project of api in Ma Governance API",
 	"main": "index.js",
 	"scripts": {
-		"start": "npx pm2-runtime start ecosystem.config.yml",
+		"start": "npx pm2-runtime start ecosystem.config.js",
 		"start:dev": "npx tsx watch index.ts",
 		"start:dev:db": "docker-compose down && docker-compose up",
 		"stop": "npx pm2 kill",
@@ -26,7 +26,9 @@
 		"athon:c:md": "zsh bin/console/create-model.sh",
 		"athon:c:t": "zsh bin/console/create-types.sh",
 		"athon:c:e": "zsh bin/console/create-entity.sh",
-		"athon:c:c": "zsh bin/console/create-config.sh"
+		"athon:c:c": "zsh bin/console/create-config.sh",
+		"deploy:prod": "git push heroku main",
+		"deploy:dev": "git push heroku develop"
 	},
 	"keywords": [
 		"API",
@@ -124,6 +126,6 @@
 	},
 	"engines": {
 		"node": "18.15.0",
-		"npm": "9.6.3"
+		"npm": "9.6.4"
 	}
 }
