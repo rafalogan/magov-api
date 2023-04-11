@@ -29,6 +29,7 @@ import { ProductModule } from 'src/modules/product';
 import { GovernmentExpensesModule } from 'src/modules/government-expenses';
 import { PaymentFormModule } from 'src/modules/payment-from';
 import { SupplierModule } from 'src/modules/supplier';
+import { TypesRecipesModule } from 'src/modules/types-recipes';
 
 export class ModulesFactory {
 	private authModule: AuthModule;
@@ -54,6 +55,7 @@ export class ModulesFactory {
 	private governmentExpenseModule: GovernmentExpensesModule;
 	private paymentFormModule: PaymentFormModule;
 	private supplierModule: SupplierModule;
+	private typesRecipesModule: TypesRecipesModule;
 
 	constructor(private app: Application, private auth: AuthConfig, services: ServicesFactory, upload: Multer) {
 		this.authModule = new AuthModule({ ...this.getRouteOptions(), service: services.authService, upload });
@@ -82,6 +84,7 @@ export class ModulesFactory {
 		this.governmentExpenseModule = new GovernmentExpensesModule({ ...this.getRouteOptions(), service: services.governmentExpenseService });
 		this.paymentFormModule = new PaymentFormModule({ ...this.getRouteOptions(), service: services.paymentFormService });
 		this.supplierModule = new SupplierModule({ ...this.getRouteOptions(), service: services.supplierService });
+		this.typesRecipesModule = new TypesRecipesModule({ ...this.getRouteOptions(), service: services.typesRecipesService });
 	}
 
 	exec() {
@@ -108,6 +111,7 @@ export class ModulesFactory {
 		this.governmentExpenseModule.exec();
 		this.paymentFormModule.exec();
 		this.supplierModule.exec();
+		this.typesRecipesModule.exec();
 		this.app.use('/media', express.static(resolve(__dirname, '../..', 'tmp', 'uploads')));
 		this.app.use(notfoundRoute);
 	}
