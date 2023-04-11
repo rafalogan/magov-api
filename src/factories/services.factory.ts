@@ -26,6 +26,7 @@ import {
 	SupplierService,
 	TaskService,
 	ThemeService,
+	TypesRecipesService,
 	UnitExpenseService,
 	UnitService,
 	UserService,
@@ -57,6 +58,7 @@ export class ServicesFactory {
 	salePaymentService: SalePaymentService;
 	paymentFormService: PaymentFormService;
 	supplierService: SupplierService;
+	typesRecipesService: TypesRecipesService;
 
 	constructor(private conn: Knex, private client: RedisClientType, private mailConfig: MailerConfig) {
 		this.unitService = new UnitService({ ...this.setServiceOptions() });
@@ -89,6 +91,7 @@ export class ServicesFactory {
 		);
 		this.paymentFormService = new PaymentFormService(this.setServiceOptions());
 		this.supplierService = new SupplierService(this.setServiceOptions());
+		this.typesRecipesService = new TypesRecipesService(this.setServiceOptions());
 	}
 
 	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client });
