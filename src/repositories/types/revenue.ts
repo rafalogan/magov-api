@@ -9,10 +9,35 @@ export interface IRevenue extends IID {
 	active: boolean;
 	recurrent: boolean;
 	documentUrl?: string;
+	documentNumber: string;
 	value: number;
 	unitId: number;
 	originId: number;
 	tenancyId: number;
+}
+
+export interface IGovernmentRevenue extends IID {
+	typeOfRecipe: string;
+	revenue: string;
+	receive: Date | string;
+	value: number;
+	status: number;
+	active: boolean;
+	recurrent: boolean;
+	documentNumber: string;
+	description?: Blob | string;
+	unitId: number;
+	tenancyId: number;
+}
+
+export interface IGovernmentRevenueModel extends IGovernmentRevenue {
+	propositions: IPropositionExpensesGovernment[];
+}
+
+export interface IPropositionExpensesGovernment {
+	id: number;
+	title: string;
+	value: number;
 }
 
 export interface IOrigin extends IID {
