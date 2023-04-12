@@ -26,3 +26,4 @@ export * from './sale-payment.service';
 export * from './payment-form.service';
 export * from './supplier.service';
 export * from './types-recipes.service';
+export * from './government-revenue.service';

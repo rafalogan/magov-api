@@ -1,5 +1,6 @@
 import { IFile } from './file';
 import { IID } from './shared';
+import { ITenancyIdRequired } from './tenacy';
 
 export interface IRevenue extends IID {
 	revenue: string;
@@ -34,10 +35,35 @@ export interface IGovernmentRevenueModel extends IGovernmentRevenue {
 	propositions: IPropositionExpensesGovernment[];
 }
 
+export interface IGovernmentRevenueViewModel extends IID, ITenancyIdRequired {
+	revenue: string;
+	receive: Date | string;
+	value: number;
+	status: number;
+	active: boolean;
+	recurrent: boolean;
+	documentNumber: string;
+	description?: Blob | string;
+	type: ITypeOrRecipeRevenue;
+	unit: IUnitGovernmentRevenue;
+	propositions: IPropositionExpensesGovernment[];
+	region: string;
+}
+
 export interface IPropositionExpensesGovernment {
 	id: number;
 	title: string;
 	value: number;
+}
+
+export interface IUnitGovernmentRevenue {
+	id: number;
+	unit: string;
+}
+
+export interface ITypeOrRecipeRevenue {
+	id: number;
+	typeOrRecipe: string;
 }
 
 export interface IOrigin extends IID {
