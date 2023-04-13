@@ -11,6 +11,7 @@ export interface IDemand extends IID, ITenancyIdRequired {
 	level: number;
 	active: boolean;
 	deadLine: Date | string;
+	approximateIncome: number;
 	status?: string;
 	createdAt: Date;
 	unitId: number;
@@ -35,6 +36,7 @@ export interface IDemandViewModel extends IID {
 	createdAt: Date | string;
 	unitId: number;
 	userId: number;
+	approximateIncome: number;
 	plaintiffId: number;
 	tenancyId: number;
 	plaintiff: string;

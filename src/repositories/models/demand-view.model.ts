@@ -1,4 +1,4 @@
-import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
+import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
 import { Keyword, Theme } from '../entities';
 import { IDemandViewModel, IKeyword, ITheme } from '../types';
 import { PlaintiffModel } from './plaintiff.model';
@@ -8,6 +8,7 @@ export class DemandViewModel {
 	name: string;
 	description?: string;
 	createdAt: Date;
+	approximateIncome: number;
 	favorite?: boolean;
 	level: number;
 	active: boolean;
@@ -26,6 +27,7 @@ export class DemandViewModel {
 		this.name = data.name;
 		this.description = convertBlobToString(data.description);
 		this.createdAt = convertToDate(data.createdAt);
+		this.approximateIncome = setValueNumberToView(data.approximateIncome) as number;
 		this.favorite = !!data.favorite;
 		this.level = data.level;
 		this.active = !!data.active;

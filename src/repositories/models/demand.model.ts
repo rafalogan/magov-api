@@ -1,4 +1,4 @@
-import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
+import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
 import { IDemandModel } from '../types';
 import { PlaintiffModel } from 'src/repositories/models/plaintiff.model';
 
@@ -13,6 +13,7 @@ export class DemandModel {
 	status?: string;
 	createdAt: Date;
 	unitId: number;
+	approximateIncome: number;
 	userId: number;
 	plaintiff: PlaintiffModel;
 	tenancyId: number;
@@ -28,6 +29,7 @@ export class DemandModel {
 		this.active = !!data.active;
 		this.deadLine = convertToDate(data.deadLine);
 		this.createdAt = data.createdAt ? convertToDate(data.createdAt) : new Date();
+		this.approximateIncome = setValueNumberToView(data.approximateIncome) as number;
 		this.status = data.status?.trim();
 		this.unitId = Number(data.unitId);
 		this.userId = Number(data.userId);
