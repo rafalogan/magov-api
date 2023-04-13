@@ -5,7 +5,7 @@ module.exports = {
 			script: './dist/index.js',
 			watch: false,
 			autorestart: true,
-			instances: 1,
+			instances: 0,
 			exec_mode: 'cluster',
 			env: {
 				NODE_ENV: process.env.NODE_ENV,
