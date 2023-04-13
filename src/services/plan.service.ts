@@ -14,7 +14,7 @@ export class PlanService extends ProductService {
 
 	async create(data: Plan) {
 		try {
-			const fromDB = (await this.getPlan(data.name)) as PlanModel;
+			const fromDB = (await this.getProduct(data.name)) as PlanModel;
 
 			existsOrError(fromDB?.id, fromDB);
 
@@ -28,7 +28,7 @@ export class PlanService extends ProductService {
 
 	async update(data: Plan, id: number) {
 		try {
-			const fromDB = (await this.getPlan(id)) as PlanModel;
+			const fromDB = (await this.getProduct(id)) as PlanModel;
 
 			existsOrError(fromDB?.id, fromDB);
 
@@ -43,7 +43,7 @@ export class PlanService extends ProductService {
 
 	async read(options: ReadOptionsModel, id?: number) {
 		onLog('plans opitons', options);
-		if (id) return this.getPlan(id);
+		if (id) return this.getProduct(id);
 
 		return this.db('products')
 			.where({ plan: true })
