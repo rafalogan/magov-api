@@ -3,7 +3,15 @@ import { onLog } from 'src/core/handlers';
 import { Demand, Plaintiff } from 'src/repositories/entities';
 import { DemandModel, DemandViewModel, ReadOptionsModel } from 'src/repositories/models';
 import { IDemand, IPlantiff, IPlantiffModel, IServiceOptions, ITheme } from 'src/repositories/types';
-import { convertBlobToString, convertDataValues, equalsOrError, existsOrError, isDataInArray, isRequired } from 'src/utils';
+import {
+	convertBlobToString,
+	convertDataValues,
+	equalsOrError,
+	existsOrError,
+	isDataInArray,
+	isRequired,
+	setValueNumberToView,
+} from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { KeywordService } from './keyword.service';
 
@@ -144,6 +152,7 @@ export class DemandService extends DatabaseService {
 						favorite: 'd.favorite',
 						level: 'd.level',
 						description: 'd.description',
+						approximate_income: 'd.approximate_income',
 						dead_line: 'd.dead_line',
 						created_at: 'd.created_at',
 						user_id: 'd.user_id',
@@ -166,6 +175,7 @@ export class DemandService extends DatabaseService {
 
 			for (const item of raw) {
 				item.description = convertBlobToString(item.description);
+				item.approximateIncome = setValueNumberToView(item.approximateIncome) as number;
 				item.favorite = !!item.favorite;
 				const keywords = await this.getKeywords(item.id);
 				const task = await this.setTasksperDemands(item.id);
@@ -192,6 +202,7 @@ export class DemandService extends DatabaseService {
 						active: 'd.active',
 						dead_line: 'd.dead_line',
 						status: 'd.status',
+						approximate_income: 'd.approximate_income',
 						created_at: 'd.created_at',
 						unit_id: 'd.unit_id',
 						user_id: 'd.user_id',
