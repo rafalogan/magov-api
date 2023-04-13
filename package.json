@@ -22,7 +22,6 @@
 		"deps": "npm i -g typescript knex",
 		"dev": "npm run start:dev",
 		"release:start": "VERSION=$(node -p \"require('./package').version\") && git flow release start $VERSION",
-		"release:start:m": "git flow release start",
 		"release:finish": "BRANCH=$(node -p \"require('./package').version\") && git flow release finish $BRANCH",
 		"athon:c:s": "zsh bin/console/create-service.sh",
 		"athon:c:m": "zsh bin/console/create-module.sh",
