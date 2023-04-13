@@ -5,6 +5,7 @@ import { IPropositionExpensesGovernment, IRevenueModel, IServiceOptions } from '
 import { DatabaseService } from './abistract-database.service';
 import { convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
 import { Revenue } from 'src/repositories/entities';
+import { onLog } from 'src/core/handlers';
 
 export class GovernmentRevenueService extends DatabaseService {
 	constructor(options: IServiceOptions) {
@@ -14,13 +15,14 @@ export class GovernmentRevenueService extends DatabaseService {
 	async create(data: GovernmentRevenueModel) {
 		try {
 			const fromDB = (await this.getGovRevenue(data.revenue, data.tenancyId)) as GovernmentRevenueViewModel;
-			notExistisOrError(fromDB?.id, fromDB);
+			onLog('fromDB to save', fromDB);
+			notExistisOrError(fromDB?.id, { message: 'Revenue already exists', status: FORBIDDEN });
 
 			const originId = (await this.getTypeOfRecipe(data.typeOfRecipe)) as number;
 			existsOrError(Number(originId), originId);
 
 			const toSave = new Revenue({ ...data, originId, origin: { origin: data.typeOfRecipe } } as IRevenueModel);
-			const [id] = await this.db('revenue').insert(convertDataValues({ ...toSave, government: true }));
+			const [id] = await this.db('revenues').insert(convertDataValues({ ...toSave, government: true }));
 			existsOrError(Number(id), { message: 'Internal error', err: id, status: INTERNAL_SERVER_ERROR });
 
 			if (data.propositions?.length) await this.setPropositionOfRevenue(data.propositions, id);
@@ -50,7 +52,7 @@ export class GovernmentRevenueService extends DatabaseService {
 				id
 			);
 
-			await this.db('revenue').update(convertDataValues(toUpdate)).where({ id }).andWhere('tenancy_id', fromDB.tenancyId);
+			await this.db('revenues').update(convertDataValues(toUpdate)).where({ id }).andWhere('tenancy_id', fromDB.tenancyId);
 			return { message: 'Revenue updated successfully', data: { ...toUpdate, propositions: data.propositions } };
 		} catch (err) {
 			return err;
@@ -82,6 +84,7 @@ export class GovernmentRevenueService extends DatabaseService {
 					status: 'r.status',
 					active: 'r.active',
 					recurrent: 'r.recurrent',
+					document_number: 'r.document_number',
 					value: 'r.value',
 					tenancy_id: 'r.tenancy_id',
 				},
@@ -92,11 +95,13 @@ export class GovernmentRevenueService extends DatabaseService {
 
 			const fromDB = await this.db(tables)
 				.select(...fields)
-				.where('tenancy_id', tenancyId)
-				.andWhere({ government: true })
+				.where('r.tenancy_id', tenancyId)
+				.andWhere('r.government', true)
 				.andWhereRaw('o.id = r.origin_id')
 				.andWhereRaw('u.id = r.unit_id')
 				.andWhereRaw('a.unit_id = r.unit_id');
+
+			onLog('fromDb list', fromDB);
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 
@@ -119,7 +124,7 @@ export class GovernmentRevenueService extends DatabaseService {
 
 	async getGovRevenue(filter: number | string, tenancyId: number) {
 		try {
-			const tables = { r: 'revenues', o: 'origins', u: 'unitsu', a: 'adreses' };
+			const tables = { r: 'revenues', o: 'origins', u: 'units', a: 'adresses' };
 			const fields = [
 				{
 					id: 'r.id',
@@ -128,6 +133,7 @@ export class GovernmentRevenueService extends DatabaseService {
 					description: 'r.description',
 					status: 'r.status',
 					active: 'r.active',
+					document_number: 'r.document_number',
 					recurrent: 'r.recurrent',
 					value: 'r.value',
 					tenancy_id: 'r.tenancy_id',
@@ -140,16 +146,16 @@ export class GovernmentRevenueService extends DatabaseService {
 				typeof filter === 'number'
 					? await this.db(tables)
 							.select(...fields)
-							.where('id', filter)
-							.andWhere('tenancy_id', tenancyId)
+							.where('r.id', filter)
+							.andWhere('r.tenancy_id', tenancyId)
 							.andWhereRaw('u.id = r.unit_id')
 							.andWhereRaw('o.id = r.origin_id')
 							.andWhereRaw('a.unit_id = r.unit_id')
 							.first()
 					: await this.db(tables)
 							.select(...fields)
-							.where('revenue', filter)
-							.andWhere('tenancy_id', tenancyId)
+							.where('r.revenue', filter)
+							.andWhere('r.tenancy_id', tenancyId)
 							.andWhereRaw('u.id = r.unit_id')
 							.andWhereRaw('o.id = r.origin_id')
 							.andWhereRaw('a.unit_id = r.unit_id')
@@ -157,6 +163,8 @@ export class GovernmentRevenueService extends DatabaseService {
 
 			existsOrError(fromDB, { message: 'Revenue not found', status: NOT_FOUND });
 			notExistisOrError(fromDB.severity === 'ERROR', { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
+
+			onLog('fromDB on getGoveRevenue', convertDataValues(fromDB, 'camel'));
 
 			const propositions = await this.getPropositionOfRevenue(fromDB.id);
 			const unit = { id: fromDB.unit_id, unit: fromDB.unit };
@@ -187,7 +195,7 @@ export class GovernmentRevenueService extends DatabaseService {
 		try {
 			for (const proposition of propositions) {
 				const fromDB = await this.db('budget_proposals').where('proposition_id', proposition.id).andWhere('revenue_id', revenueId).first();
-				notExistisOrError(fromDB.severity === 'ERROR', { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+				notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 
 				if (!fromDB) {
 					await this.db('budget_proposals').insert(convertDataValues({ propositionId: proposition.id, revenueId }));
