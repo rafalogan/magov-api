@@ -69,35 +69,64 @@ export class UnitService extends DatabaseService {
 			.catch(err => err);
 	}
 
-	async getUnit(id: number, tenancyId: number) {
+	async getUnit(filter: number | string, tenancyId: number) {
 		try {
-			const unit = await this.db({ u: 'units', p: 'products', a: 'adresses' })
-				.select(
-					{
-						id: 'u.id',
-						name: 'u.name',
-						description: 'u.description',
-						cnpj: 'u.cnpj',
-						phone: 'u.phone',
-						active: 'u.active',
-						tenancy_id: 'u.tenancy_id',
-					},
-					{ plan_id: 'p.id', plan_name: 'p.name' },
-					{
-						cep: 'a.cep',
-						street: 'a.street',
-						number: 'a.number',
-						complement: 'a.complement',
-						district: 'a.district',
-						city: 'a.city',
-						uf: 'a.uf',
-					}
-				)
-				.where('u.id', id)
-				.andWhere('u.tenancy_id', tenancyId)
-				.andWhereRaw('p.id = u.plan_id')
-				.andWhereRaw('a.unit_id = u.id')
-				.first();
+			const unit =
+				typeof filter === 'number'
+					? await this.db({ u: 'units', p: 'products', a: 'adresses' })
+							.select(
+								{
+									id: 'u.id',
+									name: 'u.name',
+									description: 'u.description',
+									cnpj: 'u.cnpj',
+									phone: 'u.phone',
+									active: 'u.active',
+									tenancy_id: 'u.tenancy_id',
+								},
+								{ plan_id: 'p.id', plan_name: 'p.name' },
+								{
+									cep: 'a.cep',
+									street: 'a.street',
+									number: 'a.number',
+									complement: 'a.complement',
+									district: 'a.district',
+									city: 'a.city',
+									uf: 'a.uf',
+								}
+							)
+							.where('u.id', filter)
+							.andWhere('u.tenancy_id', tenancyId)
+							.andWhereRaw('p.id = u.plan_id')
+							.andWhereRaw('a.unit_id = u.id')
+							.first()
+					: await this.db({ u: 'units', p: 'products', a: 'adresses' })
+							.select(
+								{
+									id: 'u.id',
+									name: 'u.name',
+									description: 'u.description',
+									cnpj: 'u.cnpj',
+									phone: 'u.phone',
+									active: 'u.active',
+									tenancy_id: 'u.tenancy_id',
+								},
+								{ plan_id: 'p.id', plan_name: 'p.name' },
+								{
+									cep: 'a.cep',
+									street: 'a.street',
+									number: 'a.number',
+									complement: 'a.complement',
+									district: 'a.district',
+									city: 'a.city',
+									uf: 'a.uf',
+								}
+							)
+							.where('u.name', filter)
+							.andWhere('u.tenancy_id', tenancyId)
+							.andWhereRaw('p.id = u.plan_id')
+							.andWhereRaw('a.unit_id = u.id')
+							.first();
 
 			existsOrError(unit?.id, { message: 'unit not found', status: NOT_FOUND });
 			const raw = convertDataValues(unit, 'camel');

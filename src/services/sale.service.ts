@@ -24,12 +24,14 @@ export class SaleService extends DatabaseService {
 		try {
 			const user = (await this.setUser(new UserModel(data.user as IUserModel))) as UserModel;
 			existsOrError(Number(user?.id), user);
-			const { id: userId, tenancyId } = user;
+			const { id: userId, tenancyId, unit: unitUser } = user;
 			onLog('new tenancy', tenancyId);
+			existsOrError(Number(tenancyId), { message: 'Tenancy not found', err: tenancyId, status: NOT_FOUND });
 
-			const unit = Number(tenancyId)
-				? ((await this.setUnit(new UnitModel({ ...data.unit, tenancyId } as IUnitModel))) as UnitModel)
-				: undefined;
+			const unit = (await this.setUnit(
+				new UnitModel({ ...unitUser, ...data.unit, tenancyId } as IUnitModel),
+				tenancyId as number
+			)) as UnitModel;
 			existsOrError(Number(unit?.id), unit);
 			onLog('unit to use', unit);
 			const { id: unitId } = unit as UnitModel;
@@ -269,17 +271,13 @@ export class SaleService extends DatabaseService {
 		}
 	}
 
-	private async setUnit(data: UnitModel) {
+	private async setUnit(data: UnitModel, tenancyId: number) {
 		try {
 			const fromDB = data?.id
-				? ((await this.unitService.getUnit(data.id as number, data.tenancyId)) as UnitModel)
-				: ((await this.db('units').select('id').where('name', data.name).andWhere('tenancy_id', data.tenancyId).first()) as any);
+				? ((await this.unitService.getUnit(data.id as number, data.tenancyId || tenancyId)) as UnitModel)
+				: ((await this.unitService.getUnit(data.name, data.tenancyId || tenancyId)) as UnitModel);
 
-			const res = data?.id ? fromDB : ({ ...data, ...fromDB } as UnitModel);
-			onLog('unit From db to sale', res);
-			if (res?.id) return res;
-
-			onLog('data to save', data);
+			if (fromDB?.id) return fromDB;
 
 			const unit = (await this.unitService.create(data)) as any;
 			onLog('save new unit', unit);

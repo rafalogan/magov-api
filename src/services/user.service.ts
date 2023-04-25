@@ -29,9 +29,12 @@ export class UserService extends DatabaseService {
 			existsOrError(Number(userId), { messages: 'Internal', error: userId, status: INTERNAL_SERVER_ERROR });
 
 			await this.saveAddress(data.address, userId);
+
 			if (data.userRules?.length) await this.saveUserRules(data.userRules, userId);
 			if (data.image) await this.setUserImage(data.image, userId);
-			const unit = data.unit ? await this.unitService.save(data.unit) : undefined;
+
+			const unitSave = data.unit ? await this.unitService.save({ ...data.unit, tenancyId }) : undefined;
+			const { data: unit } = unitSave;
 
 			deleteField(data, 'password');
 

@@ -116,9 +116,11 @@ export class SaleController extends Controller {
 
 	private setProducts(req: Request) {
 		if (req.body.products) return req.body.products;
+		const res: any[] = [];
 		const { productId, amount, productValue: value } = req.body;
+		res.push({ productId, amount, value });
 
-		return [{ productId, amount, value }] as IProduct[];
+		return res;
 	}
 
 	private setSeller(req: Request) {
@@ -185,10 +187,12 @@ export class SaleController extends Controller {
 	private setUser(req: Request) {
 		if (req.body.user) return req.body.user;
 		const { userId: id, firstName, lastName, email, password, cpf, office, level, phone } = req.body;
-		const { productId, amount } = this.setProducts(req)[0];
+		const plans = this.setProducts(req).map((i: IProduct) => {
+			const { productId: id, amount, value } = i;
+			return { id, value, amount };
+		});
 		const address = setAddress(req);
 
-		const plans = [{ id: productId, amount }];
 		return { id, firstName, lastName, password, confirmPassword: password, email, cpf, office, address, plans, level, phone } as IUserModel;
 	}
 
