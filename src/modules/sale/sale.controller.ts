@@ -116,9 +116,11 @@ export class SaleController extends Controller {
 
 	private setProducts(req: Request) {
 		if (req.body.products) return req.body.products;
+		const res: any[] = [];
 		const { productId, amount, productValue: value } = req.body;
+		res.push({ productId, amount, value });
 
-		return [{ productId, amount, value }] as IProduct[];
+		return res;
 	}
 
 	private setSeller(req: Request) {
@@ -131,7 +133,7 @@ export class SaleController extends Controller {
 	private verifyRequest(req: Request) {
 		const { dueDate, value, commissionValue, installments, paymentForm } = req.body;
 		const seller = this.setSeller(req);
-		const { name, cnpj, plan, address } = this.setUnit(req);
+		const { name, cnpj, address } = this.setUnit(req);
 		const { street, district, cep, city, uf } = address;
 
 		const requireds = requiredFields([
@@ -143,7 +145,6 @@ export class SaleController extends Controller {
 			{ field: paymentForm, message: isRequired('paymentForm') },
 			{ field: name, message: isRequired('name') },
 			{ field: cnpj, message: isRequired('cnpj') },
-			{ field: plan, message: isRequired('plan') },
 			{ field: street, message: isRequired('street') },
 			{ field: district, message: isRequired('district') },
 			{ field: cep, message: isRequired('cep') },
@@ -174,21 +175,24 @@ export class SaleController extends Controller {
 	private setUnit(req: Request) {
 		if (req.body.unit) return req.body.unit;
 		const { unitId, unitName, description, cnpj, phone } = req.body;
-		const { productId: id, amount } = this.setProducts(req)[0];
-
 		const address = setAddress(req);
-		const plan = { id, amount };
+		const products = this.setProducts(req).map((i: IProduct) => {
+			const { productId: id, amount, value } = i;
+			return { id, value, amount };
+		});
 
-		return { id: unitId, name: unitName, description, cnpj, phone, address, plan } as IUnitModel;
+		return { id: unitId, name: unitName, description, cnpj, phone, address, products } as IUnitModel;
 	}
 
 	private setUser(req: Request) {
 		if (req.body.user) return req.body.user;
 		const { userId: id, firstName, lastName, email, password, cpf, office, level, phone } = req.body;
-		const { productId, amount } = this.setProducts(req)[0];
+		const plans = this.setProducts(req).map((i: IProduct) => {
+			const { productId: id, amount, value } = i;
+			return { id, value, amount };
+		});
 		const address = setAddress(req);
 
-		const plans = [{ id: productId, amount }];
 		return { id, firstName, lastName, password, confirmPassword: password, email, cpf, office, address, plans, level, phone } as IUserModel;
 	}
 

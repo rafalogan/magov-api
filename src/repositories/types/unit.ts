@@ -7,17 +7,18 @@ export interface IUnit extends IID {
 	cnpj: string;
 	phone: string;
 	tenancyId: number;
-	planId: number;
 	active: boolean;
 	address: IAddress;
 }
 
 export interface IUnitModel extends IUnit {
-	plan: IUnitPlan;
+	products?: IUnitProduct[];
 }
 
-export interface IUnitPlan {
+export interface IUnitProduct {
 	id: number;
 	name?: string;
 	amount?: number;
+	limit?: number;
+	plan?: boolean;
 }
