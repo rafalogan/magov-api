@@ -9,7 +9,6 @@ export class Unit {
 	phone: string;
 	active: boolean;
 	tenancyId: number;
-	planId: number;
 
 	constructor(data: IUnit, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -19,6 +18,5 @@ export class Unit {
 		this.phone = clearString(data.phone);
 		this.active = !!data.active;
 		this.tenancyId = Number(data.tenancyId);
-		this.planId = Number(data.planId);
 	}
 }

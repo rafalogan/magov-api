@@ -1,5 +1,5 @@
 import { clearString, convertBlobToString } from 'src/utils';
-import { IUnitModel, IUnitPlan } from '../types';
+import { IUnitModel, IUnitProduct } from '../types';
 import { Address } from 'src/repositories/entities';
 
 export class UnitModel {
@@ -11,7 +11,7 @@ export class UnitModel {
 	tenancyId: number;
 	active: boolean;
 	address: Address;
-	plan: IUnitPlan;
+	products?: IUnitProduct[];
 
 	constructor(data: IUnitModel, id?: number) {
 		this.id = Number(id || data.id) || undefined;
@@ -22,6 +22,16 @@ export class UnitModel {
 		this.tenancyId = Number(data.tenancyId);
 		this.active = !!data.active;
 		this.address = new Address(data.address);
-		this.plan = data.plan;
+		this.products = this.setProducts(data?.products);
+	}
+
+	private setProducts(data?: IUnitProduct[]) {
+		return data?.map(item => ({
+			id: Number(item.id),
+			name: item.name?.trim(),
+			amount: Number(item.amount) || 1,
+			limit: Number(item.limit) || undefined,
+			plan: !!item.plan,
+		}));
 	}
 }

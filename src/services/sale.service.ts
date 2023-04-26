@@ -22,16 +22,17 @@ export class SaleService extends DatabaseService {
 
 	async create(data: SaleModel) {
 		try {
+			onLog('Sale to save', data);
 			const user = (await this.setUser(new UserModel(data.user as IUserModel))) as UserModel;
-			existsOrError(Number(user?.id), user);
-			const { id: userId, tenancyId, unit: unitUser } = user;
-			onLog('new tenancy', tenancyId);
+			onLog('user response', user);
+			existsOrError(Number(user?.id), { message: 'erro to set user', err: user, status: INTERNAL_SERVER_ERROR });
+
+			const { id: userId, tenancyId } = user;
 			existsOrError(Number(tenancyId), { message: 'Tenancy not found', err: tenancyId, status: NOT_FOUND });
 
-			const unit = (await this.setUnit(
-				new UnitModel({ ...unitUser, ...data.unit, tenancyId } as IUnitModel),
-				tenancyId as number
-			)) as UnitModel;
+			const unit = user?.unit?.id
+				? user.unit
+				: ((await this.setUnit(new UnitModel({ ...data.unit, active: true, tenancyId } as IUnitModel), tenancyId as number)) as UnitModel);
 			existsOrError(Number(unit?.id), unit);
 			onLog('unit to use', unit);
 			const { id: unitId } = unit as UnitModel;
@@ -258,14 +259,12 @@ export class SaleService extends DatabaseService {
 	private async setUser(data: UserModel) {
 		try {
 			const fromDB = (await this.userService.getUser(data.email)) as UserViewModel;
-			onLog('user From db', fromDB);
 			if (fromDB?.id) return fromDB as UserViewModel;
 
-			const user = (await this.userService.create(data)) as any;
-			onLog('save User', user);
-			existsOrError(Number(user.data.id), user);
+			const toSave = (await this.userService.create(data)) as any;
+			existsOrError(Number(toSave?.user.id), { message: 'Internal Error', err: toSave, status: INTERNAL_SERVER_ERROR });
 
-			return user.data as UserViewModel;
+			return toSave.user as UserViewModel;
 		} catch (err) {
 			return err;
 		}
@@ -273,18 +272,20 @@ export class SaleService extends DatabaseService {
 
 	private async setUnit(data: UnitModel, tenancyId: number) {
 		try {
-			const fromDB = data?.id
-				? ((await this.unitService.getUnit(data.id as number, data.tenancyId || tenancyId)) as UnitModel)
-				: ((await this.unitService.getUnit(data.name, data.tenancyId || tenancyId)) as UnitModel);
+			const fromDB = (await this.unitService.getUnit(data.name, tenancyId)) as UnitModel;
 
-			if (fromDB?.id) return fromDB;
+			if (fromDB?.id) {
+				const res = (await this.unitService.update({ ...data, tenancyId } as UnitModel, fromDB.id)) as any;
+				existsOrError(res?.unit.id, { message: 'Internal Error to set Unit', err: res, status: INTERNAL_SERVER_ERROR });
 
-			const unit = (await this.unitService.create(data)) as any;
-			onLog('save new unit', unit);
+				return res.unit as UnitModel;
+			}
 
-			existsOrError(unit?.data.id, unit);
+			const unitToSave = (await this.unitService.create(data)) as any;
 
-			return unit.data as UnitModel;
+			existsOrError(unitToSave?.unit.id, { message: 'Internal Error', err: unitToSave, status: INTERNAL_SERVER_ERROR });
+
+			return unitToSave.unit as UnitModel;
 		} catch (err) {
 			return err;
 		}

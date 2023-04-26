@@ -21,8 +21,6 @@ export class SaleModel {
 
 	constructor(data: ISaleModel, id?: number) {
 		this.id = setInstanceId(id || data?.id);
-		this.unit = new UnitModel(data.unit);
-		this.user = new UserModel({ ...data.user, unit: data.unit } as IUserModel);
 		this.products = this.setPoducts(data.products);
 		this.seller = new Seller(data.seller);
 		this.dueDate = convertToDate(data.dueDate);
@@ -33,6 +31,8 @@ export class SaleModel {
 		this.paymentForm = data.paymentForm.trim();
 		this.tenancyId = Number(data.tenancyId);
 		this.contract = new FileEntity(data.contract);
+		this.unit = new UnitModel(data.unit);
+		this.user = new UserModel({ ...data.user, unit: data.unit } as IUserModel);
 	}
 
 	private setPoducts(products: IProduct[]) {

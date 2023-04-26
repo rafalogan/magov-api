@@ -1,8 +1,8 @@
 import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
-import { PaginationModel, ReadOptionsModel, UserModel, UserViewModel } from 'src/repositories/models';
-import { IAddress, IServiceOptions, ITenancy, IUnitPlan, IUser, IUserViewModel } from 'src/repositories/types';
+import { PaginationModel, ReadOptionsModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
+import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserViewModel } from 'src/repositories/types';
 import { convertDataValues, deleteField, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
@@ -14,9 +14,7 @@ export class UserService extends DatabaseService {
 
 	async create(data: UserModel) {
 		try {
-			onLog('data to Save', data);
 			const fromDB = (await this.getUser(data.email)) as UserViewModel;
-
 			notExistisOrError(fromDB?.id, fromDB);
 
 			const tenancyId = data.plans || data.tenancyId ? await this.setTenancy(data.tenancyId) : undefined;
@@ -33,8 +31,10 @@ export class UserService extends DatabaseService {
 			if (data.userRules?.length) await this.saveUserRules(data.userRules, userId);
 			if (data.image) await this.setUserImage(data.image, userId);
 
-			const unitSave = data.unit ? await this.unitService.save({ ...data.unit, tenancyId }) : undefined;
-			const { data: unit } = unitSave;
+			const unitSave = data?.unit
+				? ((await this.unitService.create({ ...data.unit, active: true, tenancyId: Number(tenancyId) } as UnitModel)) as any)
+				: undefined;
+			const unit = unitSave.unit || undefined;
 
 			deleteField(data, 'password');
 
@@ -117,62 +117,41 @@ export class UserService extends DatabaseService {
 
 	async getUser(filter: number | string) {
 		try {
+			const fields = [
+				{
+					id: 'u.id',
+					first_name: 'u.first_name',
+					last_name: 'u.last_name',
+					office: 'u.office',
+					email: 'u.email',
+					password: 'u.password',
+					cpf: 'u.cpf',
+					phone: 'u.phone',
+					active: 'u.active',
+					level: 'u.level',
+					tenancy_id: 'u.tenancy_id',
+					unit_id: 'u.unit_id',
+				},
+				{
+					cep: 'a.cep',
+					street: 'a.street',
+					number: 'a.number',
+					complement: 'a.complement',
+					district: 'a.district',
+					city: 'a.city',
+					uf: 'a.uf',
+				},
+			];
+			const tables = { u: 'users', a: 'adresses' };
 			const fromDb =
 				typeof filter === 'number'
-					? await this.db({ u: 'users', a: 'adresses' })
-							.select(
-								{
-									id: 'u.id',
-									first_name: 'u.first_name',
-									last_name: 'u.last_name',
-									office: 'u.office',
-									email: 'u.email',
-									password: 'u.password',
-									cpf: 'u.cpf',
-									phone: 'u.phone',
-									active: 'u.active',
-									level: 'u.level',
-									tenancy_id: 'u.tenancy_id',
-									unit_id: 'u.unit_id',
-								},
-								{
-									cep: 'a.cep',
-									street: 'a.street',
-									number: 'a.number',
-									complement: 'a.complement',
-									district: 'a.district',
-									city: 'a.city',
-									uf: 'a.uf',
-								}
-							)
+					? await this.db(tables)
+							.select(...fields)
 							.where('u.id', filter)
 							.andWhereRaw('a.user_id = u.id')
 							.first()
-					: await this.db({ u: 'users', a: 'adresses' })
-							.select(
-								{
-									id: 'u.id',
-									first_name: 'u.first_name',
-									last_name: 'u.last_name',
-									office: 'u.office',
-									email: 'u.email',
-									password: 'u.password',
-									cpf: 'u.cpf',
-									phone: 'u.phone',
-									active: 'u.active',
-									level: 'u.level',
-									tenancy_id: 'u.tenancy_id',
-								},
-								{
-									cep: 'a.cep',
-									street: 'a.street',
-									number: 'a.number',
-									complement: 'a.complement',
-									district: 'a.district',
-									city: 'a.city',
-									uf: 'a.uf',
-								}
-							)
+					: await this.db(tables)
+							.select(...fields)
 							.where('u.email', filter)
 							.andWhereRaw('a.user_id = u.id')
 							.first();
@@ -314,7 +293,7 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async setTenancyPlans(plans: IUnitPlan[], tenancyId: number) {
+	private async setTenancyPlans(plans: IUnitProduct[], tenancyId: number) {
 		try {
 			for (const plan of plans) {
 				onLog('plan to save', plan);
