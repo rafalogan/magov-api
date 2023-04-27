@@ -1,3 +1,4 @@
+import { IFile } from './file';
 import { IKeyword } from './keyword';
 import { IID, IReadOptions } from './shared';
 import { ITheme } from './theme';
@@ -21,6 +22,7 @@ export interface IPropositionModel extends IProposition {
 	themes: string[];
 	demands?: number[];
 	tasks: ITaskProposition[];
+	file?: IFile;
 }
 
 export interface IPropositionViewModel extends IProposition {
@@ -30,6 +32,7 @@ export interface IPropositionViewModel extends IProposition {
 	demands?: IDemandPoprosition[];
 	propositions?: ISubProposition[];
 	tasks?: ITaskProposition[];
+	file?: IFile;
 }
 
 export interface IBudgetProposition {

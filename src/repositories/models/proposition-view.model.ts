@@ -1,5 +1,5 @@
 import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
-import { Keyword, Theme } from '../entities';
+import { FileEntity, Keyword, Theme } from '../entities';
 import { IBudgetProposition, IDemandPoprosition, IPropositionViewModel, ISubProposition, ITaskProposition } from '../types';
 
 export class PropositionViewModel {
@@ -12,6 +12,7 @@ export class PropositionViewModel {
 	parentId?: number;
 	unitId: number;
 	typeId: number;
+	file?: FileEntity;
 	tenancyId: number;
 	budgets?: IBudgetProposition[];
 	keywords: Keyword[];
@@ -30,6 +31,7 @@ export class PropositionViewModel {
 		this.parentId = setInstanceId(data.parentId);
 		this.unitId = Number(data.unitId);
 		this.typeId = Number(data.typeId);
+		this.file = data?.file ? new FileEntity(data.file) : undefined;
 		this.tenancyId = Number(data.tenancyId);
 		this.budgets = this.setBudgets(data.budgets);
 		this.keywords = data.keywords.map(i => new Keyword(i));

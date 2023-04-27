@@ -1,6 +1,6 @@
 import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { IPropositionModel, ITask } from '../types';
-import { Task } from 'src/repositories/entities';
+import { FileEntity, Task } from 'src/repositories/entities';
 
 export class PropositionModel {
 	id?: number;
@@ -12,6 +12,7 @@ export class PropositionModel {
 	parentId?: number;
 	unitId: number;
 	typeId: number;
+	file?: FileEntity;
 	tenancyId: number;
 	budgets?: number[];
 	keywords: string[];
@@ -30,6 +31,7 @@ export class PropositionModel {
 		this.unitId = Number(data.unitId);
 		this.typeId = Number(data.typeId);
 		this.tenancyId = Number(data.tenancyId);
+		this.file = data.file ? new FileEntity(data?.file) : undefined;
 		this.budgets = data.budgets;
 		this.keywords = data.keywords;
 		this.themes = data.themes;
