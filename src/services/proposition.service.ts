@@ -77,6 +77,7 @@ export class PropositionService extends DatabaseService {
 			}
 
 			if (data?.tasks?.length) await this.setTasks(data.tasks, id);
+			if (data?.file) await this.setFile(data.file, 'propositionId', id);
 
 			return { message: 'Proposition updated with success', data: { ...toUpdate, ...data } };
 		} catch (err) {
