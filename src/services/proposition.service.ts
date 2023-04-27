@@ -1,6 +1,6 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
-import { Proposition, Task } from 'src/repositories/entities';
+import { FileEntity, Proposition, Task } from 'src/repositories/entities';
 import { GovernmentExpensesModel, PropositionModel, PropositionsReadOptionsModel, PropositionViewModel } from 'src/repositories/models';
 import { IGovernmentExpensesModel, IProposition, IServiceOptions } from 'src/repositories/types';
 import { convertBlobToString, convertDataValues, existsOrError, isRequired, notExistisOrError, setValueNumberToView } from 'src/utils';
@@ -39,8 +39,9 @@ export class PropositionService extends DatabaseService {
 				  )
 				: undefined;
 			await this.setTasks(data.tasks, id);
+			const file = data?.file ? await this.setFile(data.file, 'propositionId', id) : undefined;
 
-			return { message: 'Proposition saved with success', data: { ...data, id, governmentExpense } };
+			return { message: 'Proposition saved with success', data: { ...data, id, governmentExpense, file } };
 		} catch (err) {
 			return err;
 		}
@@ -185,8 +186,9 @@ export class PropositionService extends DatabaseService {
 			});
 
 			const tasks = await this.getTasksProposition(fromDB.id);
+			const file = await this.getFile(fromDB.id);
 
-			return new PropositionViewModel(convertDataValues({ ...fromDB, budgets, demands, keywords, themes, tasks }, 'camel'));
+			return new PropositionViewModel(convertDataValues({ ...fromDB, budgets, demands, keywords, themes, tasks, file }, 'camel'));
 		} catch (err) {
 			return err;
 		}
@@ -333,6 +335,17 @@ export class PropositionService extends DatabaseService {
 				i = convertDataValues(i, 'camel');
 				return { ...i, responsible: `${i.userFirstName} ${i.userLastName}` };
 			});
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getFile(propositionId: number) {
+		try {
+			const fromDB = await this.db('files').where('proposition_id', propositionId).first();
+			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			return fromDB?.id ? new FileEntity(convertDataValues(fromDB, 'camel')) : fromDB;
 		} catch (err) {
 			return err;
 		}
