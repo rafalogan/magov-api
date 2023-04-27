@@ -77,7 +77,7 @@ export class ModulesFactory {
 		);
 		this.originModule = new OriginModule({ ...this.getRouteOptions(), service: services.originService });
 		this.revenueModule = new RevenueModule({ ...this.getRouteOptions(), service: services.revenueService }, upload);
-		this.propositionModule = new PropositionModule({ ...this.getRouteOptions(), service: services.propositionService });
+		this.propositionModule = new PropositionModule({ ...this.getRouteOptions(), service: services.propositionService }, upload);
 		this.taskModule = new TaskModule({ ...this.getRouteOptions(), service: services.taskService });
 		this.commentModule = new CommentModule({ ...this.getRouteOptions(), service: services.commentService });
 		this.unitExpenseModule = new UnitExpenseModule({ ...this.getRouteOptions(), service: services.unitExpenseService }, upload);

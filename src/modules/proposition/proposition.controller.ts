@@ -6,7 +6,7 @@ import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
 import { PropositionModel, PropositionsReadOptionsModel } from 'src/repositories/models';
 import { ITaskProposition } from 'src/repositories/types';
 import { PropositionService } from 'src/services';
-import { isRequired, notExistisOrError, requiredFields } from 'src/utils';
+import { isRequired, notExistisOrError, requiredFields, setFileToSave } from 'src/utils';
 
 export class PropositionController extends Controller {
 	constructor(private propositionService: PropositionService) {
@@ -21,7 +21,8 @@ export class PropositionController extends Controller {
 		}
 
 		const tenancyId = Number(req.body) || getTenancyByToken(req);
-		const proposition = new PropositionModel({ ...req.body, tenancyId });
+		const file = req.file?.originalname ? setFileToSave(req) : undefined;
+		const proposition = new PropositionModel({ ...req.body, tenancyId, file });
 
 		this.propositionService
 			.save(proposition)
@@ -32,7 +33,8 @@ export class PropositionController extends Controller {
 	edit(req: Request, res: Response) {
 		const { id } = req.params;
 		const tenancyId = getTenancyByToken(req) || Number(req.body || req.query.tenancyId);
-		const proposition = new PropositionModel({ ...req.body, tenancyId }, Number(id));
+		const file = req.file?.originalname ? setFileToSave(req) : undefined;
+		const proposition = new PropositionModel({ ...req.body, tenancyId, file }, Number(id));
 
 		this.propositionService
 			.save(proposition)
