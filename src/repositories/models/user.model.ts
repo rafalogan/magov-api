@@ -1,6 +1,6 @@
 import { clearString, hashString, setInstanceId } from 'src/utils';
 
-import { IUserModel, IUserPlan } from '../types';
+import { IUnitModel, IUserModel, IUserPlan } from '../types';
 import { Address, FileEntity } from 'src/repositories/entities';
 import { UnitModel } from './unit.model';
 
@@ -39,11 +39,19 @@ export class UserModel {
 		this.userRules = data.userRules?.map(Number) || [];
 		this.address = new Address(data.address);
 		this.plans = this.setUserPlans(data.plans);
-		this.unit = this.plans?.length && data.unit ? new UnitModel({ ...data.unit, plan: { id: this.plans[0].id, name: '' } }) : undefined;
+		this.unit = this.setUserUit(data.unit, this.plans);
 		this.image = data.image ? new FileEntity(data.image) : undefined;
 	}
 
 	private setUserPlans(plans?: IUserPlan[]) {
 		return !plans?.length ? undefined : plans.map(i => ({ id: Number(i.id), amount: Number(i.amount) || 1 } as IUserPlan));
+	}
+
+	private setUserUit(unit?: IUnitModel, plans?: IUserPlan[]) {
+		if (!unit) return undefined;
+
+		const products = unit.products?.length ? unit.products : plans ? plans : undefined;
+
+		return new UnitModel({ ...unit, products });
 	}
 }
