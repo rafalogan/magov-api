@@ -6,5 +6,9 @@ export interface IPropositionsType extends IID {
 	description: Blob | string;
 	document?: IFile;
 	active?: boolean;
-	subTypes?: IPropositionsType[];
+	parentId?: number;
+}
+
+export interface IPropositionsTypeViewModel extends IPropositionsType {
+	subTypes?: IPropositionsTypeViewModel[];
 }

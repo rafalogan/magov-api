@@ -1,10 +1,11 @@
 import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
-import { PropositionsType } from 'src/repositories/entities';
+import { FileEntity, PropositionsType } from 'src/repositories/entities';
 import { PropositionsTypeModel } from 'src/repositories/models';
 import { IFile, IPropositionsType, IServiceOptions } from 'src/repositories/types';
-import { convertDataValues, deleteFile, existsOrError, notExistisOrError } from 'src/utils';
+import { convertBlobToString, convertDataValues, deleteFile, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
+import { onLog } from 'src/core/handlers';
 
 export class PropositionsTypeService extends DatabaseService {
 	constructor(options: IServiceOptions) {
@@ -52,12 +53,18 @@ export class PropositionsTypeService extends DatabaseService {
 		try {
 			if (id) return this.getPropositionsType(id);
 
-			return this.db({ t: 'types', f: 'files' })
-				.select({ id: 't.id', name: 't.name' }, { document_url: 'f.url' })
-				.whereRaw('f.type_id = t.id')
+			return this.db('types')
 				.then(res => {
 					existsOrError(Array.isArray(res), { message: 'Internal error', status: INTERNAL_SERVER_ERROR });
-					return res.map(i => convertDataValues(i, 'camel'));
+					const result: any[] = [];
+					for (const item of res) {
+						const data = convertDataValues(item, 'camel');
+						data.description = convertBlobToString(data.description);
+						data.active = !!data.active;
+
+						result.push(data);
+					}
+					return this.setVAlues(result);
 				})
 				.catch(err => err);
 		} catch (err) {
@@ -67,29 +74,17 @@ export class PropositionsTypeService extends DatabaseService {
 
 	async getPropositionsType(value: number | string) {
 		try {
-			const fromDB = await this.db({ t: 'types', f: 'files' })
-				.select(
-					{ id: 't.id', name: 't.name', description: 't.description' },
-					{
-						title: 'f.title',
-						alt: 'f.alt',
-						domument_name: 'f.name',
-						filename: 'f.filename',
-						type: 'f.type',
-						url: 'f.url',
-					}
-				)
-				.where('t.id', value)
-				.andWhereRaw('f.type_id = t.id')
-				.orWhere('t.name', value)
-				.first();
+			const fromDB =
+				typeof value === 'number' ? await this.db('types').where('id', value).first() : await this.db('types').where('name', value).first();
 
 			existsOrError(fromDB, { message: 'Not found', status: NOT_FOUND });
 			existsOrError(fromDB?.id, { message: 'Internal error', status: INTERNAL_SERVER_ERROR });
 
+			const document = await this.getDocument(fromDB?.id);
+
 			return new PropositionsTypeModel({
 				...convertDataValues(fromDB, 'camel'),
-				document: convertDataValues({ ...fromDB, name: fromDB.document_name }, 'camel'),
+				document,
 			});
 		} catch (err) {
 			return err;
@@ -119,5 +114,40 @@ export class PropositionsTypeService extends DatabaseService {
 		} catch (err) {
 			return err;
 		}
+	}
+
+	private async getDocument(typeId: number) {
+		try {
+			const fromDB = await this.db('files').where({ type_id: typeId }).first();
+			notExistisOrError(fromDB.severity === 'ERROR', { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			if (fromDB?.id) return new FileEntity(convertDataValues(fromDB, 'camel'));
+
+			return undefined;
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private setVAlues(data: any[], parentId?: number) {
+		const rootItens = data.filter(i => !i.parentId);
+
+		if (parentId) {
+			return data
+				.filter(i => i.parentId == parentId)
+				.map(i => {
+					i.subTypes = this.setVAlues(data, i.id);
+					return i;
+				});
+		}
+
+		if (rootItens.length !== 0) {
+			return rootItens.map(i => {
+				i.subTypes = this.setVAlues(data, i.id);
+				return i;
+			});
+		}
+
+		return [];
 	}
 }

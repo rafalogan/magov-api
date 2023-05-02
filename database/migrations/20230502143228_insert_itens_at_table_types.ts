@@ -1,7 +1,7 @@
 import { Knex } from 'knex';
-import { IPropositionsType } from 'src/repositories/types';
+import { IPropositionsTypeViewModel } from 'src/repositories/types';
 
-const modelsTypes: IPropositionsType[] = [
+const modelsTypes: IPropositionsTypeViewModel[] = [
 	{
 		name: 'Comunicados',
 		description: '',
@@ -636,7 +636,7 @@ const modelsTypes: IPropositionsType[] = [
 	},
 ];
 
-const insertItem = async (knex: Knex, items: IPropositionsType[], parentId?: number): Promise<void> => {
+const insertItem = async (knex: Knex, items: IPropositionsTypeViewModel[], parentId?: number): Promise<void> => {
 	for (const item of items) {
 		const { name, description, active, subTypes } = item;
 
@@ -651,7 +651,7 @@ const insertItem = async (knex: Knex, items: IPropositionsType[], parentId?: num
 	return;
 };
 
-const delItem = async (knex: Knex, items: IPropositionsType[]): Promise<void> => {
+const delItem = async (knex: Knex, items: IPropositionsTypeViewModel[]): Promise<void> => {
 	for (const item of items) {
 		if (item.subTypes?.length) await delItem(knex, item.subTypes);
 		await knex('types').where('name', item.name).del();
