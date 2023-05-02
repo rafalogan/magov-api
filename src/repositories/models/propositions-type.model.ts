@@ -7,13 +7,15 @@ export class PropositionsTypeModel {
 	name: string;
 	description?: string;
 	active: boolean;
-	document: FileEntity;
+	document?: FileEntity;
+	parentId?: number;
 
 	constructor(data: IPropositionsType, id?: number) {
 		this.id = setInstanceId(id || data.id);
 		this.name = data.name.trim();
 		this.description = convertBlobToString(data.description);
 		this.active = !!data.active;
-		this.document = new FileEntity(data.document);
+		this.document = data.document ? new FileEntity(data.document) : undefined;
+		this.parentId = data.parentId;
 	}
 }
