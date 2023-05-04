@@ -10,6 +10,7 @@ export class Proposition {
 	favorite?: boolean;
 	expense?: number;
 	parentId?: number;
+	propositionUrl?: string;
 	unitId: number;
 	typeId: number;
 	tenancyId: number;
@@ -26,6 +27,7 @@ export class Proposition {
 		this.unitId = Number(data.unitId);
 		this.typeId = Number(data.typeId);
 		this.tenancyId = Number(data.tenancyId);
+		this.propositionUrl = data.proprositionUrl || undefined;
 	}
 
 	private setExpense(value?: number) {

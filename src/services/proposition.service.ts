@@ -219,6 +219,21 @@ export class PropositionService extends DatabaseService {
 			.catch(err => err);
 	}
 
+	async addUrl(propositionUrl: string, id: number, tenancyId: number) {
+		try {
+			const fromDB = (await this.getProprosition(id, tenancyId)) as any;
+
+			existsOrError(fromDB?.id, fromDB);
+			const toUpdate = new Proposition({ ...fromDB, propositionUrl, tenancyId }, id);
+
+			await this.db('propositions').where({ id }).andWhere('tenancy_id', tenancyId).update(convertDataValues(toUpdate));
+
+			return { message: `Url: ${propositionUrl}, sucessfully added`, data: { ...fromDB, propositionUrl } };
+		} catch (err) {
+			return err;
+		}
+	}
+
 	private async setDemands(values: number[], propositionId: number) {
 		try {
 			for (const demandId of values) {
