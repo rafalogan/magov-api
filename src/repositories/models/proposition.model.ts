@@ -12,6 +12,7 @@ export class PropositionModel {
 	parentId?: number;
 	unitId: number;
 	typeId: number;
+	propositionUrl?: string;
 	file?: FileEntity;
 	tenancyId: number;
 	budgets?: number[];
@@ -30,6 +31,7 @@ export class PropositionModel {
 		this.parentId = setInstanceId(data.parentId);
 		this.unitId = Number(data.unitId);
 		this.typeId = Number(data.typeId);
+		this.propositionUrl = data.proprositionUrl || undefined;
 		this.tenancyId = Number(data.tenancyId);
 		this.file = data.file ? new FileEntity(data?.file) : undefined;
 		this.budgets = data.budgets;

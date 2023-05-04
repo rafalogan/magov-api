@@ -14,6 +14,7 @@ export interface IProposition extends IID {
 	unitId: number;
 	typeId: number;
 	tenancyId: number;
+	proprositionUrl?: string;
 }
 
 export interface IPropositionModel extends IProposition {
