@@ -14,31 +14,75 @@ export class UserService extends DatabaseService {
 
 	async create(data: UserModel) {
 		try {
-			const fromDB = (await this.getUser(data.email)) as UserViewModel;
-			notExistisOrError(fromDB?.id, fromDB);
+			const fromDB = (await this.getUser(data.email)) as any;
+			notExistisOrError(fromDB?.id, { message: 'User already exists', status: FORBIDDEN });
+			notExistisOrError(fromDB?.err, fromDB);
 
-			const tenancyId = data.plans || data.tenancyId ? await this.setTenancy(data.tenancyId) : undefined;
-			existsOrError(Number(tenancyId), { message: 'Internal error', error: tenancyId, status: INTERNAL_SERVER_ERROR });
+			if (data?.plans) return this.setMasterUserTenancy(data);
+			if (data?.tenancyId && data.unitId) return this.setUserUnit(data);
 
-			if (data.plans?.length) await this.setTenancyPlans(data.plans, Number(tenancyId));
+			return this.setMasterUser(data);
+		} catch (err) {
+			return err;
+		}
+	}
 
-			const toSave = new User({ ...data, tenancyId } as IUser);
-			const [userId] = await this.db('users').insert(convertDataValues(toSave));
-			existsOrError(Number(userId), { messages: 'Internal', error: userId, status: INTERNAL_SERVER_ERROR });
+	private async setMasterUserTenancy(data: UserModel) {
+		try {
+			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
+			let unit: any;
 
-			await this.saveAddress(data.address, userId);
+			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
 
-			if (data.userRules?.length) await this.saveUserRules(data.userRules, userId);
-			if (data.image) await this.setUserImage(data.image, userId);
+			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
+			const [id] = await this.db('users').insert(convertDataValues(toSave));
 
-			const unitSave = data?.unit
-				? ((await this.unitService.create({ ...data.unit, active: true, tenancyId: Number(tenancyId) } as UnitModel)) as any)
-				: undefined;
-			const unit = unitSave.unit || undefined;
+			if (data.userRules?.length) await this.saveUserRules(data.userRules, id);
+			if (data.image) await this.setUserImage(data.image, id);
+
+			if (data.unit) {
+				const action = (await this.unitService.create(new UnitModel({ ...data.unit, active: true, tenancyId: Number(tenancyId) }))) as any;
+				existsOrError(action?.unit, { message: 'Error Unit Not saved', err: action, status: action?.status || INTERNAL_SERVER_ERROR });
+
+				unit = action?.unit;
+			}
 
 			deleteField(data, 'password');
 
-			return { message: 'User save with success', user: { ...data, tenancyId, id: userId, unit } };
+			return { message: 'User successful saved', user: { ...data, id, tenancyId, unit } };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setUserUnit(data: UserModel) {
+		try {
+			const tenancyId = await this.setTenancy(data.tenancyId);
+			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
+
+			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
+			const [id] = await this.db('users').insert(convertDataValues(toSave));
+			existsOrError(Number(id), { message: 'internl error', err: id, status: INTERNAL_SERVER_ERROR });
+
+			deleteField(data, 'password');
+
+			return { message: 'User successful saved', user: { ...data, id, tenancyId } };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setMasterUser(data: UserModel) {
+		try {
+			const toSave = new User({ ...data, tenancyId: undefined });
+			const [id] = await this.db('users').insert(convertDataValues(toSave));
+
+			if (data.userRules?.length) await this.saveUserRules(data.userRules, id);
+			if (data.image) await this.setUserImage(data.image, id);
+
+			deleteField(data, 'password');
+
+			return { message: 'User successful saved', user: { ...data, id } };
 		} catch (err) {
 			return err;
 		}
@@ -146,17 +190,18 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-							.select(...fields)
-							.where('u.id', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first()
+						.select(...fields)
+						.where('u.id', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first()
 					: await this.db(tables)
-							.select(...fields)
-							.where('u.email', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first();
+						.select(...fields)
+						.where('u.email', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first();
 
-			existsOrError(fromDb?.id, { message: 'User not found', status: NOT_FOUND });
+			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
+			notExistisOrError(fromDb.severity === 'ERROR', { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDb });
 			const raw = convertDataValues(fromDb, 'camel');
 			const { id } = raw;
 			onLog('raw', raw);
@@ -177,13 +222,13 @@ export class UserService extends DatabaseService {
 
 			const plans = !raw.unitId
 				? await this.getValues({
-						tableIds: 'tenancies_plans',
-						fieldIds: 'plan_id',
-						whereIds: 'tenancy_id',
-						value: raw.tenancyId,
-						table: 'products',
-						fields: ['id', 'name'],
-				  })
+					tableIds: 'tenancies_plans',
+					fieldIds: 'plan_id',
+					whereIds: 'tenancy_id',
+					value: raw.tenancyId,
+					table: 'products',
+					fields: ['id', 'name'],
+				})
 				: undefined;
 
 			return new UserViewModel({
@@ -248,30 +293,34 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async setTenancy(id?: number) {
+	private async setTenancy(tenancyId?: number, rawPlans?: IUnitProduct[]) {
 		try {
-			if (Number(id)) {
-				const plans = (await this.getPlansBytenancy(id as number)) as any[];
-				existsOrError(Array.isArray(plans), plans);
+			if (!tenancyId) {
+				const tenancy = new Tenancy({ totalUsers: 1, active: true } as ITenancy);
+				const [id] = await this.db('tenancies').insert(convertDataValues(tenancy));
+				existsOrError(Number(id), { message: 'Internal error', err: id, status: INTERNAL_SERVER_ERROR });
 
-				const fromDB = await this.db('tenancies').where({ id }).first();
-				existsOrError(fromDB?.id, { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
-				const raw = convertDataValues(fromDB, 'camel');
+				if (rawPlans?.length) await this.setTenancyPlans(rawPlans, id);
 
-				const userLimit = plans.map(i => i.limit).reduce((total, limit) => total + limit, 0);
-				existsOrError(raw.totalUsers < userLimit, { message: 'User limit reached', status: FORBIDDEN });
-				await this.db('tenancies')
-					.where({ id })
-					.update(convertDataValues(new Tenancy({ ...raw, totalUsers: raw.totalUsers + 1 })));
-				return Number(id);
+				return id;
 			}
 
-			const tenancy = new Tenancy({ totalUsers: 1, active: true } as ITenancy);
-			const [tenancyId] = await this.db('tenancies').insert(convertDataValues(tenancy));
+			if (rawPlans?.length) await this.setTenancyPlans(rawPlans, tenancyId);
 
-			existsOrError(Number(tenancyId), { message: 'Internal error', error: tenancyId, status: INTERNAL_SERVER_ERROR });
+			const plans = (await this.getPlansBytenancy(tenancyId as number)) as any[];
+			existsOrError(Array.isArray(plans), plans);
 
-			return tenancyId;
+			const fromDB = await this.db('tenancies').where({ id: tenancyId }).first();
+			existsOrError(fromDB?.id, { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+			const raw = convertDataValues(fromDB, 'camel');
+
+			const userLimit = plans.map(i => i.limit).reduce((total, limit) => total + limit, 0);
+			existsOrError(raw.totalUsers < userLimit, { message: 'User limit reached', status: FORBIDDEN });
+
+			await this.db('tenancies')
+				.where({ id: tenancyId })
+				.update(convertDataValues(new Tenancy({ ...raw, totalUsers: raw.totalUsers + 1 })));
+			return Number(tenancyId);
 		} catch (err) {
 			return err;
 		}

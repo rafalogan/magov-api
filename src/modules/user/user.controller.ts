@@ -21,7 +21,7 @@ export class UserController extends Controller {
 
 		const address = setAddress(req);
 		const image = setUserImage(req);
-		const tenancyId = req.body.tenancyId ?? getTenancyByToken(req);
+		const tenancyId = getTenancyByToken(req) || req.body.tenancyId;
 
 		const user = new UserModel({ ...req.body, tenancyId, address, image });
 
