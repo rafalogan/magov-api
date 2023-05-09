@@ -23,6 +23,9 @@ export class DemandService extends DatabaseService {
 
 	async create(data: DemandModel) {
 		try {
+			const fromDB = await this.db('demands').where('name', data.name).andWhere('tenancy_id', data.tenancyId).first();
+			notExistisOrError(fromDB?.id, { message: 'Demand already existis', status: FORBIDDEN });
+
 			if (data?.plaintiff?.id) return this.createSimpleDemand(data);
 			return this.createDemandAndPlantiff(data);
 		} catch (err) {

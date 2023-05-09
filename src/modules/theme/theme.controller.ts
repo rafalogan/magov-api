@@ -22,7 +22,7 @@ export class ThemeController extends Controller {
 
 		this.themeService
 			.save(theme)
-			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
+			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, status: err.status }));
 	}
 
@@ -32,7 +32,7 @@ export class ThemeController extends Controller {
 
 		this.themeService
 			.save(theme)
-			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
+			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err, status: err.status }));
 	}
 
@@ -45,7 +45,7 @@ export class ThemeController extends Controller {
 
 		this.themeService
 			.read(filter, active)
-			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
+			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
@@ -54,7 +54,7 @@ export class ThemeController extends Controller {
 
 		this.themeService
 			.disable(Number(id))
-			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
+			.then((data: any) => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
