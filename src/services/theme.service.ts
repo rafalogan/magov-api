@@ -3,7 +3,7 @@ import { onLog } from 'src/core/handlers';
 
 import { Theme } from 'src/repositories/entities';
 import { IServiceOptions } from 'src/repositories/types';
-import { convertDataValues } from 'src/utils';
+import { convertDataValues, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 
 export class ThemeService extends DatabaseService {
@@ -13,14 +13,13 @@ export class ThemeService extends DatabaseService {
 
 	async create(data: Theme) {
 		try {
-			const fromDB = await this.read(data.name);
+			const fromDB = (await this.getTheme(data.name)) as any;
+			notExistisOrError(fromDB?.id, { message: 'Theme already exists', status: FORBIDDEN });
 
-			if (fromDB.id) return { message: 'Theme already exists', status: FORBIDDEN };
-			const [id] = await this.db('themes').insert(convertDataValues(data));
+			const [id] = await this.db('themes').insert(convertDataValues({ ...data, active: true }));
+			existsOrError(Number(id), { message: 'internal server error', status: INTERNAL_SERVER_ERROR });
 
-			return id
-				? { message: 'Theme saved with success', data: { ...data, id } }
-				: { message: 'internal server error', status: INTERNAL_SERVER_ERROR };
+			return { message: 'Theme saved with success', data: { ...data, id } };
 		} catch (err) {
 			return err;
 		}
@@ -28,9 +27,8 @@ export class ThemeService extends DatabaseService {
 
 	async update(data: Theme, id: number) {
 		try {
-			const fromDB = await this.read(id);
-
-			if (!fromDB?.id) return { message: 'Theme not found', status: NOT_FOUND };
+			const fromDB = (await this.getTheme(id)) as any;
+			existsOrError(fromDB?.id, { message: 'Theme not found', status: NOT_FOUND });
 
 			const toSave = new Theme({ ...fromDB, ...data });
 			await this.db('themes').where({ id }).update(convertDataValues(toSave));
@@ -42,35 +40,40 @@ export class ThemeService extends DatabaseService {
 	}
 
 	async read(filter?: string | number, active?: string) {
-		onLog('filter', filter);
-		onLog('active', active);
-		if (filter) {
-			return this.db('themes')
-				.where({ id: filter })
-				.orWhere({ name: filter })
-				.first()
-				.then(res => new Theme(convertDataValues(res, 'camel')))
-				.catch(err => err);
-		}
+		try {
+			onLog('filter', filter);
+			onLog('active', active);
+			if (filter) return this.getTheme(filter);
 
-		if (active) {
-			const value = active === 'true';
-			return this.db('themes')
-				.where({ active: value })
-				.then(res => res?.map(t => new Theme(t)))
-				.catch(err => err);
-		}
+			const fromDB = active ? await this.db('themes').where({ active: true }) : await this.db('themes');
+			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 
-		return this.db('themes')
-			.then(res => res?.map(t => new Theme(t)))
-			.catch(err => err);
+			return fromDB.map(item => new Theme(convertDataValues(item, 'camel')));
+		} catch (err) {
+			return err;
+		}
+	}
+
+	async getTheme(filter: string | number) {
+		try {
+			const fromDB =
+				typeof filter === 'number'
+					? await this.db('themes').where('id', filter).first()
+					: await this.db('themes').where('name', filter).first();
+			existsOrError(fromDB, { message: 'theme not found', status: NOT_FOUND });
+			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			return new Theme(convertDataValues(fromDB, 'camel'));
+		} catch (err) {
+			return err;
+		}
 	}
 
 	async disable(id: number) {
 		try {
-			const fromDB = await this.read(id);
-
-			if (!fromDB?.id) return { message: 'Theme not found', status: NOT_FOUND };
+			const fromDB = (await this.getTheme(id)) as any;
+			existsOrError(fromDB?.id, { message: 'Theme not found', status: NOT_FOUND });
+			existsOrError(fromDB?.active, { message: 'Theme already desabled', status: FORBIDDEN });
 
 			const theme = new Theme(convertDataValues({ ...fromDB, active: false }, 'camel'));
 
