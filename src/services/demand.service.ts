@@ -10,6 +10,7 @@ import {
 	existsOrError,
 	isDataInArray,
 	isRequired,
+	notExistisOrError,
 	setValueNumberToView,
 } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
@@ -22,22 +23,52 @@ export class DemandService extends DatabaseService {
 
 	async create(data: DemandModel) {
 		try {
-			const plaintiffId = await this.setPlaintiff({ ...data.plaintiff, tenancyId: data.tenancyId, active: data.active });
+			if (data?.plaintiff?.id) return this.createSimpleDemand(data);
+			return this.createDemandAndPlantiff(data);
+		} catch (err) {
+			return err;
+		}
+	}
 
-			existsOrError(Number(plaintiffId), { messsage: 'Internal Server Errro', err: plaintiffId, status: INTERNAL_SERVER_ERROR });
+	async createSimpleDemand(data: DemandModel) {
+		try {
+			const plaintiffId = Number(data.plaintiff.id);
+			existsOrError(Number(plaintiffId), { messsage: 'Error plaintiff not found', status: INTERNAL_SERVER_ERROR });
 
-			const demandToSave = new Demand({ ...data, active: data.active || true, plaintiffId } as IDemand);
-			onLog('demand To Save', demandToSave);
-			const [id] = await this.db('demands').insert(convertDataValues(demandToSave));
-
-			existsOrError(Number(id), { messsage: 'Internal Server Error', err: id, status: INTERNAL_SERVER_ERROR });
-
-			onLog('keywords', data.keywords.length);
-
-			if (isDataInArray(data.keywords)) await this.setKeywords(data.keywords, Number(id));
-			if (isDataInArray(data.themes)) await this.setThemes(data.themes, Number(id));
+			const demand = new Demand({ ...data, plaintiffId });
+			const id = await this.saveDemand(demand, data.keywords, data.themes);
+			existsOrError(Number(id), id);
 
 			return { message: 'Demand saved successfully', data: { ...data, id } };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	async createDemandAndPlantiff(data: DemandModel) {
+		try {
+			const plaintiffId = await this.setPlaintiff({ ...data.plaintiff, tenancyId: data.tenancyId, active: data.active });
+			existsOrError(Number(plaintiffId), { messsage: 'Error plaintiff not found', status: INTERNAL_SERVER_ERROR });
+
+			const demand = new Demand({ ...data, plaintiffId: Number(plaintiffId) });
+			const id = await this.saveDemand(demand, data.keywords, data.themes);
+			existsOrError(Number(id), id);
+
+			return { message: 'Demand saved successfully', data: { ...data, id } };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	async saveDemand(data: Demand, keywords: string[], themes: string[]) {
+		try {
+			const [id] = await this.db('demands').insert(convertDataValues({ ...data, active: true }));
+			existsOrError(Number(id), { messsage: 'Internal Server Error', err: id, status: INTERNAL_SERVER_ERROR });
+
+			if (isDataInArray(keywords)) await this.setKeywords(keywords, Number(id));
+			if (isDataInArray(themes)) await this.setThemes(themes, Number(id));
+
+			return Number(id);
 		} catch (err) {
 			return err;
 		}
@@ -361,22 +392,27 @@ export class DemandService extends DatabaseService {
 
 	private async setPlaintiff(value: IPlantiffModel) {
 		try {
-			if (value.id) return Number(value.id);
-
 			const fromDB = await this.db('plaintiffs').where({ cpf_cnpj: value.cpfCnpj }).andWhere({ tenancy_id: value.tenancyId }).first();
-			if (fromDB?.id) return Number(fromDB.id);
+			if (fromDB?.id) return Number(fromDB?.id);
 
 			const data = new Plaintiff({ ...value } as IPlantiff);
 			const { email, phone, address } = value;
-			const [id] = await this.db('plaintiffs').insert(convertDataValues(data));
+			const [id] = await this.db('plaintiffs').insert(convertDataValues({ ...data, active: true }));
 			existsOrError(Number(id), { message: 'Internal error', err: id, status: INTERNAL_SERVER_ERROR });
 
-			if (Number(id)) {
-				await this.db('contacts').insert(convertDataValues({ email, phone, tenancyId: value.tenancyId, plaintiffId: id }));
-				await this.db('adresses').insert(convertDataValues({ ...address, plaintiffId: id }));
-			}
+			const [contactId] = await this.db('contacts').insert(
+				convertDataValues({ email, phone, tenancyId: value.tenancyId, plaintiffId: id })
+			);
+			existsOrError(Number(contactId), { message: 'Internal Error on save Contact', err: contactId, status: INTERNAL_SERVER_ERROR });
 
-			return id;
+			const [addressId] = await this.db('adresses').insert(convertDataValues({ ...address, plaintiffId: id }));
+			existsOrError(Number(addressId), {
+				message: 'Internal error on save Plaintiff Adress',
+				err: addressId,
+				status: INTERNAL_SERVER_ERROR,
+			});
+
+			return Number(id);
 		} catch (err) {
 			return err;
 		}

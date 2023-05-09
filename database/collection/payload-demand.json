@@ -1,0 +1,47 @@
+{
+	"name": "Nova demanda",
+	"description": "Descrição de demanda para tesst ",
+	"favorite": true,
+	"level": 5,
+	"active": true,
+	"deadLine": "2023-03-31T11:01:30",
+	"approximateIncome": 367568.98,
+	"status": "status da demanda opcional",
+	"unitId": 1,
+	"userId": 10,
+	"plaintiff": {
+		"name": "Shaulin M.P. Medeiros",
+		"birthday": "1990-01-27T00:00:00",
+		"institute": "Frango Frango",
+		"cpfCnpj": "907.234.607-60",
+		"relationshipType": null,
+		"observation": "Campo opcional, pode ser passado string com hmtl, undefined, ou null",
+		"relatives": null,
+		"voterRegistration": "446610012011",
+		"phone": "(61)998675487",
+		"email": "deamdnate@demand.com",
+		"parentId": null,
+		"instituteTypeId": 1,
+		"address": {
+			"cep": "72548-506",
+			"street": "Quadra QR 218 Conjunto F",
+			"number": null,
+			"complement": null,
+			"district": "Santa Maria",
+			"city": "Brasília",
+			"uf": "DF"
+		}
+	},
+	"tenancyId": null,
+	"keywords": [
+		"Arroz",
+		"Feijão",
+		"Salada",
+		"jordan"
+	],
+	"themes": [
+		"Saúde",
+		"Segurança",
+		"Educação"
+	]
+}
