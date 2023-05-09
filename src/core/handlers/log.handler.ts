@@ -9,7 +9,7 @@ const isDebug = process.env.DEBUG === 'true';
 const { cyan, cyanBg, black, reset, red, redBg, yellow, yellowBg, whiteBg } = TERMINAL_COLORS;
 
 export const onLog = (...args: any[]) => {
-	if (noProd || noHomolog) return console.log(`${cyanBg + black}[Log:]${reset}`, `${cyan} ${args[0]}${reset}`, ...args.slice(1));
+	if (noProd && noHomolog) return console.log(`${cyanBg + black}[Log:]${reset}`, `${cyan} ${args[0]}${reset}`, ...args.slice(1));
 	if (isDebug) return logger.log('log', `${args[0]}`, ...args.slice(1));
 };
 
@@ -27,7 +27,7 @@ export const onInfo = (...args: any[]) => logger.info(`${args[0]}`, ...args.slic
 
 export const onDebug = (...args: any[]) => {
 	if (isDebug) return logger.debug(`${args[0]}`, ...args.slice(1));
-	if (noProd || noHomolog) return console.log(`${whiteBg + black}[Debug:]${reset}`, ...args);
+	if (noProd && noHomolog) return console.log(`${whiteBg + black}[Debug:]${reset}`, ...args);
 };
 
 export const onHttp = (...args: any[]) => logger.http(stringify(...args));
