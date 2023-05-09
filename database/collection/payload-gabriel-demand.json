@@ -1,0 +1,44 @@
+{
+	"approximateIncome": 1,
+	"id": "new",
+	"name": "32649-270",
+	"description": "32649-270",
+	"favorite": true,
+	"level": "2",
+	"active": true,
+	"deadLine": "2023-03-31T11:01:30",
+	"status": "status da demanda opcional",
+	"unitId": 3,
+	"userId": 6,
+	"plaintiff": {
+		"address": {
+			"id": "4",
+			"cep": "32649-270",
+			"street": "Avenida Fausto Ribeiro da Silva",
+			"number": 0,
+			"complement": null,
+			"district": "Cidade Verde",
+			"city": "Betim",
+			"uf": "MG"
+		},
+		"name": "32649-270a",
+		"birthday": "2023-03-31T11:01:30",
+		"institute": "Empresa",
+		"cpfCnpj": "123.123.131-32",
+		"relationshipType": null,
+		"observation": "2",
+		"relatives": null,
+		"voterRegistration": "123",
+		"phone": "(21)23131-3131",
+		"email": "32649270@32649270.com",
+		"parentId": null,
+		"instituteTypeId": 1
+	},
+	"tenancyId": 3,
+	"keywords": [
+		"Feijão"
+	],
+	"themes": [
+		"Segurança"
+	]
+}

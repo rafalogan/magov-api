@@ -33,8 +33,8 @@ export class DemandModel {
 		this.status = data.status?.trim();
 		this.unitId = Number(data.unitId);
 		this.userId = Number(data.userId);
-		this.plaintiff = new PlaintiffModel(data.plaintiff);
 		this.tenancyId = data.tenancyId;
+		this.plaintiff = new PlaintiffModel({ ...data.plaintiff, tenancyId: this.tenancyId }, data.plaintiff?.id);
 		this.keywords = data.keywords;
 		this.themes = data.themes;
 	}
