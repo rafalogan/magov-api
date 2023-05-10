@@ -14,7 +14,7 @@ export interface IProposition extends IID {
 	unitId: number;
 	typeId: number;
 	tenancyId: number;
-	proprositionUrl?: string;
+	propositionUrl?: string;
 }
 
 export interface IPropositionModel extends IProposition {
@@ -63,4 +63,9 @@ export interface ITaskProposition {
 
 export interface IPropositionsReadOptions extends IReadOptions {
 	unitId?: number;
+}
+
+export interface IPropositonAddURL {
+	tenancyId: number;
+	propositionUrl: string;
 }

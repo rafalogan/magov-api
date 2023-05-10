@@ -6,7 +6,7 @@ import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
 import { PropositionModel, PropositionsReadOptionsModel } from 'src/repositories/models';
 import { ITaskProposition } from 'src/repositories/types';
 import { PropositionService } from 'src/services';
-import { isRequired, notExistisOrError, requiredFields, setFileToSave } from 'src/utils';
+import { existsOrError, isRequired, notExistisOrError, requiredFields, setFileToSave } from 'src/utils';
 
 export class PropositionController extends Controller {
 	constructor(private propositionService: PropositionService) {
@@ -27,6 +27,23 @@ export class PropositionController extends Controller {
 		this.propositionService
 			.save(proposition)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data?.status }))
+			.catch(err => ResponseHandle.onError({ res, err }));
+	}
+
+	addUrl(req: Request, res: Response) {
+		const { id } = req.params;
+		const tenancyId = getTenancyByToken(req) || Number(req.body.tenancyId);
+
+		try {
+			existsOrError(req.body.url, { message: isRequired('url'), status: BAD_REQUEST });
+			existsOrError(tenancyId, { message: isRequired('tenancyId'), status: BAD_REQUEST });
+		} catch (err) {
+			return ResponseHandle.onError({ res, err });
+		}
+
+		this.propositionService
+			.addUrl({ tenancyId, propositionUrl: req.body.url }, Number(id))
+			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 

@@ -2,7 +2,7 @@ import { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
 	return knex.schema.alterTable('propositions', (table: Knex.TableBuilder) => {
-		table.string('proposition_url').notNullable();
+		table.string('proposition_url').nullable();
 	});
 }
 

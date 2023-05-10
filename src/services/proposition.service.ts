@@ -2,7 +2,7 @@ import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-s
 import { onLog } from 'src/core/handlers';
 import { FileEntity, Proposition, Task } from 'src/repositories/entities';
 import { GovernmentExpensesModel, PropositionModel, PropositionsReadOptionsModel, PropositionViewModel } from 'src/repositories/models';
-import { IGovernmentExpensesModel, IProposition, IServiceOptions } from 'src/repositories/types';
+import { IGovernmentExpensesModel, IProposition, IPropositonAddURL, IServiceOptions } from 'src/repositories/types';
 import { convertBlobToString, convertDataValues, existsOrError, isRequired, notExistisOrError, setValueNumberToView } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { GovernmentExpensesService } from './government-expenses.service';
@@ -219,16 +219,19 @@ export class PropositionService extends DatabaseService {
 			.catch(err => err);
 	}
 
-	async addUrl(propositionUrl: string, id: number, tenancyId: number) {
+	async addUrl(data: IPropositonAddURL, id: number) {
 		try {
+			const { propositionUrl, tenancyId } = data;
 			const fromDB = (await this.getProprosition(id, tenancyId)) as any;
 
+			onLog('fromDB proposition', fromDB);
 			existsOrError(fromDB?.id, fromDB);
 			const toUpdate = new Proposition({ ...fromDB, propositionUrl, tenancyId }, id);
 
+			onLog('to update proposition', toUpdate);
 			await this.db('propositions').where({ id }).andWhere('tenancy_id', tenancyId).update(convertDataValues(toUpdate));
 
-			return { message: `Url: ${propositionUrl}, sucessfully added`, data: { ...fromDB, propositionUrl } };
+			return { message: `Url: ${propositionUrl}, sucessfully added` };
 		} catch (err) {
 			return err;
 		}

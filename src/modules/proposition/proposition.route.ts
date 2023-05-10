@@ -24,6 +24,12 @@ export class PropositionRoute extends Routes {
 			.all(methodNotAllowed);
 
 		this.app
+			.route('/propositions/add-url/:id')
+			.all(this.auth?.exec().authenticate())
+			.put(this.propositionController.addUrl.bind(this.propositionController))
+			.all(methodNotAllowed);
+
+		this.app
 			.route('/propositions/:id')
 			.all(this.auth?.exec().authenticate())
 			.get(this.propositionController.list.bind(this.propositionController))
