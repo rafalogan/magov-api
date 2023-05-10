@@ -1,6 +1,6 @@
 {
 	"name": "ma-governance-api",
-	"version": "1.4.3",
+	"version": "1.5.0",
 	"description": "Project of api in Ma Governance API",
 	"main": "index.js",
 	"scripts": {
