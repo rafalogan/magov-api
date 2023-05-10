@@ -4,3 +4,10 @@ export interface SendEmailOptions {
 	subject?: string;
 	message?: string;
 }
+
+export interface INotification {
+	to: string;
+	subject: string;
+	message: Blob | string;
+	from: string | string[];
+}
