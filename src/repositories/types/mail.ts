@@ -6,8 +6,8 @@ export interface SendEmailOptions {
 }
 
 export interface INotification {
-	to: string;
+	to: string | string[];
 	subject: string;
 	message: Blob | string;
-	from: string | string[];
+	from: string;
 }
