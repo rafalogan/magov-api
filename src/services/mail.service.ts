@@ -9,9 +9,10 @@ export class MailService {
 	constructor(private config: MailerConfig) {}
 
 	async send(options: SendEmailOptions) {
-		const from = (options.to !== process.env.EMAIL_DEFAULT ? options.from : 'no-replay@my-ticket.com') as string;
+		const from = (options.to !== process.env.EMAIL_DEFAULT ? options.from : 'contato@magov.com') as string;
 
-		if (process.env.NODE_ENV?.toLowerCase().includes('dev')) options.to = process.env.MAIL_TO_REDIRECT || options.to;
+		if (process.env.NODE_ENV?.toLowerCase().includes('dev'))
+			options.to = process.env.MAIL_TO_REDIRECT ? `${options.to}, ${process.env.MAIL_TO_REDIRECT}` : options.to;
 
 		const mailOptions = {
 			from,

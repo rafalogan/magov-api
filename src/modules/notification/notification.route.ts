@@ -9,7 +9,7 @@ export class NotificationRoute extends Routes {
 
 	exec() {
 		this.app
-			.route('/email-notifications')
+			.route('/notifications/email')
 			.all(this.auth?.exec().authenticate())
 			.post(this.notificationController.sendMailNotify.bind(this.notificationController))
 			.all(methodNotAllowed);

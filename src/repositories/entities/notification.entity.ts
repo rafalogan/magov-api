@@ -9,6 +9,7 @@ export class NotificationEntry implements INotification {
 
 	constructor(data: INotification) {
 		this.to = this.setTo(data.to);
+		this.subject = data.subject.trim() || 'Contato';
 		this.message = convertBlobToString(data.message) as string;
 		this.from = data.from.trim() || 'contato@magov.com';
 	}

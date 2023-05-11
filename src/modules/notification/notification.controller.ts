@@ -1,9 +1,9 @@
 import { BAD_REQUEST } from 'http-status';
 import { Request, Response } from 'express';
 
-import { existsOrError, isRequired, requiredFields } from 'src/utils';
+import { isRequired, notExistisOrError, requiredFields } from 'src/utils';
 import { NotificationService } from 'src/services';
-import { ResponseHandle } from 'src/core/handlers';
+import { ResponseHandle, onLog } from 'src/core/handlers';
 import { NotificationEntry } from 'src/repositories/entities';
 
 export class NotificationController {
@@ -17,6 +17,7 @@ export class NotificationController {
 		}
 
 		const data = new NotificationEntry(req.body);
+		onLog('data to send', data);
 
 		this.notificationService
 			.emailNotificate(data)
@@ -34,6 +35,6 @@ export class NotificationController {
 			{ field: from, message: isRequired('from') },
 		]);
 
-		existsOrError(requireds, { message: requireds?.join('\n '), status: BAD_REQUEST });
+		notExistisOrError(requireds, { message: requireds?.join('\n '), status: BAD_REQUEST });
 	}
 }
