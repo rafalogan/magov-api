@@ -25,3 +25,4 @@ export * from './seller.entity';
 export * from './government-expenses.entity';
 export * from './sale-payment.entity';
 export * from './types-recipes.entity';
+export * from './notification.entity';

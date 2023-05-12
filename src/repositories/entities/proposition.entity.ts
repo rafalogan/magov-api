@@ -27,7 +27,7 @@ export class Proposition {
 		this.unitId = Number(data.unitId);
 		this.typeId = Number(data.typeId);
 		this.tenancyId = Number(data.tenancyId);
-		this.propositionUrl = data.proprositionUrl || undefined;
+		this.propositionUrl = data.propositionUrl || undefined;
 	}
 
 	private setExpense(value?: number) {
