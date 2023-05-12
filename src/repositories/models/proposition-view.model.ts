@@ -32,7 +32,7 @@ export class PropositionViewModel {
 		this.parentId = setInstanceId(data.parentId);
 		this.unitId = Number(data.unitId);
 		this.typeId = Number(data.typeId);
-		this.propositionUrl = data.proprositionUrl || undefined;
+		this.propositionUrl = data.propositionUrl || undefined;
 		this.file = data?.file ? new FileEntity(data.file) : undefined;
 		this.tenancyId = Number(data.tenancyId);
 		this.budgets = this.setBudgets(data.budgets);
