@@ -1,8 +1,8 @@
 import { Multer } from 'multer';
 
 import { Credentials, UserViewModel } from 'src/repositories/models';
-import { User } from 'src/repositories/entities';
-import { IUserRule, IUserUnit } from './user';
+import { FileEntity, User } from 'src/repositories/entities';
+import { IUserPlan, IUserRule, IUserUnit } from './user';
 import { ModuleOptions } from './module';
 
 export interface ICredentials {
@@ -28,6 +28,8 @@ export interface IPayload {
 	userRules: IUserRule[];
 	tenancyId?: number;
 	unit: IUserUnit;
+	plans?: IUserPlan[];
+	image?: FileEntity;
 	iat: number;
 	exp: number;
 }
