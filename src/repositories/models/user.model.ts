@@ -22,6 +22,7 @@ export class UserModel {
 	plans?: IUserPlan[];
 	unit?: UnitModel;
 	image?: FileEntity;
+	newTenancy?: boolean;
 
 	constructor(data: IUserModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -41,6 +42,7 @@ export class UserModel {
 		this.plans = this.setUserPlans(data.plans);
 		this.unit = this.setUserUit(data.unit, this.plans);
 		this.image = data.image ? new FileEntity(data.image) : undefined;
+		this.newTenancy = !!data.newTenancy;
 	}
 
 	private setUserPlans(plans?: IUserPlan[]) {

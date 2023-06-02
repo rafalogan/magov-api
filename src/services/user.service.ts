@@ -6,6 +6,7 @@ import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserViewMode
 import { convertDataValues, deleteField, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
+import { exitOnError } from 'winston';
 
 export class UserService extends DatabaseService {
 	constructor(options: IServiceOptions, private unitService: UnitService) {
@@ -18,7 +19,7 @@ export class UserService extends DatabaseService {
 			notExistisOrError(fromDB?.id, { message: 'User already exists', status: FORBIDDEN });
 			notExistisOrError(fromDB?.err, fromDB);
 
-			if (data?.plans) return this.setMasterUserTenancy(data);
+			if (data?.newTenancy) return this.setMasterUserTenancy(data);
 			if (data?.tenancyId && data.unitId) return this.setUserUnit(data);
 
 			return this.setMasterUser(data);
@@ -47,9 +48,11 @@ export class UserService extends DatabaseService {
 				unit = action?.unit;
 			}
 
+			const address = this.setAddress(data.address, 'userId', id);
+
 			deleteField(data, 'password');
 
-			return { message: 'User successful saved', user: { ...data, id, tenancyId, unit } };
+			return { message: 'User successful saved', user: { ...data, id, tenancyId, unit, address } };
 		} catch (err) {
 			return err;
 		}
@@ -63,10 +66,11 @@ export class UserService extends DatabaseService {
 			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
 			const [id] = await this.db('users').insert(convertDataValues(toSave));
 			existsOrError(Number(id), { message: 'internl error', err: id, status: INTERNAL_SERVER_ERROR });
+			const address = this.setAddress(data.address, 'userId', id);
 
 			deleteField(data, 'password');
 
-			return { message: 'User successful saved', user: { ...data, id, tenancyId } };
+			return { message: 'User successful saved', user: { ...data, id, tenancyId, address } };
 		} catch (err) {
 			return err;
 		}
@@ -145,15 +149,17 @@ export class UserService extends DatabaseService {
 
 	async getUsers(options: ReadOptionsModel) {
 		try {
-			const users = options?.tenancyId ? await this.findAllByTenacy('users', options) : await this.findAll('users', options);
-			onLog('users', users);
-			const data = users.data?.map((user: any) => {
+			const fromDB = options?.tenancyId ? await this.db('users').where('tenancy_id', options.tenancyId) : await this.db('users');
+
+			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			const users = fromDB.map(user => {
+				user = convertDataValues(user, 'camel');
 				deleteField(user, 'password');
-				user.active = !!user.active;
 				return user;
 			});
 
-			return { ...users, data };
+			return users;
 		} catch (err) {
 			return err;
 		}
@@ -190,15 +196,15 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-						.select(...fields)
-						.where('u.id', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.first()
+							.select(...fields)
+							.where('u.id', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first()
 					: await this.db(tables)
-						.select(...fields)
-						.where('u.email', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.first();
+							.select(...fields)
+							.where('u.email', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first();
 
 			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
 			notExistisOrError(fromDb.severity === 'ERROR', { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDb });
@@ -222,13 +228,13 @@ export class UserService extends DatabaseService {
 
 			const plans = !raw.unitId
 				? await this.getValues({
-					tableIds: 'tenancies_plans',
-					fieldIds: 'plan_id',
-					whereIds: 'tenancy_id',
-					value: raw.tenancyId,
-					table: 'products',
-					fields: ['id', 'name'],
-				})
+						tableIds: 'tenancies_plans',
+						fieldIds: 'plan_id',
+						whereIds: 'tenancy_id',
+						value: raw.tenancyId,
+						table: 'products',
+						fields: ['id', 'name'],
+				  })
 				: undefined;
 
 			return new UserViewModel({

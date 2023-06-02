@@ -34,6 +34,7 @@ export interface IUserModel extends IUser {
 	plans: IUserPlan[];
 	unit?: IUnitModel;
 	image?: IFile;
+	newTenancy?: boolean;
 }
 
 export interface IUserPlan {

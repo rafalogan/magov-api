@@ -40,7 +40,6 @@ export class AuthService {
 			{ field: data.address.district, message: isRequired('address.district') },
 			{ field: data.address.city, message: isRequired('address.city') },
 			{ field: data.address.uf, message: isRequired('address.uf') },
-			{ field: data.plans?.length, message: isRequired('At least one plan') },
 		]);
 
 		notExistisOrError(requiredEmpty, requiredEmpty?.join('\n') as string);
@@ -65,8 +64,6 @@ export class AuthService {
 
 	async signupOnApp(user: UserModel) {
 		try {
-			existsOrError(user?.plans, 'Plan not found!');
-
 			onLog('User to save:', user);
 			return this.userService.save(user);
 		} catch (err) {
