@@ -1,21 +1,29 @@
 import { IFile } from './file';
 import { IID } from './shared';
-import { IUnitModel } from './unit';
-import { IUserModel } from './user';
 
 export interface ISaleModel extends IID {
-	unit: IUnitModel;
-	user?: IUserModel;
-	products: IProduct[];
-	seller: ISeller;
-	dueDate: Date | string;
-	value: number;
-	commissionValue: number;
-	installments: number;
-	description: Blob | string;
-	paymentForm: string;
+	userId: number;
+	unitId: number;
 	tenancyId: number;
+	products: ISaleProduct[];
+	seller: string;
+	cpf: string;
+	commission: number;
+	commissionInstallments: number;
+	dueDate: Date | string;
+	paymentForm: string;
+	value: number;
+	installments: number;
 	contract: IFile;
+	description: Blob | string;
+}
+
+export interface ISaleProduct {
+	id: number;
+	name: string;
+	plan: boolean;
+	amount: number;
+	value: number;
 }
 
 export interface ISaleViewModel extends IID {
@@ -72,6 +80,7 @@ export interface ISale extends IID {
 	dueDate: Date | string;
 	value: number;
 	commissionValue: number;
+	commissionInstallments: number;
 	installments: number;
 	description: Blob | string;
 	paymentId: number;

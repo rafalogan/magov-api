@@ -196,15 +196,15 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-							.select(...fields)
-							.where('u.id', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first()
+						.select(...fields)
+						.where('u.id', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first()
 					: await this.db(tables)
-							.select(...fields)
-							.where('u.email', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first();
+						.select(...fields)
+						.where('u.email', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first();
 
 			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
 			notExistisOrError(fromDb.severity === 'ERROR', { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDb });
@@ -228,13 +228,13 @@ export class UserService extends DatabaseService {
 
 			const plans = !raw.unitId
 				? await this.getValues({
-						tableIds: 'tenancies_plans',
-						fieldIds: 'plan_id',
-						whereIds: 'tenancy_id',
-						value: raw.tenancyId,
-						table: 'products',
-						fields: ['id', 'name'],
-				  })
+					tableIds: 'tenancies_plans',
+					fieldIds: 'plan_id',
+					whereIds: 'tenancy_id',
+					value: raw.tenancyId,
+					table: 'products',
+					fields: ['id', 'name'],
+				})
 				: undefined;
 
 			return new UserViewModel({
@@ -299,7 +299,7 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async setTenancy(tenancyId?: number, rawPlans?: IUnitProduct[]) {
+	async setTenancy(tenancyId?: number, rawPlans?: IUnitProduct[]) {
 		try {
 			if (!tenancyId) {
 				const tenancy = new Tenancy({ totalUsers: 1, active: true } as ITenancy);

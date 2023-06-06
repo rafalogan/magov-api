@@ -1,67 +1,41 @@
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
-import { IProduct, ISale, IServiceOptions, IUnitModel, IUserModel } from 'src/repositories/types';
+import { ISale, ISaleProduct, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
-import { UnitService } from './unit.service';
 import { UserService } from './user.service';
-import { PaginationModel, ReadOptionsModel, SaleModel, SaleViewModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
-import { FileEntity, Sale, Seller } from 'src/repositories/entities';
+import { PaginationModel, ReadOptionsModel, SaleModel, SaleViewModel } from 'src/repositories/models';
+import { Sale, Seller } from 'src/repositories/entities';
 import { convertDataValues, deleteField, existsOrError } from 'src/utils';
 import { SalePaymentService } from './sale-payment.service';
 import { onLog } from 'src/core/handlers';
 
 export class SaleService extends DatabaseService {
-	constructor(
-		options: IServiceOptions,
-		private unitService: UnitService,
-		private userService: UserService,
-		private salePaymentService: SalePaymentService
-	) {
+	constructor(options: IServiceOptions, private userService: UserService, private salePaymentService: SalePaymentService) {
 		super(options);
 	}
 
 	async create(data: SaleModel) {
 		try {
 			onLog('Sale to save', data);
-			const user = (await this.setUser(new UserModel(data.user as IUserModel))) as UserModel;
-			onLog('user response', user);
-			existsOrError(Number(user?.id), { message: 'erro to set user', err: user, status: INTERNAL_SERVER_ERROR });
-
-			const { id: userId, tenancyId } = user;
-			existsOrError(Number(tenancyId), { message: 'Tenancy not found', err: tenancyId, status: NOT_FOUND });
-
-			const unit = user?.unit?.id
-				? user.unit
-				: ((await this.setUnit(new UnitModel({ ...data.unit, active: true, tenancyId } as IUnitModel), tenancyId as number)) as UnitModel);
-			existsOrError(Number(unit?.id), unit);
-			onLog('unit to use', unit);
-			const { id: unitId } = unit as UnitModel;
-
-			const sellerId = (await this.setSeller(data.seller)) as number;
-			onLog('seler Id form db', sellerId);
-			existsOrError(Number(sellerId), sellerId);
+			const sellerId = (await this.setSeller(new Seller({ ...data }))) as number;
+			existsOrError(Number(sellerId), { message: 'Internal Error', err: sellerId, status: INTERNAL_SERVER_ERROR });
 
 			const paymentId = (await this.setPayment(data.paymentForm)) as number;
-			onLog('payment Id form db', paymentId);
-			existsOrError(Number(paymentId), paymentId);
+			existsOrError(Number(paymentId), { message: 'Internal Error', err: paymentId, status: INTERNAL_SERVER_ERROR });
 
-			const toSave = new Sale({
-				...data,
-				userId: Number(userId),
-				tenancyId: Number(tenancyId),
-				sellerId,
-				paymentId,
-				unitId: Number(unitId),
-			} as ISale);
+			const toSave = new Sale({ ...data, commissionValue: data.commission, sellerId, paymentId, description: data.description as string });
 			const [id] = await this.db('sales').insert(convertDataValues(toSave));
 			existsOrError(Number(id), { message: 'Internal Error', err: id, status: INTERNAL_SERVER_ERROR });
 
-			await this.setProduct(data.products, id);
-			const contract = (await this.setFile(data.contract, 'saleId', id)) as FileEntity;
+			const plans = data.products.filter(p => p.plan);
+			if (plans.length) await this.userService.setTenancy(data.tenancyId, plans);
 
-			existsOrError(Number(contract?.id), { message: 'Internal Error', err: contract, status: INTERNAL_SERVER_ERROR });
+			await this.setUnitProducts(data.products, data.unitId);
 
-			return { message: 'Sale successifuly saved', data: { ...toSave, id, contract } };
+			await this.setProducts(data.products, id);
+			await this.setFile(data.contract, 'saleId', id);
+
+			return { message: 'Sale successifuly saved', data: { ...data, id } };
 		} catch (err) {
 			return err;
 		}
@@ -83,9 +57,16 @@ export class SaleService extends DatabaseService {
 			await this.db('sales').where({ id }).update(convertDataValues(toUpdate));
 
 			const contract = data.contract ? await this.setFile(data.contract, 'saleId', id) : undefined;
-			const products = data.products?.length ? await this.setProduct(data.products, id) : undefined;
 
-			return { message: 'Sale successifuly updated', data: { ...toUpdate, contract, products } };
+			if (data.products?.length) {
+				const plans = data.products.filter(p => p.plan);
+				if (plans.length) await this.userService.setTenancy(tenancyId, plans);
+
+				await this.setUnitProducts(data.products, unitId);
+				await this.setUnitProducts(data.products, id);
+			}
+
+			return { message: 'Sale successifuly updated', data: { ...toUpdate, contract } };
 		} catch (err) {
 			return err;
 		}
@@ -98,7 +79,7 @@ export class SaleService extends DatabaseService {
 			const total = await this.getCount('sales');
 			const pagination = new PaginationModel({ page, limit, total });
 
-			const fromDB = await this.db({ s: 'sales', u: 'units', us: 'users', sr: 'sellers', a: 'adresses' })
+			const fromDB = await this.db({ s: 'sales', u: 'units', us: 'users', sr: 'sellers', a: 'adresses', f: 'files' })
 				.select(
 					{
 						id: 's.id',
@@ -116,12 +97,14 @@ export class SaleService extends DatabaseService {
 						uf: 'a.uf',
 					},
 					{ email: 'us.email' },
-					{ seller: 'sr.seller' }
+					{ seller: 'sr.seller' },
+					{ contract: 'f.url' }
 				)
 				.whereRaw('u.id = s.unit_id')
 				.andWhereRaw('a.unit_id = u.id')
 				.andWhereRaw('us.id = s.user_id')
 				.andWhereRaw('sr.id = s.seller_id')
+				.andWhereRaw('f.sale_id = s.id')
 				.limit(limit)
 				.offset(page * limit - limit)
 				.orderBy(orderBy || 'id', order || 'asc');
@@ -158,7 +141,15 @@ export class SaleService extends DatabaseService {
 
 	async getSale(id: number) {
 		try {
-			const fromDB = await this.db({ s: 'sales', p: 'payments', u: 'units', us: 'users', sr: 'sellers', a: 'adresses', f: 'files' })
+			const fromDB = await this.db({
+				s: 'sales',
+				p: 'payments',
+				u: 'units',
+				us: 'users',
+				sr: 'sellers',
+				a: 'adresses',
+				f: 'files',
+			})
 				.select(
 					{
 						id: 's.id',
@@ -230,12 +221,25 @@ export class SaleService extends DatabaseService {
 			existsOrError(Number(fromDB?.id), { message: 'sale not found or already deleted', status: NOT_FOUND });
 
 			const clearProducts = await this.db('products_sales').where({ sale_id: fromDB.id }).del();
-			existsOrError(Number(clearProducts), { message: 'internal error', status: INTERNAL_SERVER_ERROR, err: clearProducts });
+			existsOrError(Number(clearProducts), {
+				message: 'internal error',
+				status: INTERNAL_SERVER_ERROR,
+				err: clearProducts,
+			});
 
 			const deleteSale = await this.db('sales').where({ id }).del();
 			existsOrError(Number(deleteSale), { message: 'internal error', status: INTERNAL_SERVER_ERROR, err: deleteSale });
 
 			return { message: 'Sale successifuly deleted', data: convertDataValues(fromDB, 'camel') };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getPaymentsBySale(saleId: number) {
+		try {
+			const fromDB = await this.db('sales_payments').where('sale_id', saleId);
+			existsOrError(Array.isArray(fromDB), { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 		} catch (err) {
 			return err;
 		}
@@ -256,36 +260,20 @@ export class SaleService extends DatabaseService {
 		}
 	}
 
-	private async setUser(data: UserModel) {
+	private async setUnitProducts(data: ISaleProduct[], unitId: number) {
 		try {
-			const fromDB = (await this.userService.getUser(data.email)) as UserViewModel;
-			if (fromDB?.id) return fromDB as UserViewModel;
+			for (const product of data) {
+				const { id: productId, amount } = product;
+				const fromDB = await this.db('units_products').where('unit_id', unitId).andWhere('product_id', productId).first();
 
-			const toSave = (await this.userService.create(data)) as any;
-			existsOrError(Number(toSave?.user.id), { message: 'Internal Error', err: toSave, status: INTERNAL_SERVER_ERROR });
-
-			return toSave.user as UserViewModel;
-		} catch (err) {
-			return err;
-		}
-	}
-
-	private async setUnit(data: UnitModel, tenancyId: number) {
-		try {
-			const fromDB = (await this.unitService.getUnit(data.name, tenancyId)) as UnitModel;
-
-			if (fromDB?.id) {
-				const res = (await this.unitService.update({ ...data, tenancyId } as UnitModel, fromDB.id)) as any;
-				existsOrError(res?.unit.id, { message: 'Internal Error to set Unit', err: res, status: INTERNAL_SERVER_ERROR });
-
-				return res.unit as UnitModel;
+				if (fromDB?.unit_id) {
+					const toUpdate = { unitId, productId, amount: Number(fromDB.amount) + amount };
+					await this.db('units_products').update(convertDataValues(toUpdate)).where('unit_id', unitId).andWhere('product_id', productId);
+				} else {
+					const toSave = { unitId, productId, amount };
+					await this.db('units_products').insert(convertDataValues(toSave));
+				}
 			}
-
-			const unitToSave = (await this.unitService.create(data)) as any;
-
-			existsOrError(unitToSave?.unit.id, { message: 'Internal Error', err: unitToSave, status: INTERNAL_SERVER_ERROR });
-
-			return unitToSave.unit as UnitModel;
 		} catch (err) {
 			return err;
 		}
@@ -296,7 +284,11 @@ export class SaleService extends DatabaseService {
 			const res: any[] = [];
 
 			const products = await this.db('products_sales').where('sale_id', id);
-			existsOrError(Array.isArray(products), { message: 'Internal Error', error: products, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Array.isArray(products), {
+				message: 'Internal Error',
+				error: products,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
 			for (const product of products) {
 				onLog('product to sale', product);
@@ -313,15 +305,15 @@ export class SaleService extends DatabaseService {
 		}
 	}
 
-	private async setProduct(products: IProduct[], saleId: number) {
+	private async setProducts(products: ISaleProduct[], saleId: number) {
 		try {
-			await this.db('products_sales').where('sale_id', saleId).del();
-
 			for (const product of products) {
-				const { productId, amount } = product;
+				const { id: productId, amount, value: unitaryValue } = product;
+				await this.db('products_sales').where('sale_id', saleId).andWhere('product_id', productId).del();
+
 				onLog('to save products', { productId, amount, saleId });
 
-				const res = await this.db('products_sales').insert(convertDataValues({ productId, amount, saleId }));
+				const res = await this.db('products_sales').insert(convertDataValues({ productId, amount, saleId, unitaryValue }));
 				onLog('save products', res);
 			}
 		} catch (err) {
