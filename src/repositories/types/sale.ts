@@ -1,3 +1,4 @@
+import { SalePaymentModel } from '../models';
 import { IFile } from './file';
 import { IID } from './shared';
 
@@ -30,16 +31,24 @@ export interface ISaleViewModel extends IID {
 	dueDate: Date | string;
 	value: number;
 	commissionValue: number;
+	commissionInstallments: number;
 	installments: number;
 	description: Blob | string;
-	products: IProduct[];
-	payment: IPaymentView;
+	products: ISaleProduct[];
+	paymentForm: string;
 	unit: ISaleUnitView;
 	user: ISaleUserView;
 	seller: ISeller;
 	contract: IFile;
 	tenancyId: number;
-	payments: ISalePayment[];
+	payments: ISalePayments;
+	status: string;
+	commissionStatus: string;
+}
+
+export interface ISalePayments {
+	contract: ISalePayment[] | SalePaymentModel[];
+	commission: ISalePayment[] | SalePaymentModel[];
 }
 
 export interface IContractView {
@@ -55,7 +64,6 @@ export interface ISaleUnitView {
 	id: number;
 	name: string;
 	cnpj: string;
-	phone: string;
 	cep: string;
 	street: string;
 	number?: number;
