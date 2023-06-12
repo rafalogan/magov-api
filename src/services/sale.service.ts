@@ -40,7 +40,7 @@ export class SaleService extends DatabaseService {
 			const plans = data.products.filter(p => !!p?.plan);
 			onLog('plans to save of tenancy', plans);
 
-			if (plans.length) await this.setPlanOnTenancy(data.tenancyId, plans);
+			if (plans?.length) await this.setPlanOnTenancy(data.tenancyId, plans);
 
 			await this.setUnitProducts(data.products, data.unitId);
 			await this.setProducts(data.products, id);
@@ -118,7 +118,7 @@ export class SaleService extends DatabaseService {
 				.andWhereRaw('f.sale_id = s.id')
 				.limit(limit)
 				.offset(page * limit - limit)
-				.orderBy(orderBy || 'id', order || 'asc');
+				.orderBy(orderBy || 'id', order || 'desc');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal Error', error: fromDB, status: INTERNAL_SERVER_ERROR });
 

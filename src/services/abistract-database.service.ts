@@ -94,7 +94,8 @@ export abstract class DatabaseService extends CacheService {
 			for (const plan of plans) {
 				const { id: planId, amount } = plan;
 				const fromDB = await this.db('tenancies_plans').where('plan_id', planId).andWhere('tenancy_id', tenancyId).first();
-				notExistisOrError(fromDB.severity === 'ERROR', { message: 'internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+				onLog('tenancies plans from DB', fromDB);
+				notExistisOrError(fromDB?.severity === 'ERROR', { message: 'internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 
 				const raw = fromDB?.plan_id ? convertDataValues(fromDB, 'camel') : undefined;
 
