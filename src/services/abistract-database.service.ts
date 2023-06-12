@@ -3,8 +3,8 @@ import { INTERNAL_SERVER_ERROR } from 'http-status';
 
 import { onLog } from 'src/core/handlers';
 import { PaginationModel, ReadOptionsModel } from 'src/repositories/models';
-import { IAddress, IGetValuesOptions, IServiceOptions } from 'src/repositories/types';
-import { camelToSnake, convertDataValues, existsOrError } from 'src/utils';
+import { IAddress, IGetValuesOptions, IProduct, ISaleProduct, IServiceOptions } from 'src/repositories/types';
+import { camelToSnake, convertDataValues, existsOrError, notExistisOrError } from 'src/utils';
 import { CacheService } from './abistract-cache.service';
 import { Address, FileEntity } from 'src/repositories/entities';
 
@@ -84,6 +84,41 @@ export abstract class DatabaseService extends CacheService {
 
 			await this.db('adresses').where(camelToSnake(where), value).update(convertDataValues(data));
 			return data;
+		} catch (err) {
+			return err;
+		}
+	}
+
+	protected async setPlanOnTenancy(tenancyId: number, plans: ISaleProduct[]) {
+		try {
+			for (const plan of plans) {
+				const { id: planId, amount } = plan;
+				const fromDB = await this.db('tenancies_plans').where('plan_id', planId).andWhere('tenancy_id', tenancyId).first();
+				notExistisOrError(fromDB.severity === 'ERROR', { message: 'internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+				const raw = fromDB?.plan_id ? convertDataValues(fromDB, 'camel') : undefined;
+
+				onLog('tenancies plans raw', raw);
+
+				if (raw?.planId) {
+					const toUpdate = { ...raw, amount: raw.amount + amount };
+					const res = await this.db('tenancies_plans')
+						.where('plan_id', planId)
+						.andWhere('tenancy_id', tenancyId)
+						.update(convertDataValues(toUpdate));
+
+					onLog('response to update', res);
+
+					existsOrError(Number(res), { message: 'Internal console error', err: res, status: INTERNAL_SERVER_ERROR });
+				} else {
+					const toSave = { tenancyId, planId, amount };
+					const res = await this.db('tenancies_plans').insert(convertDataValues(toSave));
+
+					onLog('response to save', res);
+
+					existsOrError(Number(res), { message: 'Internal console error', err: res, status: INTERNAL_SERVER_ERROR });
+				}
+			}
 		} catch (err) {
 			return err;
 		}

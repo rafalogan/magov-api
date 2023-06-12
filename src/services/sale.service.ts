@@ -16,7 +16,7 @@ export class SaleService extends DatabaseService {
 
 	async create(data: SaleModel) {
 		try {
-			onLog('Sale to save', data);
+			onLog('products to save', data.products);
 			const sellerId = (await this.setSeller(new Seller({ ...data }))) as number;
 			existsOrError(Number(sellerId), { message: 'Internal Error', err: sellerId, status: INTERNAL_SERVER_ERROR });
 
@@ -34,18 +34,16 @@ export class SaleService extends DatabaseService {
 			const [id] = await this.db('sales').insert(convertDataValues(toSave));
 			existsOrError(Number(id), { message: 'Internal Error', err: id, status: INTERNAL_SERVER_ERROR });
 
-			const plans = data.products.filter(p => p.plan);
-			onLog('plans', plans);
+			onLog('new sale id', id);
+			await this.setFile(data.contract, 'saleId', id);
 
-			if (plans.length) {
-				const tenancyUpdate = await this.userService.setTenancy(data.tenancyId, plans);
-				onLog('update tenancy', tenancyUpdate);
-			}
+			const plans = data.products.filter(p => !!p?.plan);
+			onLog('plans to save of tenancy', plans);
+
+			if (plans.length) await this.setPlanOnTenancy(data.tenancyId, plans);
 
 			await this.setUnitProducts(data.products, data.unitId);
-
 			await this.setProducts(data.products, id);
-			await this.setFile(data.contract, 'saleId', id);
 
 			return { message: 'Sale successifuly saved', data: { ...data, id } };
 		} catch (err) {

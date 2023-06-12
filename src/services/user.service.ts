@@ -6,7 +6,6 @@ import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserViewMode
 import { convertDataValues, deleteField, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
-import { exitOnError } from 'winston';
 
 export class UserService extends DatabaseService {
 	constructor(options: IServiceOptions, private unitService: UnitService) {
@@ -23,70 +22,6 @@ export class UserService extends DatabaseService {
 			if (data?.tenancyId && data.unitId) return this.setUserUnit(data);
 
 			return this.setMasterUser(data);
-		} catch (err) {
-			return err;
-		}
-	}
-
-	private async setMasterUserTenancy(data: UserModel) {
-		try {
-			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
-			let unit: any;
-
-			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
-
-			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
-			const [id] = await this.db('users').insert(convertDataValues(toSave));
-
-			if (data.userRules?.length) await this.saveUserRules(data.userRules, id);
-			if (data.image) await this.setUserImage(data.image, id);
-
-			if (data.unit) {
-				const action = (await this.unitService.create(new UnitModel({ ...data.unit, active: true, tenancyId: Number(tenancyId) }))) as any;
-				existsOrError(action?.unit, { message: 'Error Unit Not saved', err: action, status: action?.status || INTERNAL_SERVER_ERROR });
-
-				unit = action?.unit;
-			}
-
-			const address = this.setAddress(data.address, 'userId', id);
-
-			deleteField(data, 'password');
-
-			return { message: 'User successful saved', user: { ...data, id, tenancyId, unit, address } };
-		} catch (err) {
-			return err;
-		}
-	}
-
-	private async setUserUnit(data: UserModel) {
-		try {
-			const tenancyId = await this.setTenancy(data.tenancyId);
-			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
-
-			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
-			const [id] = await this.db('users').insert(convertDataValues(toSave));
-			existsOrError(Number(id), { message: 'internl error', err: id, status: INTERNAL_SERVER_ERROR });
-			const address = this.setAddress(data.address, 'userId', id);
-
-			deleteField(data, 'password');
-
-			return { message: 'User successful saved', user: { ...data, id, tenancyId, address } };
-		} catch (err) {
-			return err;
-		}
-	}
-
-	private async setMasterUser(data: UserModel) {
-		try {
-			const toSave = new User({ ...data, tenancyId: undefined });
-			const [id] = await this.db('users').insert(convertDataValues(toSave));
-
-			if (data.userRules?.length) await this.saveUserRules(data.userRules, id);
-			if (data.image) await this.setUserImage(data.image, id);
-
-			deleteField(data, 'password');
-
-			return { message: 'User successful saved', user: { ...data, id } };
 		} catch (err) {
 			return err;
 		}
@@ -196,25 +131,27 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-						.select(...fields)
-						.where('u.id', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.first()
+							.select(...fields)
+							.where('u.id', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first()
 					: await this.db(tables)
-						.select(...fields)
-						.where('u.email', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.first();
+							.select(...fields)
+							.where('u.email', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first();
 
 			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
-			notExistisOrError(fromDb.severity === 'ERROR', { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDb });
+			notExistisOrError(fromDb.severity === 'ERROR', {
+				message: 'Internal error',
+				status: INTERNAL_SERVER_ERROR,
+				err: fromDb,
+			});
 			const raw = convertDataValues(fromDb, 'camel');
 			const { id } = raw;
-			onLog('raw', raw);
 
 			const unitAndPlan: any = await this.getUnitAndPlan(raw.unitId);
 
-			onLog('unit and plan', unitAndPlan);
 			const rules = await this.getValues({
 				tableIds: 'users_rules',
 				fieldIds: 'rule_id',
@@ -228,13 +165,13 @@ export class UserService extends DatabaseService {
 
 			const plans = !raw.unitId
 				? await this.getValues({
-					tableIds: 'tenancies_plans',
-					fieldIds: 'plan_id',
-					whereIds: 'tenancy_id',
-					value: raw.tenancyId,
-					table: 'products',
-					fields: ['id', 'name'],
-				})
+						tableIds: 'tenancies_plans',
+						fieldIds: 'plan_id',
+						whereIds: 'tenancy_id',
+						value: raw.tenancyId,
+						table: 'products',
+						fields: ['id', 'name'],
+				  })
 				: undefined;
 
 			return new UserViewModel({
@@ -271,34 +208,6 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async getflie(id: number) {
-		try {
-			const fromDB = await this.db('files').select('title', 'alt', 'name', 'filename', 'type', 'url').where('user_id', id).first();
-
-			if (!fromDB?.url) return {};
-			return { ...convertDataValues(fromDB, 'camel') };
-		} catch (err) {
-			return err;
-		}
-	}
-
-	private async getUnitAndPlan(id?: number) {
-		try {
-			if (!id) return { unit: {}, plan: {} };
-
-			const fromDB = await this.db({ u: 'units', p: 'products' })
-				.select({ unit_id: 'u.id', unit_name: 'u.name' }, { plan_id: 'p.id', plan_name: 'p.name' })
-				.where('u.id', id)
-				.whereRaw('p.id = u.plan_id')
-				.first();
-			const raw = convertDataValues(fromDB, 'camel');
-
-			return { unit: { id: raw.unitId, name: raw.unitName }, plan: { id: raw.planId, name: raw.planName } };
-		} catch (err) {
-			return err;
-		}
-	}
-
 	async setTenancy(tenancyId?: number, rawPlans?: IUnitProduct[]) {
 		try {
 			if (!tenancyId) {
@@ -327,6 +236,108 @@ export class UserService extends DatabaseService {
 				.where({ id: tenancyId })
 				.update(convertDataValues(new Tenancy({ ...raw, totalUsers: raw.totalUsers + 1 })));
 			return Number(tenancyId);
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setMasterUserTenancy(data: UserModel) {
+		try {
+			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
+			let unit: any;
+
+			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
+
+			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
+			const [id] = await this.db('users').insert(convertDataValues(toSave));
+
+			if (data.userRules?.length) await this.saveUserRules(data.userRules, id);
+			if (data.image) await this.setUserImage(data.image, id);
+
+			if (data.unit) {
+				const action = (await this.unitService.create(
+					new UnitModel({
+						...data.unit,
+						active: true,
+						tenancyId: Number(tenancyId),
+					})
+				)) as any;
+				existsOrError(action?.unit, {
+					message: 'Error Unit Not saved',
+					err: action,
+					status: action?.status || INTERNAL_SERVER_ERROR,
+				});
+
+				unit = action?.unit;
+			}
+
+			const address = this.setAddress(data.address, 'userId', id);
+
+			deleteField(data, 'password');
+
+			return { message: 'User successful saved', user: { ...data, id, tenancyId, unit, address } };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setUserUnit(data: UserModel) {
+		try {
+			const tenancyId = await this.setTenancy(data.tenancyId);
+			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
+
+			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
+			const [id] = await this.db('users').insert(convertDataValues(toSave));
+			existsOrError(Number(id), { message: 'internl error', err: id, status: INTERNAL_SERVER_ERROR });
+			const address = this.setAddress(data.address, 'userId', id);
+
+			deleteField(data, 'password');
+
+			return { message: 'User successful saved', user: { ...data, id, tenancyId, address } };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setMasterUser(data: UserModel) {
+		try {
+			const toSave = new User({ ...data, tenancyId: undefined });
+			const [id] = await this.db('users').insert(convertDataValues(toSave));
+
+			if (data.userRules?.length) await this.saveUserRules(data.userRules, id);
+			if (data.image) await this.setUserImage(data.image, id);
+
+			deleteField(data, 'password');
+
+			return { message: 'User successful saved', user: { ...data, id } };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getflie(id: number) {
+		try {
+			const fromDB = await this.db('files').select('title', 'alt', 'name', 'filename', 'type', 'url').where('user_id', id).first();
+
+			if (!fromDB?.url) return {};
+			return { ...convertDataValues(fromDB, 'camel') };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getUnitAndPlan(id?: number) {
+		try {
+			if (!id) return { unit: {}, plan: {} };
+
+			const fromDB = await this.db({ u: 'units', p: 'products' })
+				.select({ unit_id: 'u.id', unit_name: 'u.name' }, { plan_id: 'p.id', plan_name: 'p.name' })
+				.where('u.id', id)
+				.whereRaw('p.id = u.plan_id')
+				.first();
+			const raw = convertDataValues(fromDB, 'camel');
+
+			return { unit: { id: raw.unitId, name: raw.unitName }, plan: { id: raw.planId, name: raw.planName } };
 		} catch (err) {
 			return err;
 		}

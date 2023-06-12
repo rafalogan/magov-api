@@ -1,6 +1,7 @@
 import { clearString, convertBlobToString, convertToDate, setInstanceId, setValueNumberToDadaBase } from 'src/utils';
 import { ISaleModel, ISaleProduct } from '../types';
 import { FileEntity } from '../entities';
+import { onLog } from 'src/core/handlers';
 
 export class SaleModel {
 	id?: number;
@@ -24,7 +25,7 @@ export class SaleModel {
 		this.userId = Number(data.userId);
 		this.unitId = Number(data.unitId);
 		this.tenancyId = Number(data.tenancyId);
-		this.products = data.products;
+		this.products = this.setPoducts(data?.products);
 		this.seller = data.seller.trim();
 		this.cpf = clearString(data.cpf);
 		this.commission = setValueNumberToDadaBase(data.commission) as number;
@@ -37,12 +38,17 @@ export class SaleModel {
 		this.description = convertBlobToString(data.description);
 	}
 
-	private setPoducts(products: ISaleProduct[]): ISaleProduct[] {
-		return products?.map((product: ISaleProduct) => ({
-			...product,
-			id: Number(product.id),
-			value: setValueNumberToDadaBase(product.value) as number,
-			amount: Number(product.amount),
-		}));
+	private setPoducts(products: any): ISaleProduct[] {
+		const res: ISaleProduct[] = [];
+		products = typeof products === 'string' ? JSON.parse(products) : products;
+		onLog('raw products', products);
+
+		for (const data of products) {
+			onLog('data to parse', data);
+
+			res.push({ ...data, id: Number(data.id), value: setValueNumberToDadaBase(data.amount), amount: Number(data.amount) });
+		}
+
+		return res;
 	}
 }

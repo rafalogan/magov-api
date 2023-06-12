@@ -3,9 +3,8 @@ import { BAD_REQUEST } from 'http-status';
 
 import { Controller } from 'src/core/controllers';
 import { SalePaymentService, SaleService } from 'src/services';
-import { IProduct, IUnitModel, IUserModel } from 'src/repositories/types';
-import { isRequired, notExistisOrError, requiredFields, setAddress, setFileToSave } from 'src/utils';
-import { ResponseHandle, onLog } from 'src/core/handlers';
+import { isRequired, notExistisOrError, requiredFields, setFileToSave } from 'src/utils';
+import { ResponseHandle } from 'src/core/handlers';
 import { ReadOptionsModel, SaleModel, SalePaymentModel } from 'src/repositories/models';
 
 export class SaleController extends Controller {
@@ -21,7 +20,6 @@ export class SaleController extends Controller {
 		}
 
 		const contract = setFileToSave(req);
-		onLog('contract of sales', contract);
 		const sale = new SaleModel({ ...req.body, contract });
 
 		this.saleService
