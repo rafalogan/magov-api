@@ -1,6 +1,6 @@
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
-import { IFile, ISale, ISaleProduct, ISaleUnitView, IServiceOptions } from 'src/repositories/types';
+import { IFile, ISale, ISalePayments, ISaleProduct, ISaleUnitView, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { UserService } from './user.service';
 import { PaginationModel, ReadOptionsModel, SaleModel, SalePaymentModel, SaleViewModel } from 'src/repositories/models';
@@ -8,6 +8,7 @@ import { Sale, Seller } from 'src/repositories/entities';
 import { convertDataValues, deleteField, existsOrError } from 'src/utils';
 import { onLog } from 'src/core/handlers';
 import dayjs from 'dayjs';
+import { log } from 'node:console';
 
 export class SaleService extends DatabaseService {
 	constructor(options: IServiceOptions, private userService: UserService) {
@@ -142,7 +143,7 @@ export class SaleService extends DatabaseService {
 				item.active = !!item.active;
 
 				const payments = (await this.getPaymentsBySale(item.id)) as any;
-				const lastCommission = payments?.commission?.length ? payments.commission[0].payDate : undefined;
+				const lastCommission = payments?.commissions?.length ? payments.commissions[0].payDate : undefined;
 				const lastContract = payments?.contract?.length ? payments.contract[0].payDate : undefined;
 				const status = this.setStatusPayment(lastContract, item.active);
 				const commissionStatus = this.setStatusPayment(lastCommission, item.active);
@@ -219,7 +220,7 @@ export class SaleService extends DatabaseService {
 			onLog('raw data', raw);
 
 			const products = (await this.getProducs(raw.id)) as ISaleProduct[];
-			const payments = (await this.getPaymentsBySale(raw.id)) as any;
+			const payments = await this.getPaymentsBySale(raw.id);
 			const unit: ISaleUnitView = {
 				id: raw.unitId,
 				name: raw.unitName,
@@ -242,9 +243,9 @@ export class SaleService extends DatabaseService {
 				url: raw.url,
 			} as IFile;
 			const lastContract = payments?.contract?.length ? payments.contract[0].payDate : undefined;
-			const lastCommision = payments?.commission?.length ? payments.commission[0].payDate : undefined;
-			const status = this.setStatusPayment(lastContract, raw.active);
-			const commissionStatus = this.setStatusPayment(lastCommision, raw.active);
+			const lastCommision = payments.commissions?.length ? payments.commissions[0].payDate : undefined;
+			const status = this.setStatusPayment(lastContract as Date | undefined, raw.active);
+			const commissionStatus = this.setStatusPayment(lastCommision as Date | undefined, raw.active);
 
 			onLog('product to use', products);
 
@@ -298,17 +299,19 @@ export class SaleService extends DatabaseService {
 		}
 	}
 
-	private async getPaymentsBySale(saleId: number) {
+	private async getPaymentsBySale(saleId: number): Promise<ISalePayments> {
 		try {
-			const fromDB = await this.db('sales_payments').where('sale_id', saleId).orderBy('pay_date', 'dsc');
+			const fromDB = await this.db('sales_payments').where('sale_id', saleId).orderBy('pay_date', 'desc');
+			onLog(`payment sale: ${saleId}`, fromDB);
 			existsOrError(Array.isArray(fromDB), { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 			const commissions = [];
 			const contract = [];
 
 			for (const item of fromDB) {
 				const raw = new SalePaymentModel(convertDataValues(item, 'camel'));
+				onLog('sale payment model raw', raw);
 
-				if (raw.commission) {
+				if (raw?.commission) {
 					commissions.push(raw);
 				} else {
 					contract.push(raw);
@@ -316,7 +319,7 @@ export class SaleService extends DatabaseService {
 			}
 
 			return { contract, commissions };
-		} catch (err) {
+		} catch (err: any) {
 			return err;
 		}
 	}

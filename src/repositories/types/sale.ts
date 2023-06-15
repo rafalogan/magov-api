@@ -48,7 +48,7 @@ export interface ISaleViewModel extends IID {
 
 export interface ISalePayments {
 	contract: ISalePayment[] | SalePaymentModel[];
-	commission: ISalePayment[] | SalePaymentModel[];
+	commissions: ISalePayment[] | SalePaymentModel[];
 }
 
 export interface IContractView {

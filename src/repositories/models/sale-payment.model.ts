@@ -1,4 +1,4 @@
-import { convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
+import { convertToDate, setInstanceId } from 'src/utils';
 import { ISalePayment } from '../types';
 
 export class SalePaymentModel {
@@ -13,7 +13,7 @@ export class SalePaymentModel {
 	constructor(data: ISalePayment, id?: number) {
 		this.id = setInstanceId(id || data.id);
 		this.payDate = convertToDate(data.payDate);
-		this.value = setValueNumberToView(data.value) as number;
+		this.value = Number(data.value);
 		this.commission = !!data.commission;
 		this.saleId = Number(data.saleId);
 		this.type = data.type?.trim();

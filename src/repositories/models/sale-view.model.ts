@@ -45,9 +45,9 @@ export class SaleViewModel {
 
 	private setPayments(data: ISalePayments): ISalePayments {
 		const contract = data.contract?.map(i => (i instanceof SalePaymentModel ? i : new SalePaymentModel(i)));
-		const commission = data.commission?.map(i => (i instanceof SalePaymentModel ? i : new SalePaymentModel(i)));
+		const commissions = data.commissions?.map(i => (i instanceof SalePaymentModel ? i : new SalePaymentModel(i)));
 
-		return { contract, commission };
+		return { contract, commissions };
 	}
 
 	private setProducts(data: ISaleProduct[]) {
