@@ -7,6 +7,8 @@ export class SalePaymentModel {
 	value: number;
 	commission: boolean;
 	saleId: number;
+	type: string;
+	installment: number;
 
 	constructor(data: ISalePayment, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -14,5 +16,7 @@ export class SalePaymentModel {
 		this.value = setValueNumberToView(data.value) as number;
 		this.commission = !!data.commission;
 		this.saleId = Number(data.saleId);
+		this.type = data.type?.trim();
+		this.installment = Number(data.installment);
 	}
 }

@@ -115,6 +115,8 @@ export interface ISeller extends IID {
 export interface ISalePayment extends IID {
 	payDate: Date | string;
 	value: number;
+	installment: number;
+	type: string;
 	commission: boolean;
 	saleId: number;
 }

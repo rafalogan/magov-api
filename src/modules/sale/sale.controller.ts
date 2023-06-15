@@ -102,15 +102,6 @@ export class SaleController extends Controller {
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
-	private setProducts(req: Request) {
-		if (req.body.products) return req.body.products;
-		const res: any[] = [];
-		const { productId, amount, productValue: value } = req.body;
-		res.push({ productId, amount, value });
-
-		return res;
-	}
-
 	private verifyRequest(req: Request) {
 		const {
 			userId,
@@ -146,12 +137,14 @@ export class SaleController extends Controller {
 	}
 
 	private verifyRequiredPayment(req: Request) {
-		const { payDate, value, commission, saleId } = req.body;
+		const { payDate, value, commission, saleId, type, installment } = req.body;
 		const requireds = requiredFields([
 			{ field: payDate, message: isRequired('payDate') },
 			{ field: value, message: isRequired('value') },
 			{ field: commission !== undefined, message: isRequired('commission') },
 			{ field: saleId, message: isRequired('saleId') },
+			{ field: type, message: isRequired('type') },
+			{ field: installment, message: isRequired('installment') },
 		]);
 
 		notExistisOrError(requireds, { message: requireds?.join('\n '), status: BAD_REQUEST });
