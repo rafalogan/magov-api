@@ -119,7 +119,7 @@ export class SaleService extends DatabaseService {
 				.andWhereRaw('f.sale_id = s.id')
 				.limit(limit)
 				.offset(page * limit - limit)
-				.orderBy(orderBy || 'id', order || 'desc');
+				.orderBy(orderBy || 's.due_date', order || 'desc');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal Error', error: fromDB, status: INTERNAL_SERVER_ERROR });
 
