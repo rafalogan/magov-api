@@ -85,7 +85,7 @@ export class ServicesFactory {
 		this.commentService = new CommentService(this.setServiceOptions());
 		this.unitExpenseService = new UnitExpenseService(this.setServiceOptions());
 		this.salePaymentService = new SalePaymentService(this.setServiceOptions());
-		this.saleService = new SaleService(this.setServiceOptions(), this.unitService, this.userService, this.salePaymentService);
+		this.saleService = new SaleService(this.setServiceOptions(), this.userService);
 		this.productService = new ProductService(this.setServiceOptions());
 		this.taskService = new TaskService(
 			this.setServiceOptions(),
