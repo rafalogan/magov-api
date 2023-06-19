@@ -4,7 +4,7 @@ import { IPlan, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { Plan } from 'src/repositories/entities';
 import { convertDataValues, existsOrError, notExistisOrError } from 'src/utils';
-import { PlanModel, ReadOptionsModel } from 'src/repositories/models';
+import { PlanModel, ProductViewModel, ReadOptionsModel } from 'src/repositories/models';
 import { onLog } from 'src/core/handlers';
 
 export class ProductService extends DatabaseService {
@@ -52,7 +52,7 @@ export class ProductService extends DatabaseService {
 					return err;
 				}
 
-				return res.map((p: any) => new PlanModel(convertDataValues(p, 'camel')));
+				return res.map((p: any) => new ProductViewModel(convertDataValues(p, 'camel')));
 			})
 			.catch(err => err);
 	}

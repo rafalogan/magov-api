@@ -96,6 +96,7 @@ const setUrlToFile = (req: Request, file: CustomFile): string => {
 };
 
 export const setUserImage = (req: Request) => {
+	if (!req.file) return undefined;
 	const image = req.body.image ?? { title: req.body.imageTitle, alt: req.body.imageAlt };
 	const { title, alt } = image;
 	const file = req.file as CustomFile;
@@ -105,12 +106,14 @@ export const setUserImage = (req: Request) => {
 		alt,
 		name: file?.originalname,
 		filename: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file?.key : file?.filename,
-		type: file.mimetype,
+		type: file?.mimetype,
 		url: process.env.STORAGE_TYPE?.toLowerCase() === 's3' ? file?.location : `${baseUrl()}/media/${file.filename}`,
 	} as IFile;
 };
 
 export const setFileToSave = (req: Request) => {
+	if (!req.file) return undefined;
+
 	const bodyFile = req.body.file ?? { title: req.body.fileTitle, alt: req.body.fileAlt };
 	const { title, alt } = bodyFile;
 	const file = req.file as CustomFile;

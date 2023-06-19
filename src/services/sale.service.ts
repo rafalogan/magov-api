@@ -1,67 +1,52 @@
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
-import { IProduct, ISale, IServiceOptions, IUnitModel, IUserModel } from 'src/repositories/types';
+import { IFile, ISale, ISalePayments, ISaleProduct, ISaleUnitView, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
-import { UnitService } from './unit.service';
 import { UserService } from './user.service';
-import { PaginationModel, ReadOptionsModel, SaleModel, SaleViewModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
-import { FileEntity, Sale, Seller } from 'src/repositories/entities';
+import { PaginationModel, ReadOptionsModel, SaleModel, SalePaymentModel, SaleViewModel } from 'src/repositories/models';
+import { Sale, Seller } from 'src/repositories/entities';
 import { convertDataValues, deleteField, existsOrError } from 'src/utils';
-import { SalePaymentService } from './sale-payment.service';
 import { onLog } from 'src/core/handlers';
+import dayjs from 'dayjs';
+import { log } from 'node:console';
 
 export class SaleService extends DatabaseService {
-	constructor(
-		options: IServiceOptions,
-		private unitService: UnitService,
-		private userService: UserService,
-		private salePaymentService: SalePaymentService
-	) {
+	constructor(options: IServiceOptions, private userService: UserService) {
 		super(options);
 	}
 
 	async create(data: SaleModel) {
 		try {
-			onLog('Sale to save', data);
-			const user = (await this.setUser(new UserModel(data.user as IUserModel))) as UserModel;
-			onLog('user response', user);
-			existsOrError(Number(user?.id), { message: 'erro to set user', err: user, status: INTERNAL_SERVER_ERROR });
-
-			const { id: userId, tenancyId } = user;
-			existsOrError(Number(tenancyId), { message: 'Tenancy not found', err: tenancyId, status: NOT_FOUND });
-
-			const unit = user?.unit?.id
-				? user.unit
-				: ((await this.setUnit(new UnitModel({ ...data.unit, active: true, tenancyId } as IUnitModel), tenancyId as number)) as UnitModel);
-			existsOrError(Number(unit?.id), unit);
-			onLog('unit to use', unit);
-			const { id: unitId } = unit as UnitModel;
-
-			const sellerId = (await this.setSeller(data.seller)) as number;
-			onLog('seler Id form db', sellerId);
-			existsOrError(Number(sellerId), sellerId);
+			onLog('products to save', data.products);
+			const sellerId = (await this.setSeller(new Seller({ ...data }))) as number;
+			existsOrError(Number(sellerId), { message: 'Internal Error', err: sellerId, status: INTERNAL_SERVER_ERROR });
 
 			const paymentId = (await this.setPayment(data.paymentForm)) as number;
-			onLog('payment Id form db', paymentId);
-			existsOrError(Number(paymentId), paymentId);
+			existsOrError(Number(paymentId), { message: 'Internal Error', err: paymentId, status: INTERNAL_SERVER_ERROR });
 
 			const toSave = new Sale({
 				...data,
-				userId: Number(userId),
-				tenancyId: Number(tenancyId),
+				commissionValue: data.commission,
 				sellerId,
 				paymentId,
-				unitId: Number(unitId),
-			} as ISale);
+				description: data.description as string,
+			});
+
 			const [id] = await this.db('sales').insert(convertDataValues(toSave));
 			existsOrError(Number(id), { message: 'Internal Error', err: id, status: INTERNAL_SERVER_ERROR });
 
-			await this.setProduct(data.products, id);
-			const contract = (await this.setFile(data.contract, 'saleId', id)) as FileEntity;
+			onLog('new sale id', id);
+			await this.setFile(data.contract, 'saleId', id);
 
-			existsOrError(Number(contract?.id), { message: 'Internal Error', err: contract, status: INTERNAL_SERVER_ERROR });
+			const plans = data.products.filter(p => !!p?.plan);
+			onLog('plans to save of tenancy', plans);
 
-			return { message: 'Sale successifuly saved', data: { ...toSave, id, contract } };
+			if (plans?.length) await this.setPlanOnTenancy(data.tenancyId, plans);
+
+			await this.setUnitProducts(data.products, data.unitId);
+			await this.setProducts(data.products, id);
+
+			return { message: 'Sale successifuly saved', data: { ...data, id } };
 		} catch (err) {
 			return err;
 		}
@@ -77,15 +62,22 @@ export class SaleService extends DatabaseService {
 			const userId = Number(fromDB?.user.id);
 			const unitId = Number(fromDB.unit.id);
 			const tenancyId = Number(fromDB?.tenancyId);
-			const paymentId = data.paymentForm ? await this.setPayment(data.paymentForm) : fromDB.payment.id;
+			const paymentId = await this.setPayment(data.paymentForm);
 
 			const toUpdate = new Sale({ ...fromDB, ...data, userId, unitId, sellerId, paymentId, tenancyId } as ISale);
 			await this.db('sales').where({ id }).update(convertDataValues(toUpdate));
 
 			const contract = data.contract ? await this.setFile(data.contract, 'saleId', id) : undefined;
-			const products = data.products?.length ? await this.setProduct(data.products, id) : undefined;
 
-			return { message: 'Sale successifuly updated', data: { ...toUpdate, contract, products } };
+			if (data.products?.length) {
+				const plans = data.products.filter(p => p.plan);
+				if (plans.length) await this.userService.setTenancy(tenancyId, plans);
+
+				await this.setUnitProducts(data.products, unitId);
+				await this.setUnitProducts(data.products, id);
+			}
+
+			return { message: 'Sale successifuly updated', data: { ...toUpdate, contract } };
 		} catch (err) {
 			return err;
 		}
@@ -98,15 +90,16 @@ export class SaleService extends DatabaseService {
 			const total = await this.getCount('sales');
 			const pagination = new PaginationModel({ page, limit, total });
 
-			const fromDB = await this.db({ s: 'sales', u: 'units', us: 'users', sr: 'sellers', a: 'adresses' })
+			const fromDB = await this.db({ s: 'sales', u: 'units', us: 'users', sr: 'sellers', a: 'adresses', f: 'files' })
 				.select(
 					{
 						id: 's.id',
 						due_date: 's.due_date',
 						value: 's.value',
 						commission_value: 's.commission_value',
+						active: 's.active',
 					},
-					{ unit_name: 'u.name', cnpj: 'u.cnpj', phone: 'u.phone' },
+					{ unit_name: 'u.name', cnpj: 'u.cnpj' },
 					{
 						street: 'a.street',
 						number: 'a.number',
@@ -116,15 +109,17 @@ export class SaleService extends DatabaseService {
 						uf: 'a.uf',
 					},
 					{ email: 'us.email' },
-					{ seller: 'sr.seller' }
+					{ seller: 'sr.seller' },
+					{ contract: 'f.url' }
 				)
 				.whereRaw('u.id = s.unit_id')
 				.andWhereRaw('a.unit_id = u.id')
 				.andWhereRaw('us.id = s.user_id')
 				.andWhereRaw('sr.id = s.seller_id')
+				.andWhereRaw('f.sale_id = s.id')
 				.limit(limit)
 				.offset(page * limit - limit)
-				.orderBy(orderBy || 'id', order || 'asc');
+				.orderBy(orderBy || 's.due_date', order || 'desc');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal Error', error: fromDB, status: INTERNAL_SERVER_ERROR });
 
@@ -145,9 +140,15 @@ export class SaleService extends DatabaseService {
 			const data: any[] = [];
 
 			for (const item of raw) {
-				const payments = (await this.salePaymentService.read(item.id)) || [];
+				item.active = !!item.active;
 
-				data.push({ ...item, payments });
+				const payments = (await this.getPaymentsBySale(item.id)) as any;
+				const lastCommission = payments?.commissions?.length ? payments.commissions[0].payDate : undefined;
+				const lastContract = payments?.contract?.length ? payments.contract[0].payDate : undefined;
+				const status = this.setStatusPayment(lastContract, item.active);
+				const commissionStatus = this.setStatusPayment(lastCommission, item.active);
+
+				data.push({ ...item, payments, status, commissionStatus });
 			}
 
 			return { data, pagination };
@@ -158,39 +159,51 @@ export class SaleService extends DatabaseService {
 
 	async getSale(id: number) {
 		try {
-			const fromDB = await this.db({ s: 'sales', p: 'payments', u: 'units', us: 'users', sr: 'sellers', a: 'adresses', f: 'files' })
-				.select(
-					{
-						id: 's.id',
-						due_date: 's.due_date',
-						value: 's.value',
-						commission_value: 's.commission_value',
-						installments: 's.installments',
-						description: 's.description',
-						tenancy_id: 's.tenancy_id',
-					},
-					{ payment_id: 'p.id', form: 'p.form' },
-					{ unit_id: 'u.id', unit_name: 'u.name', cnpj: 'u.cnpj', phone: 'u.phone' },
-					{ user_id: 'us.id', first_name: 'us.first_name', last_name: 'us.last_name', email: 'us.email' },
-					{ seller_id: 'sr.id', seller: 'sr.seller', cpf: 'sr.cpf' },
-					{
-						cep: 'a.cep',
-						street: 'a.street',
-						number: 'a.number',
-						complement: 'a.complement',
-						district: 'a.district',
-						city: 'a.city',
-						uf: 'a.uf',
-					},
-					{
-						title: 'f.title',
-						alt: 'f.alt',
-						original_name: 'f.name',
-						filename: 'f.filename',
-						type: 'f.type',
-						url: 'f.url',
-					}
-				)
+			const tables = {
+				s: 'sales',
+				p: 'payments',
+				u: 'units',
+				us: 'users',
+				sr: 'sellers',
+				a: 'adresses',
+				f: 'files',
+			};
+
+			const fields = [
+				{
+					id: 's.id',
+					due_date: 's.due_date',
+					value: 's.value',
+					commission_value: 's.commission_value',
+					commission_installments: 's.commission_installments',
+					installments: 's.installments',
+					description: 's.description',
+					tenancy_id: 's.tenancy_id',
+				},
+				{ paymentForm: 'p.form' },
+				{ unit_id: 'u.id', unit_name: 'u.name', cnpj: 'u.cnpj' },
+				{ user_id: 'us.id', first_name: 'us.first_name', last_name: 'us.last_name', email: 'us.email' },
+				{ seller_id: 'sr.id', seller: 'sr.seller', cpf: 'sr.cpf' },
+				{
+					cep: 'a.cep',
+					street: 'a.street',
+					number: 'a.number',
+					complement: 'a.complement',
+					district: 'a.district',
+					city: 'a.city',
+					uf: 'a.uf',
+				},
+				{
+					title: 'f.title',
+					alt: 'f.alt',
+					original_name: 'f.name',
+					filename: 'f.filename',
+					type: 'f.type',
+					url: 'f.url',
+				},
+			];
+			const fromDB = await this.db(tables)
+				.select(...fields)
 				.where('s.id', id)
 				.andWhereRaw('p.id = s.payment_id')
 				.andWhereRaw('u.id = s.unit_id')
@@ -200,24 +213,65 @@ export class SaleService extends DatabaseService {
 				.andWhereRaw('f.sale_id = s.id')
 				.first();
 
+			onLog('from db', fromDB);
+
 			existsOrError(fromDB.id, { message: 'not found', status: NOT_FOUND });
 			const raw = convertDataValues(fromDB, 'camel');
-			const products = await this.getProducs(raw.id);
-			const payments = (await this.salePaymentService.read(raw.id)) || [];
-			const unit = { id: raw.unitId, name: raw.unitName, cnpj: raw.cnpj, phone: raw.phone };
+			onLog('raw data', raw);
+
+			const products = (await this.getProducs(raw.id)) as ISaleProduct[];
+			const payments = await this.getPaymentsBySale(raw.id);
+			const unit: ISaleUnitView = {
+				id: raw.unitId,
+				name: raw.unitName,
+				cnpj: raw.cnpj,
+				cep: raw.cep,
+				street: raw.street,
+				number: raw.number,
+				complement: raw.complement,
+				district: raw.district,
+				city: raw.city,
+				uf: raw.uf,
+			};
 			const user = { id: raw.userId, name: `${raw.firstName} ${raw.lastName}`, email: raw.email };
+			const contract = {
+				title: raw.title,
+				alt: raw.alt,
+				name: raw.originalName,
+				filename: raw.filename,
+				type: raw.type,
+				url: raw.url,
+			} as IFile;
+			const lastContract = payments?.contract?.length ? payments.contract[0].payDate : undefined;
+			const lastCommision = payments.commissions?.length ? payments.commissions[0].payDate : undefined;
+			const status = this.setStatusPayment(lastContract as Date | undefined, raw.active);
+			const commissionStatus = this.setStatusPayment(lastCommision as Date | undefined, raw.active);
 
 			onLog('product to use', products);
 
-			return new SaleViewModel({
-				...raw,
+			const sale = new SaleViewModel({
+				id: raw.id,
+				dueDate: raw.dueDate,
+				value: raw.value,
+				commissionValue: raw.commissionValue,
+				commissionInstallments: raw.commissionInstallments,
+				installments: raw.installments,
+				description: raw.description,
+				paymentForm: raw.paymentForm,
+				tenancyId: raw.tenancyId,
 				products,
 				unit,
 				user,
 				seller: { id: raw.sellerId, seller: raw.seller, cpf: raw.cpf },
-				contract: { ...raw, name: raw.originalName },
+				contract,
 				payments,
+				status,
+				commissionStatus,
 			});
+
+			onLog('sale model', sale);
+
+			return sale;
 		} catch (err) {
 			return err;
 		}
@@ -230,7 +284,11 @@ export class SaleService extends DatabaseService {
 			existsOrError(Number(fromDB?.id), { message: 'sale not found or already deleted', status: NOT_FOUND });
 
 			const clearProducts = await this.db('products_sales').where({ sale_id: fromDB.id }).del();
-			existsOrError(Number(clearProducts), { message: 'internal error', status: INTERNAL_SERVER_ERROR, err: clearProducts });
+			existsOrError(Number(clearProducts), {
+				message: 'internal error',
+				status: INTERNAL_SERVER_ERROR,
+				err: clearProducts,
+			});
 
 			const deleteSale = await this.db('sales').where({ id }).del();
 			existsOrError(Number(deleteSale), { message: 'internal error', status: INTERNAL_SERVER_ERROR, err: deleteSale });
@@ -239,6 +297,42 @@ export class SaleService extends DatabaseService {
 		} catch (err) {
 			return err;
 		}
+	}
+
+	private async getPaymentsBySale(saleId: number): Promise<ISalePayments> {
+		try {
+			const fromDB = await this.db('sales_payments').where('sale_id', saleId).orderBy('pay_date', 'desc');
+			onLog(`payment sale: ${saleId}`, fromDB);
+			existsOrError(Array.isArray(fromDB), { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+			const commissions = [];
+			const contract = [];
+
+			for (const item of fromDB) {
+				const raw = new SalePaymentModel(convertDataValues(item, 'camel'));
+				onLog('sale payment model raw', raw);
+
+				if (raw?.commission) {
+					commissions.push(raw);
+				} else {
+					contract.push(raw);
+				}
+			}
+
+			return { contract, commissions };
+		} catch (err: any) {
+			return err;
+		}
+	}
+
+	private setStatusPayment(lastPayment?: Date, active = true) {
+		if (!active) return 'desistente';
+		if (!lastPayment) return 'pendente';
+
+		const today = new Date();
+		const payDay = dayjs(lastPayment).add(30, 'd').toDate();
+
+		if (payDay > today) return 'pago';
+		return 'atrasado';
 	}
 
 	private async setSeller(data: Seller) {
@@ -256,36 +350,20 @@ export class SaleService extends DatabaseService {
 		}
 	}
 
-	private async setUser(data: UserModel) {
+	private async setUnitProducts(data: ISaleProduct[], unitId: number) {
 		try {
-			const fromDB = (await this.userService.getUser(data.email)) as UserViewModel;
-			if (fromDB?.id) return fromDB as UserViewModel;
+			for (const product of data) {
+				const { id: productId, amount } = product;
+				const fromDB = await this.db('units_products').where('unit_id', unitId).andWhere('product_id', productId).first();
 
-			const toSave = (await this.userService.create(data)) as any;
-			existsOrError(Number(toSave?.user.id), { message: 'Internal Error', err: toSave, status: INTERNAL_SERVER_ERROR });
-
-			return toSave.user as UserViewModel;
-		} catch (err) {
-			return err;
-		}
-	}
-
-	private async setUnit(data: UnitModel, tenancyId: number) {
-		try {
-			const fromDB = (await this.unitService.getUnit(data.name, tenancyId)) as UnitModel;
-
-			if (fromDB?.id) {
-				const res = (await this.unitService.update({ ...data, tenancyId } as UnitModel, fromDB.id)) as any;
-				existsOrError(res?.unit.id, { message: 'Internal Error to set Unit', err: res, status: INTERNAL_SERVER_ERROR });
-
-				return res.unit as UnitModel;
+				if (fromDB?.unit_id) {
+					const toUpdate = { unitId, productId, amount: Number(fromDB.amount) + amount };
+					await this.db('units_products').update(convertDataValues(toUpdate)).where('unit_id', unitId).andWhere('product_id', productId);
+				} else {
+					const toSave = { unitId, productId, amount };
+					await this.db('units_products').insert(convertDataValues(toSave));
+				}
 			}
-
-			const unitToSave = (await this.unitService.create(data)) as any;
-
-			existsOrError(unitToSave?.unit.id, { message: 'Internal Error', err: unitToSave, status: INTERNAL_SERVER_ERROR });
-
-			return unitToSave.unit as UnitModel;
 		} catch (err) {
 			return err;
 		}
@@ -296,7 +374,11 @@ export class SaleService extends DatabaseService {
 			const res: any[] = [];
 
 			const products = await this.db('products_sales').where('sale_id', id);
-			existsOrError(Array.isArray(products), { message: 'Internal Error', error: products, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Array.isArray(products), {
+				message: 'Internal Error',
+				error: products,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
 			for (const product of products) {
 				onLog('product to sale', product);
@@ -313,15 +395,22 @@ export class SaleService extends DatabaseService {
 		}
 	}
 
-	private async setProduct(products: IProduct[], saleId: number) {
+	private async setProducts(products: ISaleProduct[], saleId: number) {
 		try {
-			await this.db('products_sales').where('sale_id', saleId).del();
-
 			for (const product of products) {
-				const { productId, amount } = product;
+				const { id: productId, amount, value: unitaryValue } = product;
+				await this.db('products_sales').where('sale_id', saleId).andWhere('product_id', productId).del();
+
 				onLog('to save products', { productId, amount, saleId });
 
-				const res = await this.db('products_sales').insert(convertDataValues({ productId, amount, saleId }));
+				const res = await this.db('products_sales').insert(
+					convertDataValues({
+						productId,
+						amount,
+						saleId,
+						unitaryValue,
+					})
+				);
 				onLog('save products', res);
 			}
 		} catch (err) {

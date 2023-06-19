@@ -1,37 +1,54 @@
+import { SalePaymentModel } from '../models';
 import { IFile } from './file';
 import { IID } from './shared';
-import { IUnitModel } from './unit';
-import { IUserModel } from './user';
 
 export interface ISaleModel extends IID {
-	unit: IUnitModel;
-	user?: IUserModel;
-	products: IProduct[];
-	seller: ISeller;
-	dueDate: Date | string;
-	value: number;
-	commissionValue: number;
-	installments: number;
-	description: Blob | string;
-	paymentForm: string;
+	userId: number;
+	unitId: number;
 	tenancyId: number;
+	products: ISaleProduct[];
+	seller: string;
+	cpf: string;
+	commission: number;
+	commissionInstallments: number;
+	dueDate: Date | string;
+	paymentForm: string;
+	value: number;
+	installments: number;
 	contract: IFile;
+	description: Blob | string;
+}
+
+export interface ISaleProduct {
+	id: number;
+	name: string;
+	plan: boolean;
+	amount: number;
+	value: number;
 }
 
 export interface ISaleViewModel extends IID {
 	dueDate: Date | string;
 	value: number;
 	commissionValue: number;
+	commissionInstallments: number;
 	installments: number;
 	description: Blob | string;
-	products: IProduct[];
-	payment: IPaymentView;
+	products: ISaleProduct[];
+	paymentForm: string;
 	unit: ISaleUnitView;
 	user: ISaleUserView;
 	seller: ISeller;
 	contract: IFile;
 	tenancyId: number;
-	payments: ISalePayment[];
+	payments: ISalePayments;
+	status: string;
+	commissionStatus: string;
+}
+
+export interface ISalePayments {
+	contract: ISalePayment[] | SalePaymentModel[];
+	commissions: ISalePayment[] | SalePaymentModel[];
 }
 
 export interface IContractView {
@@ -47,7 +64,6 @@ export interface ISaleUnitView {
 	id: number;
 	name: string;
 	cnpj: string;
-	phone: string;
 	cep: string;
 	street: string;
 	number?: number;
@@ -72,6 +88,7 @@ export interface ISale extends IID {
 	dueDate: Date | string;
 	value: number;
 	commissionValue: number;
+	commissionInstallments: number;
 	installments: number;
 	description: Blob | string;
 	paymentId: number;
@@ -81,11 +98,12 @@ export interface ISale extends IID {
 	sellerId: number;
 }
 
-export interface IProduct {
+export interface IProduct extends IID {
 	productId: number;
 	name?: string;
 	limit?: number;
 	amount: number;
+	plan: boolean;
 	value: number;
 }
 
@@ -97,6 +115,8 @@ export interface ISeller extends IID {
 export interface ISalePayment extends IID {
 	payDate: Date | string;
 	value: number;
+	installment: number;
+	type: string;
 	commission: boolean;
 	saleId: number;
 }

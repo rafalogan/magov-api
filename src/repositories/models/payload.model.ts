@@ -1,4 +1,5 @@
-import { IPayload, IUserRule, IUserUnit } from '../types';
+import { FileEntity } from '../entities';
+import { IPayload, IUserPlan, IUserRule, IUserUnit } from '../types';
 import { UserViewModel } from './user-view.model';
 
 export class Payload {
@@ -9,6 +10,8 @@ export class Payload {
 	userRules: IUserRule[];
 	tenancyId?: number | null;
 	unit?: IUserUnit;
+	plans?: IUserPlan[];
+	image?: FileEntity;
 	iat: number;
 	exp: number;
 
@@ -20,6 +23,8 @@ export class Payload {
 		this.userRules = data.userRules;
 		this.tenancyId = data.tenancyId || null;
 		this.unit = data.unit;
+		this.plans = data?.plans;
+		this.image = data?.image;
 		this.iat = 'iat' in data ? data.iat : this.now();
 		this.exp = 'exp' in data ? data.exp : this.expires();
 	}

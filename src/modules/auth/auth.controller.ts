@@ -42,7 +42,9 @@ export class AuthController {
 		}
 
 		const image = this.setUserImage(req);
-		const user = new UserModel({ ...req.body, address, image, plans });
+		const tenancyId = undefined;
+		const unit = req.body.unit ? { ...req.body.unit, tenancyId } : undefined;
+		const user = new UserModel({ ...req.body, address, image, plans, newTenancy: true, unit, tenancyId });
 		onLog('User to signup', user);
 
 		this.authService

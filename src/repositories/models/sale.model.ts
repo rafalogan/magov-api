@@ -1,44 +1,54 @@
-import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
-import { IProduct, ISaleModel, IUserModel } from '../types';
-import { UnitModel } from './unit.model';
-import { UserModel } from './user.model';
-import { FileEntity, Seller } from '../entities';
+import { clearString, convertBlobToString, convertToDate, setInstanceId, setValueNumberToDadaBase } from 'src/utils';
+import { ISaleModel, ISaleProduct } from '../types';
+import { FileEntity } from '../entities';
+import { onLog } from 'src/core/handlers';
 
 export class SaleModel {
 	id?: number;
-	unit: UnitModel;
-	user?: UserModel;
-	products: IProduct[];
-	seller: Seller;
-	dueDate: Date;
-	value: number;
-	commissionValue: number;
-	installments: number;
-	description?: string;
-	paymentForm: string;
+	userId: number;
+	unitId: number;
 	tenancyId: number;
+	products: ISaleProduct[];
+	seller: string;
+	cpf: string;
+	commission: number;
+	commissionInstallments: number;
+	dueDate: Date;
+	paymentForm: string;
+	value: number;
+	installments: number;
 	contract: FileEntity;
+	description?: string;
 
 	constructor(data: ISaleModel, id?: number) {
 		this.id = setInstanceId(id || data?.id);
-		this.products = this.setPoducts(data.products);
-		this.seller = new Seller(data.seller);
-		this.dueDate = convertToDate(data.dueDate);
-		this.value = setValueNumberToView(data.value) as number;
-		this.commissionValue = setValueNumberToView(data.commissionValue) as number;
-		this.installments = Number(data.installments) || 1;
-		this.description = convertBlobToString(data.description);
-		this.paymentForm = data.paymentForm.trim();
+		this.userId = Number(data.userId);
+		this.unitId = Number(data.unitId);
 		this.tenancyId = Number(data.tenancyId);
+		this.products = this.setPoducts(data?.products);
+		this.seller = data.seller.trim();
+		this.cpf = clearString(data.cpf);
+		this.commission = setValueNumberToDadaBase(data.commission) as number;
+		this.commissionInstallments = Number(data.commissionInstallments) || 1;
+		this.dueDate = convertToDate(data.dueDate);
+		this.paymentForm = data.paymentForm.trim();
+		this.value = setValueNumberToDadaBase(data.value) as number;
+		this.installments = Number(data.installments) || 1;
 		this.contract = new FileEntity(data.contract);
-		this.unit = new UnitModel(data.unit);
-		this.user = new UserModel({ ...data.user, unit: data.unit } as IUserModel);
+		this.description = convertBlobToString(data.description);
 	}
 
-	private setPoducts(products: IProduct[]) {
-		return products.map(
-			(product: IProduct) =>
-				({ productId: Number(product.productId), value: setValueNumberToView(product.value), amount: Number(product.amount) } as IProduct)
-		);
+	private setPoducts(products: any): ISaleProduct[] {
+		const res: ISaleProduct[] = [];
+		products = typeof products === 'string' ? JSON.parse(products) : products;
+		onLog('raw products', products);
+
+		for (const data of products) {
+			onLog('data to parse', data);
+
+			res.push({ ...data, id: Number(data.id), value: setValueNumberToDadaBase(data.amount), amount: Number(data.amount) });
+		}
+
+		return res;
 	}
 }
