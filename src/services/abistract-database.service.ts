@@ -50,7 +50,7 @@ export abstract class DatabaseService extends CacheService {
 		return this.db(tableName)
 			.limit(limit)
 			.offset(page * limit - limit)
-			.orderBy(orderBy, order)
+			.orderBy(orderBy || 'id', order || 'asc')
 			.then(data => (!data ? {} : { data: data.map(i => convertDataValues(i, 'camel')), pagination }))
 			.catch(err => err);
 	}
@@ -64,7 +64,7 @@ export abstract class DatabaseService extends CacheService {
 			.where({ tenancy_id })
 			.limit(limit)
 			.offset(page * limit - limit)
-			.orderBy(orderBy, order)
+			.orderBy(orderBy || 'id', order || 'asc')
 			.then(data => (!data ? {} : { data: data.map(i => convertDataValues(i, 'camel')), pagination }))
 			.catch(err => err);
 	}
