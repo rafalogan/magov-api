@@ -17,6 +17,7 @@ export class RevenueModel {
 	tenancyId: number;
 	document?: FileEntity;
 	origin: Origin;
+	government: boolean;
 
 	constructor(data: IRevenueModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -33,5 +34,6 @@ export class RevenueModel {
 		this.tenancyId = data.tenancyId;
 		this.document = data.document ? new FileEntity(data?.document as IFile) : undefined;
 		this.origin = typeof data.origin === 'string' ? new Origin({ origin: data.origin }) : new Origin(data.origin);
+		this.government = !!data.government;
 	}
 }

@@ -51,7 +51,9 @@ export class UnitController extends Controller {
 
 	list(req: Request, res: Response) {
 		const { id } = req.params;
-		const tenancyId = req.query.tenancyId || getTenancyByToken(req);
+		const tenancyId = getTenancyByToken(req) || Number(req.query.tenancyId);
+
+		onLog('tenancy to list', tenancyId);
 
 		try {
 			existsOrError(tenancyId, isRequired('Query param tenancyId'));

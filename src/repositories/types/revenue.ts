@@ -15,6 +15,7 @@ export interface IRevenue extends IID {
 	unitId: number;
 	originId: number;
 	tenancyId: number;
+	government: boolean;
 }
 
 export interface IGovernmentRevenue extends IID {
@@ -29,6 +30,7 @@ export interface IGovernmentRevenue extends IID {
 	description?: Blob | string;
 	unitId: number;
 	tenancyId: number;
+	government: boolean;
 }
 
 export interface IGovernmentRevenueModel extends IGovernmentRevenue {
@@ -75,4 +77,5 @@ export interface IRevenueModel extends IRevenue {
 	unit?: string;
 	document?: IFile;
 	origin: IOrigin | string;
+	government: boolean;
 }

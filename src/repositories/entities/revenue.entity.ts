@@ -15,6 +15,7 @@ export class Revenue {
 	unitId: number;
 	originId: number;
 	tenancyId: number;
+	government: boolean;
 
 	constructor(data: IRevenueModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -30,5 +31,6 @@ export class Revenue {
 		this.unitId = Number(data.unitId);
 		this.originId = Number(data.originId);
 		this.tenancyId = Number(data.tenancyId);
+		this.government = !!data.government;
 	}
 }
