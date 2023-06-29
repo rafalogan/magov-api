@@ -1,5 +1,5 @@
 import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
-import { IGovernmentExpensesModel, IPropositionGovExpense, ITaskGovExpense, IGExpenseBudget } from '../types';
+import { IGovernmentExpensesModel, IGExpenseBudget } from '../types';
 
 export class GovernmentExpensesModel {
 	id?: number;
@@ -9,8 +9,8 @@ export class GovernmentExpensesModel {
 	value: number;
 	observations?: string;
 	active: boolean;
-	proposition?: IPropositionGovExpense;
-	task?: ITaskGovExpense;
+	propositionId: number;
+	taskId?: number;
 	tenancyId: number;
 	budgets?: IGExpenseBudget[];
 
@@ -22,8 +22,8 @@ export class GovernmentExpensesModel {
 		this.value = setValueNumberToView(data.value) as number;
 		this.observations = convertBlobToString(data.observations);
 		this.active = !!data.active;
-		this.proposition = data?.proposition;
-		this.task = data?.task;
+		this.propositionId = Number(data.propositionId);
+		this.taskId = Number(data?.taskId);
 		this.tenancyId = Number(data.tenancyId);
 		this.budgets = data.budgets;
 	}

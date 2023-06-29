@@ -19,10 +19,10 @@ export interface IGovernmentExpensesModel extends IID {
 	value: number;
 	observations?: Blob | string;
 	active: boolean;
-	proposition?: IPropositionGovExpense;
-	task?: ITaskGovExpense;
+	propositionId: number;
+	taskId?: number;
 	tenancyId: number;
-	budgets: IGExpenseBudget[];
+	budgets?: IGExpenseBudget[];
 }
 
 export interface IGExpenseBudget {
@@ -39,4 +39,18 @@ export interface IPropositionGovExpense {
 export interface ITaskGovExpense {
 	id: number;
 	title: string;
+}
+
+export interface IGovernmentExpenseViewModel {
+	id: number;
+	expense: string;
+	description?: Blob | string;
+	dueDate: Date | string;
+	value: number;
+	observations?: Blob | string;
+	active: boolean;
+	proposition: IPropositionGovExpense;
+	task?: ITaskGovExpense;
+	tenancyId: number;
+	budgets?: IGExpenseBudget[];
 }

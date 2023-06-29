@@ -21,7 +21,12 @@ export class GovernmentRevenueService extends DatabaseService {
 			const originId = (await this.getTypeOfRecipe(data.typeOfRecipe)) as number;
 			existsOrError(Number(originId), originId);
 
-			const toSave = new Revenue({ ...data, originId, origin: { origin: data.typeOfRecipe } } as IRevenueModel);
+			const toSave = new Revenue({
+				...data,
+				originId,
+				origin: { origin: data.typeOfRecipe },
+				government: true,
+			} as IRevenueModel);
 			const [id] = await this.db('revenues').insert(convertDataValues({ ...toSave, government: true }));
 			existsOrError(Number(id), { message: 'Internal error', err: id, status: INTERNAL_SERVER_ERROR });
 
@@ -39,15 +44,15 @@ export class GovernmentRevenueService extends DatabaseService {
 
 			if (data.propositions.length) await this.setPropositionOfRevenue(data.propositions, id);
 
-			const originId = data.typeOfRecipe ? ((await this.getTypeOfRecipe(data.typeOfRecipe)) as number) : fromDB.type.id;
+			const originId = await this.getTypeOfRecipe(data.typeOfRecipe || fromDB.typeOfRecipe);
 			const toUpdate = new Revenue(
 				{
 					...fromDB,
 					...data,
 					originId,
-					origin: { origin: data.typeOfRecipe || fromDB.type.typeOrRecipe },
 					unit: fromDB.unit.unit,
 					tenancyId: fromDB.tenancyId,
+					government: true,
 				} as IRevenueModel,
 				id
 			);
@@ -88,7 +93,7 @@ export class GovernmentRevenueService extends DatabaseService {
 					value: 'r.value',
 					tenancy_id: 'r.tenancy_id',
 				},
-				{ type_id: 'o.id', type_of_recipe: 'o.origin' },
+				{ type_of_recipe: 'o.origin' },
 				{ unit_id: 'u.id', unit: 'u.name' },
 				{ city: 'a.city', uf: 'a.uf' },
 			];
@@ -99,7 +104,8 @@ export class GovernmentRevenueService extends DatabaseService {
 				.andWhere('r.government', true)
 				.andWhereRaw('o.id = r.origin_id')
 				.andWhereRaw('u.id = r.unit_id')
-				.andWhereRaw('a.unit_id = r.unit_id');
+				.andWhereRaw('a.unit_id = r.unit_id')
+				.orderBy('r.receive', 'desc');
 
 			onLog('fromDb list', fromDB);
 
@@ -110,11 +116,11 @@ export class GovernmentRevenueService extends DatabaseService {
 				const raw = convertDataValues(item, 'camel');
 				const propositions = await this.getPropositionOfRevenue(raw.id);
 				const unit = { id: raw.unitId, unit: raw.unit };
-				const type = { id: raw.typeId, typeOfRecipe: raw.typeOfRecipe };
 				const region = `${raw.city}-${raw.uf}`;
 
-				res.push(new GovernmentRevenueViewModel({ ...raw, unit, type, propositions, region }));
+				res.push(new GovernmentRevenueViewModel({ ...raw, unit, propositions, region }));
 			}
+			onLog('response', res);
 
 			return res;
 		} catch (err) {
@@ -162,7 +168,11 @@ export class GovernmentRevenueService extends DatabaseService {
 							.first();
 
 			existsOrError(fromDB, { message: 'Revenue not found', status: NOT_FOUND });
-			notExistisOrError(fromDB.severity === 'ERROR', { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
+			notExistisOrError(fromDB.severity === 'ERROR', {
+				message: 'Internal error',
+				status: INTERNAL_SERVER_ERROR,
+				err: fromDB,
+			});
 
 			onLog('fromDB on getGoveRevenue', convertDataValues(fromDB, 'camel'));
 
@@ -195,7 +205,11 @@ export class GovernmentRevenueService extends DatabaseService {
 		try {
 			for (const proposition of propositions) {
 				const fromDB = await this.db('budget_proposals').where('proposition_id', proposition.id).andWhere('revenue_id', revenueId).first();
-				notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+				notExistisOrError(fromDB?.severity === 'ERROR', {
+					message: 'Internal error',
+					err: fromDB,
+					status: INTERNAL_SERVER_ERROR,
+				});
 
 				if (!fromDB) {
 					await this.db('budget_proposals').insert(convertDataValues({ propositionId: proposition.id, revenueId }));
@@ -209,7 +223,11 @@ export class GovernmentRevenueService extends DatabaseService {
 	private async getTypeOfRecipe(origin: string) {
 		try {
 			const fromDB = await this.db('origins').where({ origin }).first();
-			notExistisOrError(fromDB.severity === 'ERROR', { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+			notExistisOrError(fromDB.severity === 'ERROR', {
+				message: 'Internal error',
+				err: fromDB,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
 			if (fromDB?.id) return Number(fromDB.id);
 
@@ -226,7 +244,11 @@ export class GovernmentRevenueService extends DatabaseService {
 		try {
 			const expansesIds = (await this.db('budget_proposals').select('proposition_id').where('revenue_id', revenueId)) as any | any[];
 
-			notExistisOrError(expansesIds?.severity === 'ERROR', { message: 'Internal error', err: expansesIds, status: INTERNAL_SERVER_ERROR });
+			notExistisOrError(expansesIds?.severity === 'ERROR', {
+				message: 'Internal error',
+				err: expansesIds,
+				status: INTERNAL_SERVER_ERROR,
+			});
 			if (!expansesIds) return [];
 
 			const ids = expansesIds.map((i: any) => i.proposition_id);
@@ -234,7 +256,11 @@ export class GovernmentRevenueService extends DatabaseService {
 
 			for (const id of ids) {
 				const data = await this.db('propositions').select('id', 'title', 'expense').where({ id }).first();
-				notExistisOrError(data?.severity === 'ERROR', { message: 'Internal error', err: data, status: INTERNAL_SERVER_ERROR });
+				notExistisOrError(data?.severity === 'ERROR', {
+					message: 'Internal error',
+					err: data,
+					status: INTERNAL_SERVER_ERROR,
+				});
 
 				res.push(convertDataValues(data, 'camel'));
 			}

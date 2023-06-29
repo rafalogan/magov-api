@@ -50,7 +50,7 @@ export class GovernmentExpensesService extends DatabaseService {
 				{ title: 'p.title', menu: 'p.menu' },
 				{ type: 't.name' },
 				{ unit: 'u.name' },
-				{ district: 'a.city', uf: 'a.uf' },
+				{ city: 'a.city', uf: 'a.uf' },
 			];
 			const res = await this.db(tables)
 				.select(...fields)
