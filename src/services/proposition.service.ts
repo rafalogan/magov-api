@@ -35,6 +35,8 @@ export class PropositionService extends DatabaseService {
 							proposition: { id, title: data.title },
 							budgets: data.budgets?.map(i => ({ id: Number(i) })),
 							tenancyId: data.tenancyId,
+							active: true,
+							propositionId: id,
 						} as IGovernmentExpensesModel)
 				  )
 				: undefined;
