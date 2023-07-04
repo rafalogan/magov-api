@@ -26,7 +26,7 @@ export class GovernmentRevenueViewModel {
 		this.status = Number(data.status);
 		this.active = !!data.active;
 		this.recurrent = !!data.recurrent;
-		this.documentNumber = data.documentNumber?.trim();
+		this.documentNumber = data.documentNumber?.trim() as string;
 		this.description = convertBlobToString(data.description);
 		this.origin = data.origin;
 		this.unit = data.unit;
