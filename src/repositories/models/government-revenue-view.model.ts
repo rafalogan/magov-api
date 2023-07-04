@@ -12,9 +12,9 @@ export class GovernmentRevenueViewModel {
 	recurrent: boolean;
 	documentNumber: string;
 	description?: string;
-	typeOfRecipe: string;
+	origin: string;
 	unit: IUnitGovernmentRevenue;
-	propositions: IPropositionExpensesGovernment[];
+	expenses: IPropositionExpensesGovernment[];
 	region: string;
 	tenancyId: number;
 
@@ -28,9 +28,9 @@ export class GovernmentRevenueViewModel {
 		this.recurrent = !!data.recurrent;
 		this.documentNumber = data.documentNumber?.trim();
 		this.description = convertBlobToString(data.description);
-		this.typeOfRecipe = data.typeOfRecipe;
+		this.origin = data.origin;
 		this.unit = data.unit;
-		this.propositions = this.setPropositions(data.propositions);
+		this.expenses = this.setPropositions(data.expenses);
 		this.region = data.region?.trim();
 		this.tenancyId = Number(data.tenancyId);
 	}
@@ -40,7 +40,8 @@ export class GovernmentRevenueViewModel {
 
 		return data?.map(i => {
 			const expense = i.expense / 100;
-			return { ...i, expense };
+			const reserveValue = i.reserveValue / 100;
+			return { ...i, expense, reserveValue };
 		});
 	}
 }

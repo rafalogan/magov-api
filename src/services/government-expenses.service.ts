@@ -3,8 +3,9 @@ import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-s
 import { IGExpenseBudget, IGovernmentExpensesModel, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { GovernmentExpensesModel, ReadOptionsModel } from 'src/repositories/models';
-import { convertBlobToString, convertDataValues, existsOrError, isRequired, notExistisOrError, setValueNumberToView } from 'src/utils';
-import { GovernmentExpenses } from 'src/repositories/entities';
+import { convertBlobToString, convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
+import { GovernmentExpenses, GovernmentReserve } from 'src/repositories/entities';
+import { onLog } from 'src/core/handlers';
 
 export class GovernmentExpensesService extends DatabaseService {
 	constructor(options: IServiceOptions) {
@@ -29,7 +30,11 @@ export class GovernmentExpensesService extends DatabaseService {
 		try {
 			const fromDB = (await this.getExpense(id, data.tenancyId)) as GovernmentExpenses;
 			existsOrError(fromDB?.id, fromDB);
-			const toUpdate = new GovernmentExpenses({ ...fromDB, ...data, tenancyId: fromDB.tenancyId } as IGovernmentExpensesModel);
+			const toUpdate = new GovernmentExpenses({
+				...fromDB,
+				...data,
+				tenancyId: fromDB.tenancyId,
+			} as IGovernmentExpensesModel);
 			await this.db('government_expenses').update(convertDataValues(toUpdate)).where({ id }).andWhere('tenancy_id', fromDB.tenancyId);
 
 			return { message: 'Government expense successfully updated', data: toUpdate };
@@ -77,6 +82,7 @@ export class GovernmentExpensesService extends DatabaseService {
 			return err;
 		}
 	}
+
 	async getExpense(filter: number | string, tenancyId: number) {
 		try {
 			const fromDB = await this.db('government_expenses')
@@ -114,6 +120,34 @@ export class GovernmentExpensesService extends DatabaseService {
 		}
 	}
 
+	async setReserve(data: GovernmentReserve, tenancyId: number) {
+		try {
+			const fromDB = (await this.getExpense(data.id, tenancyId)) as GovernmentExpensesModel;
+
+			existsOrError(fromDB?.id, { message: 'Expenses not found.', status: NOT_FOUND });
+
+			for (const item of data.reserves) {
+				const verify = await this.db('government_expenses_payment')
+					.where('government_expense_id', data.id)
+					.andWhere('revenue_id', item.id)
+					.first();
+
+				onLog('verify', verify);
+
+				if (!verify) {
+					const { revenueValue, date } = item;
+					const toSave = { governmentExpenseId: data.id, revenueId: item.id, value: revenueValue, date };
+
+					await this.db('government_expenses_payment').insert(convertDataValues(toSave));
+				}
+			}
+
+			return { message: 'Reserve successfully saved', data };
+		} catch (err) {
+			return err;
+		}
+	}
+
 	private async setBudgets(budgets: IGExpenseBudget[], governmentExpanseId: number, date: Date) {
 		try {
 			const res: any[] = [];
@@ -136,7 +170,14 @@ export class GovernmentExpensesService extends DatabaseService {
 	private async getBudgets(expenseId: number) {
 		try {
 			const tables = { gep: 'government_expenses_payment', r: 'revenues' };
-			const fields = [{ date: 'gep.date', value: 'gep.value' }, { revenue: 'r.revenue' }];
+			const fields = [
+				{ date: 'gep.date', value: 'gep.value' },
+				{
+					revenue: 'r.revenue',
+					id: 'r.id',
+					revenue_value: 'r.value',
+				},
+			];
 			const fromDB = await this.db(tables)
 				.where('gep.government_expense_id', expenseId)
 				.select(...fields)

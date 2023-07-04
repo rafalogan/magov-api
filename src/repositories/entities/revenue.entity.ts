@@ -26,7 +26,7 @@ export class Revenue {
 		this.active = !!data.active;
 		this.recurrent = !!data.recurrent;
 		this.documentUrl = 'documentUrl' in data ? data.documentUrl?.trim() : undefined;
-		this.documentNumber = 'documentNumber' in data ? data.documentNumber.trim() : undefined;
+		this.documentNumber = 'documentNumber' in data ? data.documentNumber?.trim() : undefined;
 		this.value = setValueNumberToDadaBase(data.value) as number;
 		this.unitId = Number(data.unitId);
 		this.originId = Number(data.originId);

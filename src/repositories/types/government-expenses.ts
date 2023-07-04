@@ -54,3 +54,16 @@ export interface IGovernmentExpenseViewModel {
 	tenancyId: number;
 	budgets?: IGExpenseBudget[];
 }
+
+export interface IGovernmentReserve {
+	id: number;
+	reserves: IGovernmentRevenueReserve[];
+}
+
+export interface IGovernmentRevenueReserve {
+	id: number;
+	date: Date | string;
+	value: number;
+	revenue: string;
+	revenueValue: number;
+}

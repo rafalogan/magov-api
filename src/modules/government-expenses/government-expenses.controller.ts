@@ -4,8 +4,9 @@ import { Request, Response } from 'express';
 import { Controller } from 'src/core/controllers';
 import { GovernmentExpensesService } from 'src/services';
 import { isRequired, notExistisOrError, requiredFields } from 'src/utils';
-import { ResponseHandle, getTenancyByToken } from 'src/core/handlers';
+import { getTenancyByToken, onLog, ResponseHandle } from 'src/core/handlers';
 import { GovernmentExpensesModel, ReadOptionsModel } from 'src/repositories/models';
+import { GovernmentReserve } from 'src/repositories/entities';
 
 export class GovernmentExpensesController extends Controller {
 	constructor(private governmentExpensesService: GovernmentExpensesService) {
@@ -57,6 +58,26 @@ export class GovernmentExpensesController extends Controller {
 		this.governmentExpensesService
 			.disabled(Number(id), tenancyId)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.catch(err => ResponseHandle.onError({ res, err }));
+	}
+
+	reserve(req: Request, res: Response) {
+		const { id } = req.params;
+		const tenancyId = getTenancyByToken(req) || Number(req.query.tenancyId);
+
+		onLog('receiver', req.body);
+		const toSave = new GovernmentReserve({ ...req.body }, Number(id));
+
+		onLog('to reserves', toSave);
+
+		return this.governmentExpensesService
+			.setReserve(toSave, tenancyId)
+			.then(data =>
+				ResponseHandle.onSuccess({
+					res,
+					data,
+				})
+			)
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 

@@ -19,7 +19,7 @@ export interface IRevenue extends IID {
 }
 
 export interface IGovernmentRevenue extends IID {
-	typeOfRecipe: string;
+	origin: string;
 	revenue: string;
 	receive: Date | string;
 	value: number;
@@ -34,7 +34,7 @@ export interface IGovernmentRevenue extends IID {
 }
 
 export interface IGovernmentRevenueModel extends IGovernmentRevenue {
-	propositions: IPropositionExpensesGovernment[];
+	expenses: IPropositionExpensesGovernment[];
 }
 
 export interface IGovernmentRevenueViewModel extends IID, ITenancyIdRequired {
@@ -44,18 +44,20 @@ export interface IGovernmentRevenueViewModel extends IID, ITenancyIdRequired {
 	status: number;
 	active: boolean;
 	recurrent: boolean;
-	documentNumber: string;
+	documentNumber?: string;
 	description?: Blob | string;
-	typeOfRecipe: string;
+	origin: string;
 	unit: IUnitGovernmentRevenue;
-	propositions: IPropositionExpensesGovernment[];
+	expenses: IPropositionExpensesGovernment[];
 	region: string;
 }
 
 export interface IPropositionExpensesGovernment {
 	id: number;
-	title: string;
+	name: string;
 	expense: number;
+	reserveValue: number;
+	date?: Date | string;
 }
 
 export interface IUnitGovernmentRevenue {
