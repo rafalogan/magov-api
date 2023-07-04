@@ -1,6 +1,6 @@
 import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { FileEntity, Origin } from '../entities';
-import { IFile, IRevenueModel } from '../types';
+import { IFile, IOrigin, IRevenueModel } from '../types';
 
 export class RevenueModel {
 	id?: number;
@@ -17,6 +17,7 @@ export class RevenueModel {
 	tenancyId: number;
 	document?: FileEntity;
 	origin: Origin;
+	government: boolean;
 
 	constructor(data: IRevenueModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -32,6 +33,7 @@ export class RevenueModel {
 		this.unit = data.unit;
 		this.tenancyId = data.tenancyId;
 		this.document = data.document ? new FileEntity(data?.document as IFile) : undefined;
-		this.origin = typeof data.origin === 'string' ? new Origin({ origin: data.origin }) : new Origin(data.origin);
+		this.origin = typeof data.origin === 'string' ? new Origin({ origin: data.origin }) : new Origin(data.origin as IOrigin);
+		this.government = !!data.government;
 	}
 }

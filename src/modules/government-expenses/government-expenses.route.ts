@@ -1,4 +1,4 @@
-import { Routes, methodNotAllowed } from 'src/core/routes';
+import { methodNotAllowed, Routes } from 'src/core/routes';
 import { RouteOptions } from 'src/repositories/types';
 import { GovernmentExpensesController } from './government-expenses.controller';
 
@@ -13,6 +13,12 @@ export class GovernmentExpensesRoute extends Routes {
 			.all(this.auth?.exec().authenticate())
 			.get(this.governmentExpensesController.list.bind(this.governmentExpensesController))
 			.post(this.governmentExpensesController.save.bind(this.governmentExpensesController))
+			.all(methodNotAllowed);
+
+		this.app
+			.route('/government-expenses/reserves/:id')
+			.all(this.auth?.exec().authenticate())
+			.put(this.governmentExpensesController.reserve.bind(this.governmentExpensesController))
 			.all(methodNotAllowed);
 
 		this.app

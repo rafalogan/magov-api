@@ -10,15 +10,16 @@ export interface IRevenue extends IID {
 	active: boolean;
 	recurrent: boolean;
 	documentUrl?: string;
-	documentNumber: string;
+	documentNumber?: string;
 	value: number;
 	unitId: number;
 	originId: number;
 	tenancyId: number;
+	government: boolean;
 }
 
 export interface IGovernmentRevenue extends IID {
-	typeOfRecipe: string;
+	origin: string;
 	revenue: string;
 	receive: Date | string;
 	value: number;
@@ -29,10 +30,11 @@ export interface IGovernmentRevenue extends IID {
 	description?: Blob | string;
 	unitId: number;
 	tenancyId: number;
+	government: boolean;
 }
 
 export interface IGovernmentRevenueModel extends IGovernmentRevenue {
-	propositions: IPropositionExpensesGovernment[];
+	expenses: IPropositionExpensesGovernment[];
 }
 
 export interface IGovernmentRevenueViewModel extends IID, ITenancyIdRequired {
@@ -42,18 +44,20 @@ export interface IGovernmentRevenueViewModel extends IID, ITenancyIdRequired {
 	status: number;
 	active: boolean;
 	recurrent: boolean;
-	documentNumber: string;
+	documentNumber?: string;
 	description?: Blob | string;
-	type: ITypeOrRecipeRevenue;
+	origin: string;
 	unit: IUnitGovernmentRevenue;
-	propositions: IPropositionExpensesGovernment[];
+	expenses: IPropositionExpensesGovernment[];
 	region: string;
 }
 
 export interface IPropositionExpensesGovernment {
 	id: number;
-	title: string;
-	value: number;
+	name: string;
+	expense: number;
+	reserveValue: number;
+	date?: Date | string;
 }
 
 export interface IUnitGovernmentRevenue {
@@ -74,5 +78,6 @@ export interface IOrigin extends IID {
 export interface IRevenueModel extends IRevenue {
 	unit?: string;
 	document?: IFile;
-	origin: IOrigin | string;
+	origin?: IOrigin | string;
+	government: boolean;
 }

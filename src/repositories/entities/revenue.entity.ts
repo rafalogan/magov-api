@@ -15,6 +15,7 @@ export class Revenue {
 	unitId: number;
 	originId: number;
 	tenancyId: number;
+	government: boolean;
 
 	constructor(data: IRevenueModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -25,10 +26,11 @@ export class Revenue {
 		this.active = !!data.active;
 		this.recurrent = !!data.recurrent;
 		this.documentUrl = 'documentUrl' in data ? data.documentUrl?.trim() : undefined;
-		this.documentNumber = 'documentNumber' in data ? data.documentNumber.trim() : undefined;
+		this.documentNumber = 'documentNumber' in data ? data.documentNumber?.trim() : undefined;
 		this.value = setValueNumberToDadaBase(data.value) as number;
 		this.unitId = Number(data.unitId);
 		this.originId = Number(data.originId);
 		this.tenancyId = Number(data.tenancyId);
+		this.government = !!data.government;
 	}
 }

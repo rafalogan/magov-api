@@ -3,7 +3,7 @@ import { IGovernmentRevenueModel, IPropositionExpensesGovernment } from '../type
 
 export class GovernmentRevenueModel {
 	id?: number;
-	typeOfRecipe: string;
+	origin: string;
 	revenue: string;
 	receive: Date;
 	value: number;
@@ -14,11 +14,11 @@ export class GovernmentRevenueModel {
 	description?: string;
 	unitId: number;
 	tenancyId: number;
-	propositions: IPropositionExpensesGovernment[];
+	expenses: IPropositionExpensesGovernment[];
 
 	constructor(data: IGovernmentRevenueModel, id?: number) {
 		this.id = setInstanceId(id || data?.id);
-		this.typeOfRecipe = data.typeOfRecipe.trim();
+		this.origin = data.origin?.trim();
 		this.revenue = data.revenue.trim();
 		this.receive = convertToDate(data.receive);
 		this.value = setValueNumberToView(data.value) as number;
@@ -29,6 +29,12 @@ export class GovernmentRevenueModel {
 		this.description = convertBlobToString(data.description);
 		this.unitId = data.unitId;
 		this.tenancyId = data.tenancyId;
-		this.propositions = data.propositions;
+		this.expenses = this.setExpenses(data?.expenses);
+	}
+
+	private setExpenses(data?: IPropositionExpensesGovernment[]): IPropositionExpensesGovernment[] {
+		if (!data) return [];
+
+		return data?.map(i => ({ ...i, expense: i.expense * 100, reserveValue: i.reserveValue * 100 }));
 	}
 }

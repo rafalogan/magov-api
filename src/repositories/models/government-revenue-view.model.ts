@@ -1,5 +1,6 @@
-import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
-import { IGovernmentRevenueViewModel, IPropositionExpensesGovernment, ITypeOrRecipeRevenue, IUnitGovernmentRevenue } from '../types';
+import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
+import { IGovernmentRevenueViewModel, IPropositionExpensesGovernment, IUnitGovernmentRevenue } from '../types';
+import isEmpty from 'is-empty';
 
 export class GovernmentRevenueViewModel {
 	id?: number;
@@ -11,9 +12,9 @@ export class GovernmentRevenueViewModel {
 	recurrent: boolean;
 	documentNumber: string;
 	description?: string;
-	type: ITypeOrRecipeRevenue;
+	origin: string;
 	unit: IUnitGovernmentRevenue;
-	propositions: IPropositionExpensesGovernment[];
+	expenses: IPropositionExpensesGovernment[];
 	region: string;
 	tenancyId: number;
 
@@ -21,24 +22,26 @@ export class GovernmentRevenueViewModel {
 		this.id = setInstanceId(id || data.id);
 		this.revenue = data.revenue.trim();
 		this.receive = convertToDate(data.receive);
-		this.value = setValueNumberToView(data.value) as number;
+		this.value = data.value / 100;
 		this.status = Number(data.status);
 		this.active = !!data.active;
 		this.recurrent = !!data.recurrent;
-		this.documentNumber = data.documentNumber.trim();
+		this.documentNumber = data.documentNumber?.trim() as string;
 		this.description = convertBlobToString(data.description);
-		this.type = data.type;
+		this.origin = data.origin;
 		this.unit = data.unit;
-		this.propositions = this.setProprositions(data.propositions);
-		this.region = data.region.trim();
-		this.tenancyId = data.tenancyId;
+		this.expenses = this.setPropositions(data.expenses);
+		this.region = data.region?.trim();
+		this.tenancyId = Number(data.tenancyId);
 	}
 
-	private setProprositions(data: IPropositionExpensesGovernment[]) {
-		if (!data?.length) return [];
-		return data.map(i => {
-			i.value = setValueNumberToView(i.value) as number;
-			return i;
+	private setPropositions(data?: IPropositionExpensesGovernment[]): IPropositionExpensesGovernment[] {
+		if (!data || isEmpty(data)) return [];
+
+		return data?.map(i => {
+			const expense = i.expense / 100;
+			const reserveValue = i.reserveValue / 100;
+			return { ...i, expense, reserveValue };
 		});
 	}
 }

@@ -21,8 +21,8 @@ export class GovernmentExpenses {
 		this.value = setValueNumberToDadaBase(data.value) as number;
 		this.observations = convertBlobToString(data.observations);
 		this.active = !!data.active;
-		this.propositionId = setInstanceId(data.proposition?.id);
-		this.tasksId = setInstanceId(data.task?.id);
+		this.propositionId = Number(data.propositionId);
+		this.tasksId = setInstanceId(data.taskId);
 		this.tenancyId = Number(data.tenancyId);
 	}
 }

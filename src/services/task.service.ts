@@ -79,6 +79,8 @@ export class TaskService extends DatabaseService {
 								dueDate: data.end,
 								value: data.cost,
 								task: { id, title: data.title },
+								active: true,
+								propositionId: Number(data.propositionId),
 							} as IGovernmentExpensesModel)
 					  )
 					: undefined;

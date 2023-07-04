@@ -3,8 +3,9 @@ import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-s
 import { IGExpenseBudget, IGovernmentExpensesModel, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { GovernmentExpensesModel, ReadOptionsModel } from 'src/repositories/models';
-import { convertDataValues, existsOrError, isRequired, notExistisOrError, setValueNumberToView } from 'src/utils';
-import { GovernmentExpenses } from 'src/repositories/entities';
+import { convertBlobToString, convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
+import { GovernmentExpenses, GovernmentReserve } from 'src/repositories/entities';
+import { onLog } from 'src/core/handlers';
 
 export class GovernmentExpensesService extends DatabaseService {
 	constructor(options: IServiceOptions) {
@@ -29,7 +30,11 @@ export class GovernmentExpensesService extends DatabaseService {
 		try {
 			const fromDB = (await this.getExpense(id, data.tenancyId)) as GovernmentExpenses;
 			existsOrError(fromDB?.id, fromDB);
-			const toUpdate = new GovernmentExpenses({ ...fromDB, ...data, tenancyId: fromDB.tenancyId } as IGovernmentExpensesModel);
+			const toUpdate = new GovernmentExpenses({
+				...fromDB,
+				...data,
+				tenancyId: fromDB.tenancyId,
+			} as IGovernmentExpensesModel);
 			await this.db('government_expenses').update(convertDataValues(toUpdate)).where({ id }).andWhere('tenancy_id', fromDB.tenancyId);
 
 			return { message: 'Government expense successfully updated', data: toUpdate };
@@ -44,17 +49,40 @@ export class GovernmentExpensesService extends DatabaseService {
 			existsOrError(tenancyId, { message: isRequired('tenancyId'), status: BAD_REQUEST });
 
 			if (id) return this.getExpense(id, tenancyId as number);
-			const res = await this.db('government_expenses').select('id', 'expense', 'due_date', 'value').where('tenancy_id', tenancyId);
+			const tables = { ge: 'government_expenses', p: 'propositions', u: 'units', t: 'types', a: 'adresses' };
+			const fields = [
+				{ id: 'ge.id', expense: 'ge.expense', due_date: 'ge.due_date', description: 'ge.description', value: 'ge.value' },
+				{ title: 'p.title', menu: 'p.menu' },
+				{ type: 't.name' },
+				{ unit: 'u.name' },
+				{ city: 'a.city', uf: 'a.uf' },
+			];
+			const res = await this.db(tables)
+				.select(...fields)
+				.where('ge.tenancy_id', tenancyId)
+				.andWhereRaw('p.id = ge.proposition_id')
+				.andWhereRaw('t.id = p.type_id')
+				.andWhereRaw('u.id = p.unit_id')
+				.andWhereRaw('a.unit_id = p.unit_id');
 			existsOrError(Array.isArray(res), { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: res });
 
-			return res.map(i => {
-				i.value = setValueNumberToView(i.value);
-				return convertDataValues(i, 'camel');
-			});
+			const data: any[] = [];
+
+			for (const item of res) {
+				const reserve = (await this.getBudgets(item.id)) as any;
+				const description = convertBlobToString(item.description);
+				const menu = convertBlobToString(item.menu);
+				const balance = reserve?.map((i: any) => i.value).reduce((total: number, value: number) => total + value, 0) - item.value;
+
+				data.push({ ...convertDataValues(item, 'camel'), description, menu, reserve, balance });
+			}
+
+			return data;
 		} catch (err) {
 			return err;
 		}
 	}
+
 	async getExpense(filter: number | string, tenancyId: number) {
 		try {
 			const fromDB = await this.db('government_expenses')
@@ -92,6 +120,34 @@ export class GovernmentExpensesService extends DatabaseService {
 		}
 	}
 
+	async setReserve(data: GovernmentReserve, tenancyId: number) {
+		try {
+			const fromDB = (await this.getExpense(data.id, tenancyId)) as GovernmentExpensesModel;
+
+			existsOrError(fromDB?.id, { message: 'Expenses not found.', status: NOT_FOUND });
+
+			for (const item of data.reserves) {
+				const verify = await this.db('government_expenses_payment')
+					.where('government_expense_id', data.id)
+					.andWhere('revenue_id', item.id)
+					.first();
+
+				onLog('verify', verify);
+
+				if (!verify) {
+					const { revenueValue, date } = item;
+					const toSave = { governmentExpenseId: data.id, revenueId: item.id, value: revenueValue, date };
+
+					await this.db('government_expenses_payment').insert(convertDataValues(toSave));
+				}
+			}
+
+			return { message: 'Reserve successfully saved', data };
+		} catch (err) {
+			return err;
+		}
+	}
+
 	private async setBudgets(budgets: IGExpenseBudget[], governmentExpanseId: number, date: Date) {
 		try {
 			const res: any[] = [];
@@ -106,6 +162,29 @@ export class GovernmentExpensesService extends DatabaseService {
 			}
 
 			return res;
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getBudgets(expenseId: number) {
+		try {
+			const tables = { gep: 'government_expenses_payment', r: 'revenues' };
+			const fields = [
+				{ date: 'gep.date', value: 'gep.value' },
+				{
+					revenue: 'r.revenue',
+					id: 'r.id',
+					revenue_value: 'r.value',
+				},
+			];
+			const fromDB = await this.db(tables)
+				.where('gep.government_expense_id', expenseId)
+				.select(...fields)
+				.andWhereRaw('r.id = gep.revenue_id');
+			existsOrError(Array.isArray(fromDB), { message: 'intenal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			return fromDB?.map(i => convertDataValues(i, 'camel'));
 		} catch (err) {
 			return err;
 		}

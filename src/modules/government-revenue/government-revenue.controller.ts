@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 
 import { Controller } from 'src/core/controllers';
 import { GovernmentRevenueService } from 'src/services';
-import { ResponseHandle, getTenancyByToken } from 'src/core/handlers';
+import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
 import { existsOrError, isRequired, notExistisOrError, requiredFields } from 'src/utils';
 import { GovernmentRevenueModel, ReadOptionsModel } from 'src/repositories/models';
 
@@ -67,11 +67,11 @@ export class GovernmentRevenueController extends Controller {
 	}
 
 	private verifyRequest(req: Request) {
-		const { typeOfRecipe, unitId, revenue, receive, documentNumber, value } = req.body;
+		const { origin, unitId, revenue, receive, documentNumber, value } = req.body;
 		const tenancyId = getTenancyByToken(req) || Number(req.body.tenancyId);
 
 		const requireds = requiredFields([
-			{ field: typeOfRecipe, message: isRequired('typeOfRecipe') },
+			{ field: origin, message: isRequired('typeOfRecipe') },
 			{ field: unitId, message: isRequired('unitId') },
 			{ field: revenue, message: isRequired('revenue') },
 			{ field: receive, message: isRequired('receive') },
