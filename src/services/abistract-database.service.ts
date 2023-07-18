@@ -3,7 +3,7 @@ import { INTERNAL_SERVER_ERROR } from 'http-status';
 
 import { onLog } from 'src/core/handlers';
 import { PaginationModel, ReadOptionsModel } from 'src/repositories/models';
-import { IAddress, IGetValuesOptions, IProduct, ISaleProduct, IServiceOptions } from 'src/repositories/types';
+import { IAddress, IGetValuesOptions, ISaleProduct, IServiceOptions } from 'src/repositories/types';
 import { camelToSnake, convertDataValues, existsOrError, notExistisOrError } from 'src/utils';
 import { CacheService } from './abistract-cache.service';
 import { Address, FileEntity } from 'src/repositories/entities';
@@ -43,7 +43,8 @@ export abstract class DatabaseService extends CacheService {
 	}
 
 	async findAll(tableName: string, options: ReadOptionsModel) {
-		const { limit, page, orderBy, order } = options;
+		const { limit, orderBy, order } = options;
+		const page = options.page || 1;
 		const total = (await this.getCount(tableName)) as number;
 		const pagination = new PaginationModel({ page, limit, total });
 
@@ -56,7 +57,8 @@ export abstract class DatabaseService extends CacheService {
 	}
 
 	async findAllByTenacy(tableName: string, options: ReadOptionsModel) {
-		const { limit, page, tenancyId: tenancy_id, orderBy, order } = options;
+		const { limit, tenancyId: tenancy_id, orderBy, order } = options;
+		const page = options?.page || 1;
 		const total = (await this.getCount(tableName, tenancy_id)) as number;
 		const pagination = new PaginationModel({ page, limit, total });
 
