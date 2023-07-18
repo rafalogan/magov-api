@@ -1,7 +1,7 @@
 import { IReadOptions } from '../types';
 
 export class ReadOptionsModel {
-	page: number;
+	page?: number;
 	limit: number;
 	orderBy?: string;
 	order?: string;
@@ -10,7 +10,7 @@ export class ReadOptionsModel {
 	taskId?: number;
 
 	constructor(data: IReadOptions) {
-		this.page = Number(data.page) || 1;
+		this.page = Number(data.page) || undefined;
 		this.limit = Number(data.limit) || 10;
 		this.orderBy = data.orderBy || undefined;
 		this.order = data.orderBy || undefined;

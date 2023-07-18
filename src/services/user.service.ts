@@ -59,24 +59,54 @@ export class UserService extends DatabaseService {
 		try {
 			const { page, limit, unitId, tenancyId, orderBy, order } = options;
 			const total = await this.getCount('users', tenancyId);
-			const pagination = new PaginationModel({ page, limit, total });
+			const tables = { u: 'users', un: 'units' };
+			const fields = [
+				{
+					id: 'u.id',
+					first_name: 'u.first_name',
+					last_name: 'u.last_name',
+					office: 'u.office',
+					email: 'u.email',
+					cpf: 'u.cpf',
+					phone: 'u.phone',
+					level: 'u.level',
+					active: 'u.active',
+					tenancy_id: 'u.tenancy_id',
+				},
+				{ unit_id: 'un.id', unit_name: 'un.name' },
+			];
 
-			const fromDB = await this.db('users')
-				.where('unit_id', unitId)
-				.andWhere('tenancy_id', tenancyId)
-				.limit(limit)
-				.offset(page * limit - limit)
+			if (page) {
+				const pagination = new PaginationModel({ page, limit, total });
+				const fromDB = await this.db(tables)
+					.select(...fields)
+					.where('u.unit_id', unitId)
+					.andWhere('u.tenancy_id', tenancyId)
+					.andWhereRaw('un.id = u.unit_id')
+					.limit(limit)
+					.offset(page * limit - limit)
+					.orderBy(orderBy || 'id', order || 'asc');
+
+				existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+				const data = fromDB.map(i => {
+					deleteField(i, 'password');
+					i.active = !!i.active;
+					return convertDataValues(i, 'camel');
+				});
+				return { data, pagination };
+			}
+
+			const fromDB = await this.db(tables)
+				.select(...fields)
+				.where('u.unit_id', unitId)
+				.andWhere('u.tenancy_id', tenancyId)
+				.andWhereRaw('un.id = u.unit_id')
 				.orderBy(orderBy || 'id', order || 'asc');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 
-			const data = fromDB.map(i => {
-				deleteField(i, 'password');
-				i.active = !!i.active;
-				return convertDataValues(i, 'camel');
-			});
-
-			return { data, pagination };
+			return fromDB.map(i => convertDataValues(i, 'camel'));
 		} catch (err) {
 			return err;
 		}
@@ -84,17 +114,31 @@ export class UserService extends DatabaseService {
 
 	async getUsers(options: ReadOptionsModel) {
 		try {
-			const fromDB = options?.tenancyId ? await this.db('users').where('tenancy_id', options.tenancyId) : await this.db('users');
+			const tables = { u: 'users', un: 'units' };
+			const fields = [
+				{
+					id: 'u.id',
+					first_name: 'u.first_name',
+					last_name: 'u.last_name',
+					office: 'u.office',
+					email: 'u.email',
+					cpf: 'u.cpf',
+					phone: 'u.phone',
+					level: 'u.level',
+					active: 'u.active',
+					tenancy_id: 'u.tenancy_id',
+				},
+				{ unit_id: 'un.id', unit_name: 'un.name' },
+			];
+
+			const fromDB = await this.db(tables)
+				.select(...fields)
+				.andWhere('u.tenancy_id', options.tenancyId)
+				.andWhereRaw('un.id = u.unit_id');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 
-			const users = fromDB.map(user => {
-				user = convertDataValues(user, 'camel');
-				deleteField(user, 'password');
-				return user;
-			});
-
-			return users;
+			return fromDB.map(i => convertDataValues(i, 'camel'));
 		} catch (err) {
 			return err;
 		}
