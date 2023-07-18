@@ -35,11 +35,12 @@ export class ContactService extends DatabaseService {
 
 	async read(options: ReadOptionsModel, id?: number) {
 		try {
-			const { page, limit, orderBy, order, tenancyId } = options;
+			const { limit, orderBy, order, tenancyId } = options;
 			existsOrError(tenancyId, { message: isRequired('tenancyId'), status: BAD_REQUEST });
 
 			if (id) return this.getContact(id, tenancyId as number);
 
+			const page = options.page || 1;
 			const total = await this.getCount('contacts', tenancyId);
 			const pagination = new PaginationModel({ page, limit, total });
 			onLog('tenancyId', tenancyId);
