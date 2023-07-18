@@ -1,4 +1,5 @@
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+import dayjs from 'dayjs';
 
 import { IFile, ISale, ISalePayments, ISaleProduct, ISaleUnitView, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
@@ -7,8 +8,6 @@ import { PaginationModel, ReadOptionsModel, SaleModel, SalePaymentModel, SaleVie
 import { Sale, Seller } from 'src/repositories/entities';
 import { convertDataValues, deleteField, existsOrError } from 'src/utils';
 import { onLog } from 'src/core/handlers';
-import dayjs from 'dayjs';
-import { log } from 'node:console';
 
 export class SaleService extends DatabaseService {
 	constructor(options: IServiceOptions, private userService: UserService) {
@@ -88,7 +87,7 @@ export class SaleService extends DatabaseService {
 			if (id) return this.getSale(id);
 			const { page, limit, orderBy, order } = options;
 			const total = await this.getCount('sales');
-			const pagination = new PaginationModel({ page, limit, total });
+			const pagination = new PaginationModel({ page: page || 1, limit, total });
 
 			const fromDB = await this.db({ s: 'sales', u: 'units', us: 'users', sr: 'sellers', a: 'adresses', f: 'files' })
 				.select(
@@ -118,7 +117,7 @@ export class SaleService extends DatabaseService {
 				.andWhereRaw('sr.id = s.seller_id')
 				.andWhereRaw('f.sale_id = s.id')
 				.limit(limit)
-				.offset(page * limit - limit)
+				.offset(page || 1 * limit - limit)
 				.orderBy(orderBy || 's.due_date', order || 'desc');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal Error', error: fromDB, status: INTERNAL_SERVER_ERROR });

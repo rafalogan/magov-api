@@ -39,7 +39,7 @@ export interface IReadOptions extends IPaginationOptions {
 }
 
 export interface IPagination extends IPaginationOptions {
-	page: number;
+	page?: number;
 	limit: number;
 	total: number;
 }

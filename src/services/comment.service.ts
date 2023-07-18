@@ -48,7 +48,8 @@ export class CommentService extends DatabaseService {
 
 	async getComments(options: ReadOptionsModel) {
 		try {
-			const { page, limit, taskId, tenancyId, order, orderBy } = options;
+			const { limit, taskId, tenancyId, order, orderBy } = options;
+			const page = options.page || 1;
 			const total = !taskId ? await this.getCount('comments', tenancyId) : null;
 
 			const tables = { c: 'comments', u: 'users' };
