@@ -33,11 +33,11 @@ export class UserModel {
 		this.cpf = clearString(data.cpf);
 		this.phone = clearString(data.phone);
 		this.office = data.office.trim();
-		this.active = data.active || true;
+		this.active = !!data.active;
 		this.level = Number(data.level);
 		this.unitId = setInstanceId(data.unitId);
 		this.tenancyId = setInstanceId(data.tenancyId);
-		this.userRules = data.userRules?.map(Number) || [];
+		this.userRules = Array.isArray(data?.userRules) ? data.userRules?.map(Number) : [];
 		this.address = new Address(data.address);
 		this.plans = this.setUserPlans(data.plans);
 		this.unit = this.setUserUit(data.unit, this.plans);
@@ -46,11 +46,20 @@ export class UserModel {
 	}
 
 	private setUserPlans(plans?: IUserPlan[]) {
-		return !plans?.length ? undefined : plans.map(i => ({ id: Number(i.id), amount: Number(i.amount) || 1 } as IUserPlan));
+		if (!Array.isArray(plans)) return undefined;
+		return !plans?.length
+			? undefined
+			: plans.map(
+					i =>
+						({
+							id: Number(i.id),
+							amount: Number(i.amount) || 1,
+						} as IUserPlan)
+			  );
 	}
 
 	private setUserUit(unit?: IUnitModel, plans?: IUserPlan[]) {
-		if (!unit) return undefined;
+		if (!unit || typeof unit === 'string') return undefined;
 
 		const products = unit.products?.length ? unit.products : plans ? plans : undefined;
 

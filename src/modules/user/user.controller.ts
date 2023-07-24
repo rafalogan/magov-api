@@ -2,7 +2,7 @@ import { BAD_REQUEST } from 'http-status';
 import { Request, Response } from 'express';
 
 import { Controller } from 'src/core/controllers';
-import { setAddress, requiredFields, notExistisOrError, equalsOrError, setUserImage, deleteField } from 'src/utils';
+import { deleteField, equalsOrError, notExistisOrError, requiredFields, setAddress, setUserImage } from 'src/utils';
 import { UserService } from 'src/services';
 import { getTenancyByToken, onLog, ResponseHandle } from 'src/core/handlers';
 import { ReadOptionsModel, UserModel } from 'src/repositories/models';
@@ -20,10 +20,12 @@ export class UserController extends Controller {
 		}
 
 		const address = setAddress(req);
+		onLog('Address user', address);
 		const image = setUserImage(req);
 		const tenancyId = getTenancyByToken(req) || req.body.tenancyId;
 
 		const user = new UserModel({ ...req.body, tenancyId, address, image });
+		onLog('User to save', user);
 
 		this.userService
 			.save(user)
@@ -88,6 +90,9 @@ export class UserController extends Controller {
 		]);
 
 		notExistisOrError(requireds, { message: `${requireds?.join(' is required \n ')} is required`, status: BAD_REQUEST });
-		equalsOrError(password, confirmPassword, { message: 'confirmPassword should be equal to password', status: BAD_REQUEST });
+		equalsOrError(password, confirmPassword, {
+			message: 'confirmPassword should be equal to password',
+			status: BAD_REQUEST,
+		});
 	}
 }

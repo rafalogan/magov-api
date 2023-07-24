@@ -3,6 +3,7 @@ import { Request } from 'express';
 import { CustomFile, IAddress, IFile } from 'src/repositories/types';
 import { baseUrl } from 'src/utils/validate';
 import { upperCaseFirstLetter } from './convert-date';
+import isEmpty from 'is-empty';
 
 export const snakeToCamel = (field: string): string => {
 	let toArray = field.split('_');
@@ -96,7 +97,8 @@ const setUrlToFile = (req: Request, file: CustomFile): string => {
 };
 
 export const setUserImage = (req: Request) => {
-	if (!req.file) return undefined;
+	if (!req.file || isEmpty(req.file)) return undefined;
+
 	const image = req.body.image ?? { title: req.body.imageTitle, alt: req.body.imageAlt };
 	const { title, alt } = image;
 	const file = req.file as CustomFile;
