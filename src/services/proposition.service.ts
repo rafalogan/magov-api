@@ -94,17 +94,31 @@ export class PropositionService extends DatabaseService {
 			existsOrError(tenancyId, { message: isRequired('tenancyId'), status: BAD_REQUEST });
 			if (id) return this.getProprosition(id, tenancyId as number);
 
-			const table = 'propositions';
-			const fields = ['id', 'title', 'favorite', 'deadline', 'active', 'menu', 'expense'];
+			const table = { p: 'propositions', t: 'types' };
+			const fields = [
+				{
+					id: 'p.id',
+					title: 'p.title',
+					favorite: 'p.favorite',
+					deadline: 'p.deadline',
+					active: 'p.active',
+					menu: 'p.menu',
+					expense: 'p.expense',
+					link: 'p.proposition_url',
+				},
+				{ type_id: 't.id', type: 't.name' },
+			];
 
 			const fromDB = unitId
 				? await this.db(table)
 						.select(...fields)
-						.where({ unit_id: unitId })
-						.andWhere({ tenancy_id: tenancyId })
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw(`p.unit_id = ${unitId}`)
+						.andWhereRaw('t.id = p.type_id')
 				: await this.db(table)
 						.select(...fields)
-						.where({ tenancy_id: tenancyId });
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw('t.id = p.type_id');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
 			const raw = fromDB.map((i: any) => convertDataValues(i, 'camel'));
@@ -129,6 +143,15 @@ export class PropositionService extends DatabaseService {
 					fields: ['id', 'keyword'],
 				})) as any;
 
+				const budgets = await this.getValues({
+					value: item.id,
+					tableIds: 'budget_proposals',
+					fieldIds: 'revenue_id',
+					whereIds: 'proposition_id',
+					table: 'revenues',
+					fields: ['id', 'revenue', 'value'],
+				});
+
 				const favorite = !!item.favorite;
 				const active = !!item.active;
 				const themes = themesRaw.map((i: any) => i.name).join('/');
@@ -136,7 +159,7 @@ export class PropositionService extends DatabaseService {
 				const expense = setValueNumberToView(item.expense);
 				const menu = convertBlobToString(item.menu);
 
-				res.push({ ...item, favorite, active, expense, themes, keywords, menu });
+				res.push({ ...item, favorite, active, expense, themes, keywords, menu, budgets });
 			}
 
 			return res;
@@ -191,7 +214,20 @@ export class PropositionService extends DatabaseService {
 			const tasks = await this.getTasksProposition(fromDB.id);
 			const file = await this.getFile(fromDB.id);
 
-			return new PropositionViewModel(convertDataValues({ ...fromDB, budgets, demands, keywords, themes, tasks, file }, 'camel'));
+			return new PropositionViewModel(
+				convertDataValues(
+					{
+						...fromDB,
+						budgets,
+						demands,
+						keywords,
+						themes,
+						tasks,
+						file,
+					},
+					'camel'
+				)
+			);
 		} catch (err) {
 			return err;
 		}
@@ -364,7 +400,11 @@ export class PropositionService extends DatabaseService {
 	private async getFile(propositionId: number) {
 		try {
 			const fromDB = await this.db('files').where('proposition_id', propositionId).first();
-			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+			notExistisOrError(fromDB?.severity === 'ERROR', {
+				message: 'Internal Error',
+				err: fromDB,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
 			return fromDB?.id ? new FileEntity(convertDataValues(fromDB, 'camel')) : fromDB;
 		} catch (err) {
