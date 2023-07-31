@@ -6,9 +6,9 @@
 	"scripts": {
 		"start": "npx pm2-runtime start ecosystem.config.js",
 		"start:dev": "npx tsx watch index.ts",
-		"start:dev:db": "docker-compose down && docker-compose up",
+		"db:up": "docker-compose down && docker-compose up",
+		"db:down": "docker-compose down",
 		"stop": "npx pm2 kill",
-		"stop:dev:db": "docker-compose down",
 		"build": "rm -rf ./dist && npx tsc",
 		"test": "npx vitest --config vite.config.ts",
 		"test:cov": "npx vitest --coverage --config vite.config.ts",
@@ -98,7 +98,7 @@
 		"@types/multer": "^1.4.7",
 		"@types/multer-s3": "^3.0.0",
 		"@types/mysql2": "github:types/mysql2",
-		"@types/node": "^18.15.3",
+		"@types/node": "^18.17.1",
 		"@types/nodemailer": "^6.4.7",
 		"@types/passport": "^1.0.12",
 		"@types/passport-jwt": "^3.0.8",
@@ -114,19 +114,19 @@
 		"eslint-plugin-prettier": "^4.2.1",
 		"faker": "^6.6.6",
 		"faker-br": "^0.4.1",
-		"prettier": "^2.8.4",
+		"prettier": "^3.0.0",
 		"source-map": "^0.7.4",
 		"supertest": "^6.3.3",
 		"ts-node": "^10.9.1",
 		"tsconfig-paths": "^4.1.2",
-		"tsup": "^6.6.3",
+		"tsup": "^7.1.0",
 		"tsx": "^3.12.5",
 		"typescript": "^5.0.2",
 		"vite-tsconfig-paths": "^4.0.7",
-		"vitest": "^0.29.3"
+		"vitest": "^0.33.0"
 	},
 	"engines": {
-		"node": "18.16.1",
-		"npm": "9.7.2"
+		"node": "v18.17.0",
+		"npm": "9.8.1"
 	}
 }
