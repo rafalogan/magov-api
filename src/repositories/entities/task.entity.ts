@@ -31,6 +31,5 @@ export class Task {
 		this.tenancyId = Number(data.tenancyId);
 		this.propositionId = setInstanceId(data.propositionId);
 		this.demandId = setInstanceId(data.demandId);
-		this.plaintiffId = setInstanceId(data.plaintiffId);
 	}
 }
