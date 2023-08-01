@@ -1,7 +1,6 @@
-import { IComment, ITaskModel, IUnitExpenseModel } from '../types';
+import { IComment, IPlantiffTask, ITaskModel, IUnitExpenseModel } from '../types';
 import { Comment, UnitExpense } from 'src/repositories/entities';
 import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToDadaBase } from 'src/utils';
-import { PlaintiffModel } from './plaintiff.model';
 
 export class TaskModel {
 	id?: number;
@@ -17,8 +16,7 @@ export class TaskModel {
 	tenancyId: number;
 	propositionId?: number;
 	demandId?: number;
-	plaintiffId?: number;
-	plaintiff?: PlaintiffModel;
+	participants: IPlantiffTask[];
 	users: number[];
 	comments?: Comment[];
 	themes: string[];
@@ -37,10 +35,6 @@ export class TaskModel {
 		this.tenancyId = Number(data.tenancyId);
 		this.propositionId = setInstanceId(data.propositionId);
 		this.demandId = setInstanceId(data.demandId);
-		this.plaintiffId = setInstanceId(data.plaintiffId);
-		this.plaintiff = data?.plaintiff?.name
-			? new PlaintiffModel({ ...data.plaintiff, tenancyId: data?.plaintiff?.tenancyId || this.tenancyId })
-			: undefined;
 		this.users = data.users;
 		this.userId = Number(data.userId || data.users[0]);
 		this.comments = this.setComents(data.comments);
@@ -48,8 +42,8 @@ export class TaskModel {
 			data.setUnitExpense && this.cost
 				? this.setUnitExpense()
 				: data.unitExpense
-				? this.setUnitExpense(data.unitExpense as IUnitExpenseModel)
-				: undefined;
+					? this.setUnitExpense(data.unitExpense as IUnitExpenseModel)
+					: undefined;
 		this.themes = data.themes;
 	}
 
