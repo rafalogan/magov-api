@@ -16,7 +16,7 @@ export class TaskModel {
 	tenancyId: number;
 	propositionId?: number;
 	demandId?: number;
-	participants: IPlantiffTask[];
+	participants?: IPlantiffTask[];
 	users: number[];
 	comments?: Comment[];
 	themes: string[];
