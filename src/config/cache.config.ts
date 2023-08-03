@@ -25,9 +25,10 @@ export class CacheConfig {
 		if (!this.enabledCache) return onInfo('Cache is disabled');
 
 		return this.connection
-			.on('connect', () => this.onConnect())
-			.on('ready', () => this.onReady())
-			.on('error', (error: any) => this.onCacheError(error));
+			.connect()
+			.then(() => this.onConnect())
+			.catch(() => this.onCacheError())
+			.finally(() => this.onReady());
 	}
 
 	disconnect() {
