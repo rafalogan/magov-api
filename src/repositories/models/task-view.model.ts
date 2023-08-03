@@ -16,7 +16,7 @@ export class TaskViewModel {
 	tenancyId: number;
 	proposition?: IPropositionTask;
 	demand?: IDemandTask;
-	plaintiff?: IPlantiffTask;
+	participants?: IPlantiffTask[];
 	comments?: ICommentTask[];
 	themes: IThemeTask[];
 
@@ -35,9 +35,15 @@ export class TaskViewModel {
 		this.tenancyId = Number(data.tenancyId);
 		this.proposition = this.setProposition(data.proposition);
 		this.demand = this.setDemand(data.demand);
-		this.plaintiff = data.plaintiff;
+		this.participants = this.setParticipants(data.participants);
 		this.comments = this.setComments(data.comments);
 		this.themes = data.themes;
+	}
+
+	private setParticipants(data?: IPlantiffTask[]): IPlantiffTask[] {
+		if (!data) return [];
+
+		return data.map(i => ({ ...i, id: Number(i.id), name: i.name?.trim() }));
 	}
 
 	private setDemand(value?: IDemandTask) {
