@@ -42,9 +42,16 @@ export class TaskModel {
 			data.setUnitExpense && this.cost
 				? this.setUnitExpense()
 				: data.unitExpense
-					? this.setUnitExpense(data.unitExpense as IUnitExpenseModel)
-					: undefined;
+				? this.setUnitExpense(data.unitExpense as IUnitExpenseModel)
+				: undefined;
 		this.themes = data.themes;
+		this.participants = this.setParticipates(data.participants);
+	}
+
+	private setParticipates(data?: IPlantiffTask[]): IPlantiffTask[] {
+		if (!data) return [];
+
+		return data.map(i => ({ ...i, id: Number(i.id) }));
 	}
 
 	private setUnitExpense(value?: IUnitExpenseModel) {

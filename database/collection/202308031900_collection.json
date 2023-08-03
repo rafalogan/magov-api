@@ -1,0 +1,5810 @@
+{
+	"info": {
+		"_postman_id": "b7057d51-4669-4d62-a145-54d7e6ba0c7c",
+		"name": "MaGovernance",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "8559392"
+	},
+	"item": [
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "signin",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"pm.collectionVariables.set(\"token_master\", jsonData.token);",
+									"pm.environment.set(\"token_master\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "file",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"root@root.com\",\n    \"password\": \"@Root2023\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/signin",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"signin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signin/tenancy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"pm.environment.set(\"token_tenancy\", jsonData.token);",
+									"pm.collectionVariables.set(\"token_tenancy\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "file",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"maria@mums.com\",\n    \"password\": \"Maria@t3st\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/signin",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"signin"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signup",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "file",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Pictures/wallpapers/6058b37ce377b.jpg"
+								},
+								{
+									"key": "firstName",
+									"value": "Silvana ",
+									"type": "text"
+								},
+								{
+									"key": "lastName",
+									"value": "pereira",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "maria@mums.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "Maria@t3st",
+									"type": "text"
+								},
+								{
+									"key": "confirmPassword",
+									"value": "Maria@t3st",
+									"type": "text"
+								},
+								{
+									"key": "cpf",
+									"value": "430.834.666-50",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "61987986548",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "10",
+									"type": "text"
+								},
+								{
+									"key": "cep",
+									"value": "76842392",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "qua 00 conj. Z",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "complement",
+									"value": "casa",
+									"type": "text"
+								},
+								{
+									"key": "district",
+									"value": "norte",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Brasília",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "DF",
+									"type": "text"
+								},
+								{
+									"key": "planId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "office",
+									"value": "deputado",
+									"type": "text"
+								},
+								{
+									"key": "imageTitle",
+									"value": "Minha foto",
+									"type": "text"
+								},
+								{
+									"key": "imageAlt",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "unitId",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/signup",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "validateToken",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3NzYxNjgzNiwiZXhwIjoxNjc3NzAzMjM2fQ.sYrlEP8DZspCK76Y9gyDb8c072QmULwuoeKsPsw8fZI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}"
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/validate-token",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"validate-token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "userVerify",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3NzYxNjgzNiwiZXhwIjoxNjc3NzAzMjM2fQ.sYrlEP8DZspCK76Y9gyDb8c072QmULwuoeKsPsw8fZI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"root@root.com\",\n    \"subject\": \"teste\",\n    \"message\": \"<storng>teste</storng>\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/user-verify",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"user-verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "recovey",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3NzYxNjgzNiwiZXhwIjoxNjc3NzAzMjM2fQ.sYrlEP8DZspCK76Y9gyDb8c072QmULwuoeKsPsw8fZI",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"test@test.com\",\n    \"password\": \"@T3st\",\n    \"confirmPassword\": \"@T3st\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/recovey",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"recovey"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "signin/paula.pedrosa",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"",
+									"pm.environment.set(\"token_tenancy\", jsonData.token);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "file",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"paula.pedrosa@seguranca.gov.br\",\n    \"password\": \"@Novo!2023\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/signin",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"signin"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "units",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEiLCJsYXN0TmFtZSI6IlNpbHZhIiwiZW1haWwiOiJtYXJpYUBtdW1zLmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6MSwidW5pdCI6e30sImlhdCI6MTY3Nzc4NTg3NywiZXhwIjoxNjc3ODcyMjc3fQ.dGlL6FLngAIsnVqQyNycmC8WcMd1lY9AV0i-X-TkyXk",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Gabinente de Teste\",\n    \"description\": \"Teste de unidade para Application\",\n    \"cnpj\": \"84.817.416/0001-97\",\n    \"phone\": \"(00) 9 9999-9999\",\n    \"planId\": 1,\n    \"address\": {\n        \"cep\": \"65915-820\",\n        \"street\": \"Rua São João\",\n        \"number\": null,\n        \"complement\": null,\n        \"district\": \"Parque Alvorada II\",\n        \"city\": \"Imperatriz\", \n        \"uf\": \"MA\"    \n        }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/units",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"units"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "read/list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEiLCJsYXN0TmFtZSI6IlNpbHZhIiwiZW1haWwiOiJtYXJpYUBtdW1zLmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6MSwidW5pdCI6e30sImlhdCI6MTY3Nzc4NTg3NywiZXhwIjoxNjc3ODcyMjc3fQ.dGlL6FLngAIsnVqQyNycmC8WcMd1lY9AV0i-X-TkyXk",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Gabinente de Teste\",\n    \"description\": \"Teste de unidade para Application\",\n    \"cnpj\": \"84.817.416/0001-97\",\n    \"phone\": \"(00) 9 9999-9999\",\n    \"address\": {\n        \"cep\": \"65915-820\",\n        \"street\": \"Rua São João\",\n        \"number\": null,\n        \"complement\": null,\n        \"district\": \"Parque Alvorada II\",\n        \"city\": \"Imperatriz\", \n        \"uf\": \"MA\"    \n        }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/units",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"units"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "read/list/master",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEiLCJsYXN0TmFtZSI6IlNpbHZhIiwiZW1haWwiOiJtYXJpYUBtdW1zLmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6MSwidW5pdCI6e30sImlhdCI6MTY3Nzc4NTg3NywiZXhwIjoxNjc3ODcyMjc3fQ.dGlL6FLngAIsnVqQyNycmC8WcMd1lY9AV0i-X-TkyXk",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Gabinente de Teste\",\n    \"description\": \"Teste de unidade para Application\",\n    \"cnpj\": \"84.817.416/0001-97\",\n    \"phone\": \"(00) 9 9999-9999\",\n    \"address\": {\n        \"cep\": \"65915-820\",\n        \"street\": \"Rua São João\",\n        \"number\": null,\n        \"complement\": null,\n        \"district\": \"Parque Alvorada II\",\n        \"city\": \"Imperatriz\", \n        \"uf\": \"MA\"    \n        }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/units",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"units"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "read/unit",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEiLCJsYXN0TmFtZSI6IlNpbHZhIiwiZW1haWwiOiJtYXJpYUBtdW1zLmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6MSwidW5pdCI6e30sImlhdCI6MTY3Nzc4NTg3NywiZXhwIjoxNjc3ODcyMjc3fQ.dGlL6FLngAIsnVqQyNycmC8WcMd1lY9AV0i-X-TkyXk",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Gabinente de Teste\",\n    \"description\": \"Teste de unidade para Application\",\n    \"cnpj\": \"84.817.416/0001-97\",\n    \"phone\": \"(00) 9 9999-9999\",\n    \"address\": {\n        \"cep\": \"65915-820\",\n        \"street\": \"Rua São João\",\n        \"number\": null,\n        \"complement\": null,\n        \"district\": \"Parque Alvorada II\",\n        \"city\": \"Imperatriz\", \n        \"uf\": \"MA\"    \n        }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/units/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"units",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEiLCJsYXN0TmFtZSI6IlNpbHZhIiwiZW1haWwiOiJtYXJpYUBtdW1zLmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6MSwidW5pdCI6e30sImlhdCI6MTY3Nzc4NTg3NywiZXhwIjoxNjc3ODcyMjc3fQ.dGlL6FLngAIsnVqQyNycmC8WcMd1lY9AV0i-X-TkyXk",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Gabinente de Teste\",\n    \"description\": \"Teste de unidade para Application\",\n    \"cnpj\": \"84.817.416/0001-97\",\n    \"phone\": \"(00) 9 9999-9999\",\n    \"address\": {\n        \"cep\": \"65915-820\",\n        \"street\": \"Rua São João\",\n        \"number\": null,\n        \"complement\": null,\n        \"district\": \"Parque Alvorada II\",\n        \"city\": \"Imperatriz\", \n        \"uf\": \"MA\"    \n        }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/units/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"units",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEiLCJsYXN0TmFtZSI6IlNpbHZhIiwiZW1haWwiOiJtYXJpYUBtdW1zLmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6MSwidW5pdCI6e30sImlhdCI6MTY3Nzc4NTg3NywiZXhwIjoxNjc3ODcyMjc3fQ.dGlL6FLngAIsnVqQyNycmC8WcMd1lY9AV0i-X-TkyXk",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Gabinente de Teste\",\n    \"description\": \"Teste de unidade para Application\",\n    \"cnpj\": \"84.817.416/0001-97\",\n    \"phone\": \"(00) 9 9999-9999\",\n    \"address\": {\n        \"cep\": \"65915-820\",\n        \"street\": \"Rua São João\",\n        \"number\": null,\n        \"complement\": null,\n        \"district\": \"Parque Alvorada II\",\n        \"city\": \"Imperatriz\", \n        \"uf\": \"MA\"    \n        }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/units/10",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"units",
+								"10"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "createUser",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEgIiwibGFzdE5hbWUiOiJTaWx2YSIsImVtYWlsIjoibWFyaWFAbXVtcy5jb20iLCJ1c2VyUnVsZXMiOltdLCJ0ZW5hbmN5SWQiOjEsInVuaXQiOnt9LCJpYXQiOjE2Nzc2ODE1OTUsImV4cCI6MTY3Nzc2Nzk5NX0.Tn4ud_-Py5WOuhqJJABGG4mu7uSE7as20LhC24yMnA8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Pictures/wallpapers/wallpaperflare.com_wallpaper-15.jpg"
+								},
+								{
+									"key": "firstName",
+									"value": "Kelly ",
+									"type": "text"
+								},
+								{
+									"key": "lastName",
+									"value": "Marques",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "kmarqs@gabinet.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "@Kmarqs",
+									"type": "text"
+								},
+								{
+									"key": "confirmPassword",
+									"value": "@Kmarqs",
+									"type": "text"
+								},
+								{
+									"key": "cpf",
+									"value": "430.834.666-50",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "61987986548",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "10",
+									"type": "text"
+								},
+								{
+									"key": "office",
+									"value": "assesor",
+									"type": "text"
+								},
+								{
+									"key": "image",
+									"value": "Minha foto",
+									"contentType": "",
+									"type": "text"
+								},
+								{
+									"key": "imageAlt",
+									"value": "teste de alt da image",
+									"type": "text"
+								},
+								{
+									"key": "unitId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "cep",
+									"value": "72428245",
+									"contentType": "",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "Núcleo Rural Casa Grande Módulo 8 MA - 20",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "complement",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "district",
+									"value": "Ponte Alta (Gama)",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Brasília",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "DF",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/users",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "users",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEgIiwibGFzdE5hbWUiOiJTaWx2YSIsImVtYWlsIjoibWFyaWFAbXVtcy5jb20iLCJ1c2VyUnVsZXMiOltdLCJ0ZW5hbmN5SWQiOjEsInVuaXQiOnt9LCJpYXQiOjE2Nzc2ODE1OTUsImV4cCI6MTY3Nzc2Nzk5NX0.Tn4ud_-Py5WOuhqJJABGG4mu7uSE7as20LhC24yMnA8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/users",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "users?unitId=",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEgIiwibGFzdE5hbWUiOiJTaWx2YSIsImVtYWlsIjoibWFyaWFAbXVtcy5jb20iLCJ1c2VyUnVsZXMiOltdLCJ0ZW5hbmN5SWQiOjEsInVuaXQiOnt9LCJpYXQiOjE2Nzc2ODE1OTUsImV4cCI6MTY3Nzc2Nzk5NX0.Tn4ud_-Py5WOuhqJJABGG4mu7uSE7as20LhC24yMnA8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/users?unitId=3",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "unitId",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "users/noTenancy",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3NzY4NTI3OCwiZXhwIjoxNjc3NzcxNjc4fQ.EQGAjlyETLblDGL4hpbo4FM9h-5yBndW2OowkTR0zrc",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Pictures/wallpapers/wallpaperflare.com_wallpaper-3.jpg"
+								},
+								{
+									"key": "firstName",
+									"value": "Patricia",
+									"type": "text"
+								},
+								{
+									"key": "lastName",
+									"value": "pontes",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "paty@suport.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "@P4tys",
+									"type": "text"
+								},
+								{
+									"key": "confirmPassword",
+									"value": "@P4tys",
+									"type": "text"
+								},
+								{
+									"key": "cpf",
+									"value": "430.834.666-50",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "61987986548",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "10",
+									"type": "text"
+								},
+								{
+									"key": "cep",
+									"value": "76842392",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "qua 00 conj. Z",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "complement",
+									"value": "casa",
+									"type": "text"
+								},
+								{
+									"key": "district",
+									"value": "norte",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Brasília",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "DF",
+									"type": "text"
+								},
+								{
+									"key": "planId",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "office",
+									"value": "deputado",
+									"type": "text"
+								},
+								{
+									"key": "imageTitle",
+									"value": "Minha foto",
+									"type": "text"
+								},
+								{
+									"key": "imageAlt",
+									"value": "imagem de teste",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/users",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEgIiwibGFzdE5hbWUiOiJTaWx2YSIsImVtYWlsIjoibWFyaWFAbXVtcy5jb20iLCJ1c2VyUnVsZXMiOltdLCJ0ZW5hbmN5SWQiOjEsInVuaXQiOnt9LCJpYXQiOjE2Nzc2ODE1OTUsImV4cCI6MTY3Nzc2Nzk5NX0.Tn4ud_-Py5WOuhqJJABGG4mu7uSE7as20LhC24yMnA8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{mg_host_api}}/users/5",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"users",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "editUser",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEgIiwibGFzdE5hbWUiOiJTaWx2YSIsImVtYWlsIjoibWFyaWFAbXVtcy5jb20iLCJ1c2VyUnVsZXMiOltdLCJ0ZW5hbmN5SWQiOjEsInVuaXQiOnt9LCJpYXQiOjE2Nzc2ODE1OTUsImV4cCI6MTY3Nzc2Nzk5NX0.Tn4ud_-Py5WOuhqJJABGG4mu7uSE7as20LhC24yMnA8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Pictures/wallpapers/wallpaperflare.com_wallpaper-3.jpg"
+								},
+								{
+									"key": "firstName",
+									"value": "Mariana ",
+									"type": "text"
+								},
+								{
+									"key": "lastName",
+									"value": "Pinho",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "Mari@gaminete.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "@Mar1",
+									"type": "text"
+								},
+								{
+									"key": "confirmPassword",
+									"value": "@Mar1",
+									"type": "text"
+								},
+								{
+									"key": "cpf",
+									"value": "430.834.666-50",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "61987986548",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "10",
+									"type": "text"
+								},
+								{
+									"key": "cep",
+									"value": "76842392",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "qua 00 conj. Z",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "complement",
+									"value": "casa",
+									"type": "text"
+								},
+								{
+									"key": "district",
+									"value": "norte",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Brasília",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "DF",
+									"type": "text"
+								},
+								{
+									"key": "planId",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "office",
+									"value": "deputado",
+									"type": "text"
+								},
+								{
+									"key": "imageTitle",
+									"value": "Minha foto",
+									"type": "text"
+								},
+								{
+									"key": "imageAlt",
+									"value": "imagem de teste",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/users/3",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"users",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteUser",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEgIiwibGFzdE5hbWUiOiJTaWx2YSIsImVtYWlsIjoibWFyaWFAbXVtcy5jb20iLCJ1c2VyUnVsZXMiOltdLCJ0ZW5hbmN5SWQiOjEsInVuaXQiOnt9LCJpYXQiOjE2Nzc2ODE1OTUsImV4cCI6MTY3Nzc2Nzk5NX0.Tn4ud_-Py5WOuhqJJABGG4mu7uSE7as20LhC24yMnA8",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Pictures/wallpapers/wallpaperflare.com_wallpaper-3.jpg"
+								},
+								{
+									"key": "firstName",
+									"value": "Mariana ",
+									"type": "text"
+								},
+								{
+									"key": "lastName",
+									"value": "Pinho",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "Mari@gaminete.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "@Mar1",
+									"type": "text"
+								},
+								{
+									"key": "confirmPassword",
+									"value": "@Mar1",
+									"type": "text"
+								},
+								{
+									"key": "cpf",
+									"value": "430.834.666-50",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "61987986548",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "10",
+									"type": "text"
+								},
+								{
+									"key": "cep",
+									"value": "76842392",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "qua 00 conj. Z",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "complement",
+									"value": "casa",
+									"type": "text"
+								},
+								{
+									"key": "district",
+									"value": "norte",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Brasília",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "DF",
+									"type": "text"
+								},
+								{
+									"key": "planId",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "office",
+									"value": "deputado",
+									"type": "text"
+								},
+								{
+									"key": "imageTitle",
+									"value": "Minha foto",
+									"type": "text"
+								},
+								{
+									"key": "imageAlt",
+									"value": "imagem de teste",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/users/5",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"users",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "plans",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Novo plano\",\n\t\"description\": \"Campo opcional, pode ser mandado html string ou null\",\n\t\"usersLimit\": 70,\n\t\"unitaryValue\": 750.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/plans",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"plans"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "plans",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/plans",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"plans"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "plan",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/plans/4",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"plans",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Plano Editado\",\n\t\"description\": \"Campo opcional, pode ser mandado html string ou null\",\n\t\"usersLimit\": 70,\n\t\"unitaryValue\": 957.70\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/plans/4",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"plans",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tonken_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Plano Editado\",\n\t\"description\": \"Campo opcional, pode ser mandado html string ou null\",\n\t\"usersLimit\": 70,\n\t\"unitaryValue\": 957.70\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/plans/5",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"plans",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "keywords",
+			"item": [
+				{
+					"name": "keywords",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3Nzg3ODA5OCwiZXhwIjoxNjc3OTY0NDk4fQ.Z8wIsR8HwB8id1qm8_i-1QUnEUcSN-5EtU0Y9Dv3fZQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/keywords",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"keywords"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "keyword",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3Nzg3ODA5OCwiZXhwIjoxNjc3OTY0NDk4fQ.Z8wIsR8HwB8id1qm8_i-1QUnEUcSN-5EtU0Y9Dv3fZQ",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/keywords",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"keywords"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "keywords",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3Nzg4MTk5NSwiZXhwIjoxNjc3OTY4Mzk1fQ.JFpDBL1-o3FahfRXpSX3tVwoHlNKxsS4ihb-VDDVtJ8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/keywords/7",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"keywords",
+								"7"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "themes",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3Nzg4MTk5NSwiZXhwIjoxNjc3OTY4Mzk1fQ.JFpDBL1-o3FahfRXpSX3tVwoHlNKxsS4ihb-VDDVtJ8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Teste de temas\",\n\t\"description\": \"Campo opicional, pode ser string  html ou null\",\n    \"active\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/themes",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"themes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "themes",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3Nzg4MTk5NSwiZXhwIjoxNjc3OTY4Mzk1fQ.JFpDBL1-o3FahfRXpSX3tVwoHlNKxsS4ihb-VDDVtJ8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Teste de temas\",\n\t\"description\": \"Campo opicional, pode ser string  html ou null\",\n    \"active\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/themes",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"themes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "themes/active",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3Nzg4MTk5NSwiZXhwIjoxNjc3OTY4Mzk1fQ.JFpDBL1-o3FahfRXpSX3tVwoHlNKxsS4ihb-VDDVtJ8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Teste de temas\",\n\t\"description\": \"Campo opicional, pode ser string  html ou null\",\n    \"active\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/themes?active=true",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"themes"
+							],
+							"query": [
+								{
+									"key": "active",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "theme",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3Nzg4MTk5NSwiZXhwIjoxNjc3OTY4Mzk1fQ.JFpDBL1-o3FahfRXpSX3tVwoHlNKxsS4ihb-VDDVtJ8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Teste de temas\",\n\t\"description\": \"Campo opicional, pode ser string  html ou null\",\n    \"active\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/themes/20",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"themes",
+								"20"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3Nzg4MTk5NSwiZXhwIjoxNjc3OTY4Mzk1fQ.JFpDBL1-o3FahfRXpSX3tVwoHlNKxsS4ihb-VDDVtJ8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Teste de tema editado\",\n\t\"description\": \"Campo opicional, pode ser string  html ou null\",\n    \"active\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/themes/21",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"themes",
+								"21"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3Nzg4MTk5NSwiZXhwIjoxNjc3OTY4Mzk1fQ.JFpDBL1-o3FahfRXpSX3tVwoHlNKxsS4ihb-VDDVtJ8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Teste de tema editado\",\n\t\"description\": \"Campo opicional, pode ser string  html ou null\",\n    \"active\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/themes/21",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"themes",
+								"21"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "rules",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3ODExMDIzNiwiZXhwIjoxNjc4MTk2NjM2fQ.Hn1sqBLZ20uEfh9BBW1RhpI4p6wXojPYk_fZllq0m1Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Teste Rule 3\",\n    \"description\": \"Camapo opicional, pode ser mandado Html, Blob ou string\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/rules",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"rules"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "rules",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3ODExMDIzNiwiZXhwIjoxNjc4MTk2NjM2fQ.Hn1sqBLZ20uEfh9BBW1RhpI4p6wXojPYk_fZllq0m1Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/rules",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"rules"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "rule",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3ODExMDIzNiwiZXhwIjoxNjc4MTk2NjM2fQ.Hn1sqBLZ20uEfh9BBW1RhpI4p6wXojPYk_fZllq0m1Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/rules/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"rules",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3ODExMDIzNiwiZXhwIjoxNjc4MTk2NjM2fQ.Hn1sqBLZ20uEfh9BBW1RhpI4p6wXojPYk_fZllq0m1Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Create rule\",\n    \"description\": \"Camapo opicional, pode ser mandado Html, Blob ou string\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/rules/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"rules",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3ODExMDIzNiwiZXhwIjoxNjc4MTk2NjM2fQ.Hn1sqBLZ20uEfh9BBW1RhpI4p6wXojPYk_fZllq0m1Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Teste Rule\",\n    \"description\": \"Camapo opicional, pode ser mandado Html, Blob ou string\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/rules/8",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"rules",
+								"8"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "institutes-types",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3ODExMDIzNiwiZXhwIjoxNjc4MTk2NjM2fQ.Hn1sqBLZ20uEfh9BBW1RhpI4p6wXojPYk_fZllq0m1Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"liderança\",\n    \"active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/institutes-types",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"institutes-types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "institutesTypes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/institutes-types",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"institutes-types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "institutesType",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwiZmlyc3ROYW1lIjoiUm9vdCIsImxhc3ROYW1lIjoiVXNlciIsImVtYWlsIjoicm9vdEByb290LmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6bnVsbCwidW5pdCI6e30sImlhdCI6MTY3ODExMDIzNiwiZXhwIjoxNjc4MTk2NjM2fQ.Hn1sqBLZ20uEfh9BBW1RhpI4p6wXojPYk_fZllq0m1Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/institutes-types/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"institutes-types",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tonken_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Liderança\",\n    \"active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/institutes-types/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"institutes-types",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{tonken_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/institutes-types/4",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"institutes-types",
+								"4"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "demands",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Nova demanda\",\n    \"description\": \"Descrição de demanda para tesst \",\n    \"favorite\": true,\n    \"level\": 5,\n\t\"active\": true,\n\t\"deadLine\": \"2023-03-31T11:01:30\",\n    \"approximateIncome\": 367568.98,\n\t\"status\": \"status da demanda opcional\",\n\t\"unitId\": 1,\n\t\"userId\": 10,\n\t\"plaintiff\": {\n        \"name\": \"Shaulin M.P. Medeiros\",\n        \"birthday\": \"1990-01-27T00:00:00\",\n\t    \"institute\": \"Frango Frango\",\n\t    \"cpfCnpj\": \"907.234.607-60\",\n\t    \"relationshipType\": null,\n\t    \"observation\": \"Campo opcional, pode ser passado string com hmtl, undefined, ou null\",\n\t    \"relatives\": null,\n\t    \"voterRegistration\": \"446610012011\",\n\t    \"phone\": \"(61)998675487\",\n\t    \"email\": \"deamdnate@demand.com\",\n\t    \"parentId\": null,\n\t    \"instituteTypeId\": 1,\n\t    \"address\": {\n            \"cep\": \"72548-506\",\n\t        \"street\": \"Quadra QR 218 Conjunto F\",\n\t        \"number\": null,\n\t        \"complement\": null,\n\t        \"district\": \"Santa Maria\",\n\t        \"city\": \"Brasília\",\n\t        \"uf\": \"DF\"\n        }\n    },\n\t\"tenancyId\": null,\n\t\"keywords\": [\n        \"Arroz\",\n        \"Feijão\",\n        \"Salada\",\n        \"jordan\"\n    ],\n\t\"themes\": [ \"Saúde\", \"Segurança\", \"Educação\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/demands",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"demands"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "demands",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/demands",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"demands"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "demand",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/demands/7",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"demands",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "favorite",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEiLCJsYXN0TmFtZSI6IlNpbHZhIiwiZW1haWwiOiJtYXJpYUBtdW1zLmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6MSwidW5pdCI6e30sImlhdCI6MTY3ODM2ODQwMSwiZXhwIjoxNjc4NDU0ODAxfQ.SxPfhP_fo2YO0QTqjiOJMbdI6mzwCvPiru8NhdSYFHo",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/demands/7",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"demands",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Nova demanda\",\n    \"description\": \"Descrição de demanda para tesst \",\n    \"favorite\": true,\n    \"level\": 5,\n\t\"active\": true,\n\t\"deadLine\": \"2023-03-31T11:01:30\",\n\t\"status\": \"status da demanda opcional\",\n\t\"unitId\": 1,\n\t\"userId\": 4,\n\t\"plaintiff\": {\n        \"name\": \"Shaulin M.P. Medeiros\",\n        \"birthday\": \"1990-01-27T00:00:00\",\n\t    \"institute\": \"Frango Frango\",\n\t    \"cpfCnpj\": \"907.234.607-60\",\n\t    \"relationshipType\": null,\n\t    \"observation\": \"Campo opcional, pode ser passado string com hmtl, undefined, ou null\",\n\t    \"relatives\": null,\n\t    \"voterRegistration\": \"446610012011\",\n\t    \"phone\": \"(61)998675487\",\n\t    \"email\": \"deamdnate@demand.com\",\n\t    \"parentId\": null,\n\t    \"instituteTypeId\": 1,\n\t    \"address\": {\n            \"cep\": \"72548-506\",\n\t        \"street\": \"Quadra QR 218 Conjunto F\",\n\t        \"number\": null,\n\t        \"complement\": null,\n\t        \"district\": \"Santa Maria\",\n\t        \"city\": \"Brasília\",\n\t        \"uf\": \"DF\"\n        }\n    },\n\t\"tenancyId\": null,\n\t\"keywords\": [\n        \"Arroz\",\n        \"Feijão\",\n        \"Salada\",\n        \"jordan\"\n    ],\n\t\"themes\": [\"Bean\", \"York\", \"Mcfadden\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/demands/5",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"demands",
+								"5"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/demands/5",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"demands",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "plaintiffs",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Paula Prado\",\n    \"birthday\": \"1990-01-27T00:00:00\",\n    \"institute\": \"Frango Frango\",\n    \"cpfCnpj\": \"44.662.379/0001-70\",\n    \"relationshipType\": null,\n    \"observation\": \"Campo opcional, pode ser passado string com hmtl, undefined, ou null\",\n    \"relatives\": null,\n    \"voterRegistration\": \"777671710191\",\n    \"phone\": \"(61)998675487\",\n    \"email\": \"deamdnate@demand.com\",\n    \"parentId\": 2,\n    \"instituteTypeId\": 1,\n    \"active\": true,\n    \"tenancyId\": null,\n    \"address\": {\n        \"cep\": \"72548-506\",\n        \"street\": \"Quadra QR 218 Conjunto F\",\n        \"number\": null,\n        \"complement\": null,\n        \"district\": \"Santa Maria\",\n        \"city\": \"Brasília\",\n        \"uf\": \"DF\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/plaintiffs",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"plaintiffs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "plaintiffs",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/plaintiffs",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"plaintiffs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "plaintiff",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/plaintiffs/2",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"plaintiffs",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Shaulin M.P. Medeiros\",\n    \"birthday\": \"1990-01-27T00:00:00\",\n    \"institute\": \"Frango Frango\",\n    \"cpfCnpj\": \"907.234.607-60\",\n    \"relationshipType\": null,\n    \"observation\": \"Campo opcional, pode ser passado string com hmtl, undefined, ou null\",\n    \"relatives\": null,\n    \"voterRegistration\": \"446610012011\",\n    \"phone\": \"(61)998675487\",\n    \"email\": \"deamdnate@demand.com\",\n    \"parentId\": null,\n    \"instituteTypeId\": 1,\n    \"active\": true,\n    \"tenancyId\": null,\n    \"address\": {\n        \"cep\": \"72548-506\",\n        \"street\": \"Quadra QR 218 Conjunto F\",\n        \"number\": null,\n        \"complement\": null,\n        \"district\": \"Santa Maria\",\n        \"city\": \"Brasília\",\n        \"uf\": \"DF\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/plaintiffs/3",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"plaintiffs",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "disabled",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Shaulin M.P. Medeiros\",\n    \"birthday\": \"1990-01-27T00:00:00\",\n    \"institute\": \"Frango Frango\",\n    \"cpfCnpj\": \"907.234.607-60\",\n    \"relationshipType\": null,\n    \"observation\": \"Campo opcional, pode ser passado string com hmtl, undefined, ou null\",\n    \"relatives\": null,\n    \"voterRegistration\": \"446610012011\",\n    \"phone\": \"(61)998675487\",\n    \"email\": \"deamdnate@demand.com\",\n    \"parentId\": null,\n    \"instituteTypeId\": 1,\n    \"active\": true,\n    \"tenancyId\": null,\n    \"address\": {\n        \"cep\": \"72548-506\",\n        \"street\": \"Quadra QR 218 Conjunto F\",\n        \"number\": null,\n        \"complement\": null,\n        \"district\": \"Santa Maria\",\n        \"city\": \"Brasília\",\n        \"uf\": \"DF\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/plaintiffs/5",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"plaintiffs",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "contacts",
+			"item": [
+				{
+					"name": "contacts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/contacts",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"contacts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "contact",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/contacts",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"contacts"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "types",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Desktop/Apostila_cilios.pdf"
+								},
+								{
+									"key": "name",
+									"value": "Minuta",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "campo optional pode ser Htlm ou null",
+									"type": "text"
+								},
+								{
+									"key": "fileTitle",
+									"value": "tutulo do arquivo",
+									"type": "text"
+								},
+								{
+									"key": "fileAlt",
+									"value": "descrição do arquivo",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/types",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "types",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/types",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "type",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/types/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"types",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Desktop/Apostila_cilios.pdf"
+								},
+								{
+									"key": "name",
+									"value": "Minuta",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "campo optional pode ser Htlm ou null",
+									"type": "text"
+								},
+								{
+									"key": "fileTitle",
+									"value": "tutulo do arquivo",
+									"type": "text"
+								},
+								{
+									"key": "fileAlt",
+									"value": "descrição do arquivo",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/types",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"types"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/types/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"types",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "revenues",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEiLCJsYXN0TmFtZSI6IlNpbHZhIiwiZW1haWwiOiJtYXJpYUBtdW1zLmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6MSwidW5pdCI6e30sImlhdCI6MTY3ODczODkyMywiZXhwIjoxNjc4ODI1MzIzfQ.OCGmAmLmum5LPrzHXDMQIn4pzU_ufWNtoB97DsAHfq8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Desktop/Currículo Rafael.pdf"
+								},
+								{
+									"key": "revenue",
+									"value": "nova receita de teste",
+									"type": "text"
+								},
+								{
+									"key": "receive",
+									"value": "2023-03-13T10:01:00",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "campo opcional",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "3",
+									"type": "text"
+								},
+								{
+									"key": "value",
+									"value": "3500.50",
+									"type": "text"
+								},
+								{
+									"key": "unitId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "tenancyId",
+									"value": "null",
+									"type": "text"
+								},
+								{
+									"key": "origin",
+									"value": "repasse de verba",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/revenues",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"revenues"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "revnues",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/revenues",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"revenues"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "revnue",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/revenues/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"revenues",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Pictures/wallpapers/DeLorean_Back_to_the_Future_DMC-12_by_Mauru_88_MPH_567675_2500x1280.jpg"
+								},
+								{
+									"key": "revenue",
+									"value": "update receita",
+									"type": "text"
+								},
+								{
+									"key": "receive",
+									"value": "2023-03-13T10:01:00",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "campo opcional",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "3",
+									"type": "text"
+								},
+								{
+									"key": "value",
+									"value": "3500.50",
+									"type": "text"
+								},
+								{
+									"key": "unitId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "tenancyId",
+									"value": "null",
+									"type": "text"
+								},
+								{
+									"key": "origin",
+									"value": "Salario ",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/revenues/8",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"revenues",
+								"8"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Pictures/wallpapers/DeLorean_Back_to_the_Future_DMC-12_by_Mauru_88_MPH_567675_2500x1280.jpg"
+								},
+								{
+									"key": "revenue",
+									"value": "update receita",
+									"type": "text"
+								},
+								{
+									"key": "receive",
+									"value": "2023-03-13T10:01:00",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "campo opcional",
+									"type": "text"
+								},
+								{
+									"key": "status",
+									"value": "3",
+									"type": "text"
+								},
+								{
+									"key": "value",
+									"value": "3500.50",
+									"type": "text"
+								},
+								{
+									"key": "unitId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "tenancyId",
+									"value": "null",
+									"type": "text"
+								},
+								{
+									"key": "origin",
+									"value": "Salario ",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/revenues/8",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"revenues",
+								"8"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "origins",
+			"item": [
+				{
+					"name": "origins",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEiLCJsYXN0TmFtZSI6IlNpbHZhIiwiZW1haWwiOiJtYXJpYUBtdW1zLmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6MSwidW5pdCI6e30sImlhdCI6MTY3ODczODkyMywiZXhwIjoxNjc4ODI1MzIzfQ.OCGmAmLmum5LPrzHXDMQIn4pzU_ufWNtoB97DsAHfq8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/origins",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"origins"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "origin",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6MywiZmlyc3ROYW1lIjoiTWFpcmEiLCJsYXN0TmFtZSI6IlNpbHZhIiwiZW1haWwiOiJtYXJpYUBtdW1zLmNvbSIsInVzZXJSdWxlcyI6W10sInRlbmFuY3lJZCI6MSwidW5pdCI6e30sImlhdCI6MTY3ODczODkyMywiZXhwIjoxNjc4ODI1MzIzfQ.OCGmAmLmum5LPrzHXDMQIn4pzU_ufWNtoB97DsAHfq8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/origins/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"origins",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "propositions",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"proposition de testes\",\n    \"menu\": \"ementea da proposição\",\n    \"deadline\": \"2023-03-20T14:00:00\",\n    \"active\": null,\n    \"expense\": 7450.75,\n    \"parentId\": null,\n    \"unitId\": 1,\n    \"typeId\": 1,\n    \"tenancyId\": null,\n    \"budgets\": [\n        1,\n        3\n    ],\n    \"keywords\": [\n        \"Teste\",\n        \"Oficio\",\n        \"frango\"\n    ],\n    \"themes\": [\n        \"Holder\",\n        \"York\",\n        \"Cox\"\n    ],\n    \"demands\": [\n        3,\n        5\n    ],\n    \"tasks\": [\n        {\n            \"id\": null,\n            \"task\": \"teste de tarefa\",\n            \"deadline\": \"2023-03-17T14:00:00\",\n            \"level\": 7,\n            \"userId\": 4\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/propositions",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"propositions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "propositions",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/propositions",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"propositions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "proposition",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/propositions/26",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"propositions",
+								"26"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "favorite",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"proposition de testes editado\",\n    \"menu\": \"ementea da proposição\",\n    \"deadline\": \"2023-03-20T14:00:00\",\n    \"active\": null,\n    \"expense\": 7450.75,\n    \"parentId\": null,\n    \"unitId\": 1,\n    \"typeId\": 1,\n    \"tenancyId\": null,\n    \"budgets\": [\n        1,\n        7\n    ],\n    \"keywords\": [\n        \"Teste\",\n        \"Oficio\",\n        \"frango\"\n    ],\n    \"themes\": [\n        \"Holder\",\n        \"York\",\n        \"Cox\"\n    ],\n    \"demands\": [\n        3,\n        5\n    ],\n    \"tasks\": [\n        {\n            \"id\": null,\n            \"task\": \"teste de tarefa\",\n            \"deadline\": \"2023-03-17T14:00:00\",\n            \"level\": 7,\n            \"userId\": 4\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/propositions/favorite/2",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"propositions",
+								"favorite",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"proposition de testes editado\",\n    \"menu\": \"ementea da proposição\",\n    \"deadline\": \"2023-03-20T14:00:00\",\n    \"active\": null,\n    \"expense\": 7450.75,\n    \"parentId\": null,\n    \"unitId\": 1,\n    \"typeId\": 1,\n    \"tenancyId\": null,\n    \"budgets\": [\n        1,\n        7\n    ],\n    \"keywords\": [\n        \"Teste\",\n        \"Oficio\",\n        \"frango\"\n    ],\n    \"themes\": [\n        \"Holder\",\n        \"York\",\n        \"Cox\"\n    ],\n    \"demands\": [\n        3,\n        5\n    ],\n    \"tasks\": [\n        {\n            \"id\": null,\n            \"task\": \"teste de tarefa\",\n            \"deadline\": \"2023-03-17T14:00:00\",\n            \"level\": 7,\n            \"userId\": 4\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/propositions/26",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"propositions",
+								"26"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addUrl",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"url\": \"https://stackoverflow.com/questions/2671454/heroku-how-to-see-all-the-logs\",\n    \"tenancyId\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/propositions/add-url/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"propositions",
+								"add-url",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/propositions/28",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"propositions",
+								"28"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "tasks",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Tarefa de teste 14\",\n    \"description\": \"Decription é opcional, pode ser string ou null\",\n    \"cost\": null,\n    \"start\": \"2023-03-16T18:02:00\",\n    \"end\": \"2023-03-22T09:00:00\",\n    \"level\": 5,\n    \"status\": 3,\n    \"userId\": null,\n    \"unitId\": 1,\n    \"tenancyId\": null,\n    \"propositionId\": null,\n    \"demandId\": null,\n    \"participants\": [\n        {\n            \"id\": 1,\n            \"name\": \"Shaulin M.P. Medeiros\",\n            \"phone\": \"61998675487\",\n            \"email\": \"deamdnate@demand.com\"\n        }\n    ],\n    \"users\": [\n        3,\n        4\n    ],\n    \"themes\": [\n        \"Celular\"\n    ],\n    \"unitExpense\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/tasks",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "tasks",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/tasks",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"tasks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "tasks/unit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/tasks?unit=1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"tasks"
+							],
+							"query": [
+								{
+									"key": "unit",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/tasks/22",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"tasks",
+								"22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Tarefa de teste 1\",\n    \"description\": \"Decription é opcional, pode ser string ou null\",\n    \"cost\": null,\n    \"start\": \"2023-03-16T18:02:00\",\n    \"end\": \"2023-03-22T09:00:00\",\n    \"level\": 5,\n    \"status\": 3,\n    \"userId\": null,\n    \"unitId\": 1,\n    \"tenancyId\": null,\n    \"propositionId\": null,\n    \"demandId\": 5,\n    \"plaintiffId\": null,\n    \"plaintiff\": {\n        \"name\": \"Pamela Vikers\",\n        \"birthday\": \"1988-07-18T00:00:00\",\n        \"institute\": \"Ong de testes\",\n        \"active\": true,\n        \"cpfCnpj\": \"253.478.400-56\",\n        \"relationshipType\": null,\n        \"observation\": \"Campo opcional\",\n        \"relative\": null,\n        \"voterRegistration\": \"862204780108\",\n        \"phone\": \"09786789876\",\n        \"email\": \"demandante@d.com\",\n        \"instituteTypeId\": 1,\n        \"address\": {\n            \"cep\": \"48912-970\",\n            \"street\": \"Praça Central\",\n            \"number\": null,\n            \"complement\": null,\n            \"district\": \"Centro\",\n            \"city\": \"Abóbora\",\n            \"uf\": \"BA\"\n        }\n    },\n    \"users\": [\n        3,\n        4\n    ],\n    \"themes\": [\n        \"Celular\"\n    ],\n    \"unitExpense\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/tasks/10",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"tasks",
+								"10"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/tasks/13",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"tasks",
+								"13"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "comments",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"comment\": \"Resposta da resposta\",\n    \"active\": null,\n    \"taskId\": 1,\n    \"parentId\": 2,\n    \"userId\": 3,\n    \"tenancyId\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/comments",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "comments",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/comments",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"comments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "comment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/comments/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"comments",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "comments/task",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/comments/?taskId=1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"comments",
+								""
+							],
+							"query": [
+								{
+									"key": "taskId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1,\n    \"comment\": \"Comentario editado\",\n    \"active\": null,\n    \"taskId\": 15,\n    \"parentId\": null,\n    \"userId\": 3,\n    \"tenancyId\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/comments/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"comments",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/comments/2",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"comments",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "units-expenses",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Desktop/output000.txt"
+								},
+								{
+									"key": "expense",
+									"value": "teste de gsto 11",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Campo opicional pode ser null",
+									"type": "text"
+								},
+								{
+									"key": "dueDate",
+									"value": "2023-03-19T18:00:00",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "active",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "supplier",
+									"value": "biribinha atominca ltda",
+									"type": "text"
+								},
+								{
+									"key": "expenseType",
+									"value": "alimentação",
+									"type": "text"
+								},
+								{
+									"key": "taskId",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "unitId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "tenancyId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "paymentForm",
+									"value": "boleto",
+									"type": "text"
+								},
+								{
+									"key": "value",
+									"value": "150.75",
+									"type": "text"
+								},
+								{
+									"key": "installments",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/unit-expenses",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"unit-expenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "unit-expenses",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/unit-expenses",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"unit-expenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "unit-expenses?unit=",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/unit-expenses?unid=1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"unit-expenses"
+							],
+							"query": [
+								{
+									"key": "unid",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "unit-expense",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/unit-expenses/12",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"unit-expenses",
+								"12"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create Copy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Desktop/output000.txt"
+								},
+								{
+									"key": "expense",
+									"value": "teste de gsto editado",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "Campo opicional pode ser null",
+									"type": "text"
+								},
+								{
+									"key": "dueDate",
+									"value": "2023-03-19T18:00:00",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "active",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "supplier",
+									"value": "biribinha atominca ltda",
+									"type": "text"
+								},
+								{
+									"key": "expenseType",
+									"value": "alimentação",
+									"type": "text"
+								},
+								{
+									"key": "taskId",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "unitId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "tenancyId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "paymentForm",
+									"value": "boleto",
+									"type": "text"
+								},
+								{
+									"key": "value",
+									"value": "150.75",
+									"type": "text"
+								},
+								{
+									"key": "installments",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/unit-expenses/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"unit-expenses",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "expense",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "dueDate",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "active",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "supplierId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "expenseType",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "taskId",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "unitId",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "tenancyId",
+									"value": "",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/unit-expenses/3",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"unit-expenses",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "government-expenses",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\t\n\t\"expense\": \"Gasto Governamental de teste\",\n\t\"description\": \"Campo opcional\",\n\t\"dueDate\": \"2023-03-22T18:00:00\",\n\t\"value\": 2537.87,\n\t\"observations\": \"Campo opicional\",\n\t\"proposition\": null,\n\t\"task\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/government-expenses",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-expenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "government-expenses",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/government-expenses",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-expenses"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "government-expense",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/government-expenses/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-expenses",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\t\n\t\"expense\": \"Gasto Governamental de teste editado\",\n\t\"description\": \"Campo opcional\",\n\t\"dueDate\": \"2023-03-22T18:00:00\",\n\t\"value\": 2537.87,\n\t\"observations\": \"Campo opicional\",\n\t\"proposition\": null,\n\t\"task\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/government-expenses/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-expenses",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\t\n\t\"expense\": \"Gasto Governamental de teste editado\",\n\t\"description\": \"Campo opcional\",\n\t\"dueDate\": \"2023-03-22T18:00:00\",\n\t\"value\": 2537.87,\n\t\"observations\": \"Campo opicional\",\n\t\"proposition\": null,\n\t\"task\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/government-expenses/2",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-expenses",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Sales",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Desktop/output000.txt"
+								},
+								{
+									"key": "unitId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "unitName",
+									"value": "Gabinete Brasilia",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "campo opicional",
+									"type": "text"
+								},
+								{
+									"key": "cnpj",
+									"value": "43.983.372/0001-98",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "(86) 9 9787-9889",
+									"type": "text"
+								},
+								{
+									"key": "cep",
+									"value": "34545-360",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "Rua São Cristóvão",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "complement",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "district",
+									"value": "Santo Antônio (Roça Grande)",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Sabará",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "MG",
+									"type": "text"
+								},
+								{
+									"key": "userId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "firstName",
+									"value": "Tania",
+									"type": "text"
+								},
+								{
+									"key": "lastName",
+									"value": "Carvalho",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "ttania@novogabinete.com.br",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345@",
+									"type": "text"
+								},
+								{
+									"key": "cpf",
+									"value": "278.992.600-00",
+									"type": "text"
+								},
+								{
+									"key": "office",
+									"value": "Deputada",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "userRules",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "productId",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "productValue",
+									"value": "300.00",
+									"type": "text"
+								},
+								{
+									"key": "sellerName",
+									"value": "Marcos Jr",
+									"type": "text"
+								},
+								{
+									"key": "sellerCpf",
+									"value": "001.597.730-75",
+									"type": "text"
+								},
+								{
+									"key": "dueDate",
+									"value": "2023-03-22T10:00:00",
+									"type": "text"
+								},
+								{
+									"key": "value",
+									"value": "600.00",
+									"type": "text"
+								},
+								{
+									"key": "commissionValue",
+									"value": "90.00",
+									"type": "text"
+								},
+								{
+									"key": "installments",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "paymentForm",
+									"value": "Cartão de Credito",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sales",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/sales",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "sale",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/sales/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Desktop/output000.txt"
+								},
+								{
+									"key": "unitId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "unitName",
+									"value": "Gabinete Brasilia editado",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "campo opicional",
+									"type": "text"
+								},
+								{
+									"key": "cnpj",
+									"value": "43.983.372/0001-98",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "(86) 9 9787-9889",
+									"type": "text"
+								},
+								{
+									"key": "cep",
+									"value": "34545-360",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "Rua São Cristóvão",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "complement",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "district",
+									"value": "Santo Antônio (Roça Grande)",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Sabará",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "MG",
+									"type": "text"
+								},
+								{
+									"key": "userId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "firstName",
+									"value": "Tania",
+									"type": "text"
+								},
+								{
+									"key": "lastName",
+									"value": "Carvalho",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "ttania@novogabinete.com.br",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345@",
+									"type": "text"
+								},
+								{
+									"key": "cpf",
+									"value": "278.992.600-00",
+									"type": "text"
+								},
+								{
+									"key": "office",
+									"value": "Deputada",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "userRules",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "productId",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "productValue",
+									"value": "300.00",
+									"type": "text"
+								},
+								{
+									"key": "sellerName",
+									"value": "Marcos Jr",
+									"type": "text"
+								},
+								{
+									"key": "sellerCpf",
+									"value": "001.597.730-75",
+									"type": "text"
+								},
+								{
+									"key": "dueDate",
+									"value": "2023-03-22T10:00:00",
+									"type": "text"
+								},
+								{
+									"key": "value",
+									"value": "600.00",
+									"type": "text"
+								},
+								{
+									"key": "commissionValue",
+									"value": "90.00",
+									"type": "text"
+								},
+								{
+									"key": "installments",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "paymentForm",
+									"value": "Cartão de Credito",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/rafaelcandeira/Desktop/output000.txt"
+								},
+								{
+									"key": "unitId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "unitName",
+									"value": "Gabinete Brasilia editado",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "campo opicional",
+									"type": "text"
+								},
+								{
+									"key": "cnpj",
+									"value": "43.983.372/0001-98",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "(86) 9 9787-9889",
+									"type": "text"
+								},
+								{
+									"key": "cep",
+									"value": "34545-360",
+									"type": "text"
+								},
+								{
+									"key": "street",
+									"value": "Rua São Cristóvão",
+									"type": "text"
+								},
+								{
+									"key": "number",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "complement",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "district",
+									"value": "Santo Antônio (Roça Grande)",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Sabará",
+									"type": "text"
+								},
+								{
+									"key": "uf",
+									"value": "MG",
+									"type": "text"
+								},
+								{
+									"key": "userId",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "firstName",
+									"value": "Tania",
+									"type": "text"
+								},
+								{
+									"key": "lastName",
+									"value": "Carvalho",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "ttania@novogabinete.com.br",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "12345@",
+									"type": "text"
+								},
+								{
+									"key": "cpf",
+									"value": "278.992.600-00",
+									"type": "text"
+								},
+								{
+									"key": "office",
+									"value": "Deputada",
+									"type": "text"
+								},
+								{
+									"key": "level",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "userRules",
+									"value": "",
+									"type": "text"
+								},
+								{
+									"key": "productId",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "amount",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "productValue",
+									"value": "300.00",
+									"type": "text"
+								},
+								{
+									"key": "sellerName",
+									"value": "Marcos Jr",
+									"type": "text"
+								},
+								{
+									"key": "sellerCpf",
+									"value": "001.597.730-75",
+									"type": "text"
+								},
+								{
+									"key": "dueDate",
+									"value": "2023-03-22T10:00:00",
+									"type": "text"
+								},
+								{
+									"key": "value",
+									"value": "600.00",
+									"type": "text"
+								},
+								{
+									"key": "commissionValue",
+									"value": "90.00",
+									"type": "text"
+								},
+								{
+									"key": "installments",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "paymentForm",
+									"value": "Cartão de Credito",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales/6",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payments/create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"payDate\": \"2023-03-27T10:00:00\",\n\t\"value\": 60000,\n\t\"commission\": false,\n\t\"saleId\": 7\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payments/list",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payment?saleId=",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments?saleId=1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments"
+							],
+							"query": [
+								{
+									"key": "saleId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payment",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments?saleId=1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments"
+							],
+							"query": [
+								{
+									"key": "saleId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payments/edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"payDate\": \"2023-03-27T10:00:00\",\n\t\"value\": 30000,\n\t\"commission\": true,\n\t\"saleId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payments/delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"payDate\": \"2023-03-27T10:00:00\",\n\t\"value\": 30000,\n\t\"commission\": true,\n\t\"saleId\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/sales/payments/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"sales",
+								"payments",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "products",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Produto de teste\",\n\t\"description\": \"Campo opcional, pode ser mandado html string ou null\",\n\t\"plan\": false,\n\t\"limit\": 70,\n\t\"Value\": 750.00\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/products",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "products",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/products",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "product",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/plans/4",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"plans",
+								"4"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Produto testes editados\",\n\t\"description\": \"Campo opcional, pode ser mandado html string ou null\",\n\t\"limit\": 70,\n\t\"value\": 957.70\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/products/6",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"products",
+								"6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Plano Editado\",\n\t\"description\": \"Campo opcional, pode ser mandado html string ou null\",\n\t\"usersLimit\": 70,\n\t\"unitaryValue\": 957.70\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/products/5",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"products",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "payments-form",
+			"item": [
+				{
+					"name": "payment-forms",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/payment-forms",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"payment-forms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "payment-form",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/payment-forms/2",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"payment-forms",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "suppliers",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"Fornecedor de testes 3\",\n\t\"description\": \"campo opcional\",\n\t\"tenancyId\": null\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/suppliers",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"suppliers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "suppliers",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/suppliers",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"suppliers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "supplier",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/suppliers/3",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"suppliers",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "types-recipes",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"origin\": \"Extra Orçamentária\",\n\t\"description\": \"campo opcional\",\n\t\"government\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/types-recipes",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"types-recipes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "types-recipes",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/types-recipes",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"types-recipes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "type-recipe",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/types-recipes/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"types-recipes",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"origin\": \"Originária editado\",\n\t\"description\": \"campo opcional\",\n\t\"government\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/types-recipes/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"types-recipes",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_master}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"origin\": \"Originária editado\",\n\t\"description\": \"campo opcional\",\n\t\"government\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/types-recipes/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"types-recipes",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "government-revenues",
+			"item": [
+				{
+					"name": "create",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"typeOfRecipe\": \"Originária (origem de atividade própria)\",\n\t\"revenue\": \"Atividade propria\",\n\t\"receive\": \"2023-04-13T10:00:00\",\n\t\"value\": 750344.44,\n\t\"status\": 1,\n\t\"active\": true,\n\t\"recurrent\": false,\n\t\"documentNumber\": \"877688io9789787897889977889\",\n\t\"description\": \"Campo opcional ou null\",\n\t\"unitId\": 3,\n\t\"tenancyId\": null,\n\t\"propositions\": [{\n\t\t\t\"id\": 2,\n\t\t\t\"title\": \"proposition de testes 4\",\n\t\t\t\"expense\": 8908.75\n\t\t},\n\t\t{\n\t\t\t\"id\": 3,\n\t\t\t\"title\": \"proposition de testes\",\n\t\t\t\"expense\": 7450.75\n\t\t}\n        ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/government-revenues",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-revenues"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "government-revenues",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/government-revenues",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-revenues"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "government-revenue",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/government-revenues/13",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-revenues",
+								"13"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "edit",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"typeOfRecipe\": \"Originária (origem de atividade própria)\",\n\t\"revenue\": \"Atividade propria\",\n\t\"receive\": \"2023-04-13T10:00:00\",\n\t\"value\": 750344.44,\n\t\"status\": 1,\n\t\"active\": true,\n\t\"recurrent\": false,\n\t\"documentNumber\": \"877688io9789787897889977889\",\n\t\"description\": \"Campo opcional ou null\",\n\t\"unitId\": 1,\n\t\"tenancyId\": null,\n\t\"propositions\": [\n\t\t{\n\t\t\t\"id\": 2,\n\t\t\t\"title\": \"proposition de testes 4\",\n\t\t\t\"expense\": 8908.75\n\t\t},\n\t\t{\n\t\t\t\"id\": 3,\n\t\t\t\"title\": \"proposition de testes\",\n\t\t\t\"expense\": 7450.75\n\t\t}\n\t]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/government-revenues/1",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-revenues",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "disabled",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{mg_host_api}}/government-revenues/5",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"government-revenues",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "notifications",
+			"item": [
+				{
+					"name": "notifications/email",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token_tenancy}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"to\": [\n        \"teste@teste.com\"\n    ],\n    \"subject\": \"teset de notficação de e-mail\",\n    \"message\": \"<html>\\n<head>\\n<meta charset=\\\"UTF-8\\\" />\\n<title>Teste - Notificação email</title>\\n</head>\\n<body>\\n<main>\\n<h1>Teste de e-mail</h1>\\n<p>\\nLorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.\\n</p>\\n</main>\\n</body>\\n</html>\",\n    \"from\": \"no-reply@teste.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mg_host_api}}/notifications/email",
+							"host": [
+								"{{mg_host_api}}"
+							],
+							"path": [
+								"notifications",
+								"email"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "mg_host_api",
+			"value": "https://localhost:3001",
+			"type": "string"
+		},
+		{
+			"key": "token_master",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "token_tenancy",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

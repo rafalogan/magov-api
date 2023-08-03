@@ -1,14 +1,7 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Task } from 'src/repositories/entities';
-import {
-	GovernmentExpensesModel,
-	PlaintiffModel,
-	ReadOptionsModel,
-	TaskModel,
-	TaskViewModel,
-	UnitExpenseModel,
-} from 'src/repositories/models';
+import { GovernmentExpensesModel, ReadOptionsModel, TaskModel, TaskViewModel, UnitExpenseModel } from 'src/repositories/models';
 import { IGovernmentExpensesModel, IPlantiffTask, IServiceOptions, IUnitExpenseModel } from 'src/repositories/types';
 import {
 	clearDuplicateItems,
@@ -20,7 +13,6 @@ import {
 	notExistisOrError,
 } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
-import { PlaintiffService } from './plaintiff.service';
 import { GovernmentExpensesService } from './government-expenses.service';
 import { UnitExpenseService } from './unit-expense.service';
 
@@ -38,7 +30,6 @@ export class TaskService extends DatabaseService {
 			tenancy_id: 't.tenancy_id',
 			proposition_id: 't.proposition_id',
 			demand_id: 't.demand_id',
-			plaintiff_id: 't.plaintiff_id',
 		},
 		{ user_id: 'u.id', user_first_name: 'u.first_name', user_last_name: 'u.last_name' },
 		{ unit_id: 'un.id', unit: 'un.name' },
@@ -48,7 +39,6 @@ export class TaskService extends DatabaseService {
 
 	constructor(
 		options: IServiceOptions,
-		private plaintiffService: PlaintiffService,
 		private governmentExpenseService: GovernmentExpensesService,
 		private unitExpenseService: UnitExpenseService
 	) {
@@ -57,6 +47,7 @@ export class TaskService extends DatabaseService {
 
 	async create(data: TaskModel) {
 		try {
+			onLog('data to save', data);
 			const fromDB = (await this.getTask(data.title, data.tenancyId)) as TaskViewModel;
 
 			onLog('response getTask', fromDB);
@@ -67,38 +58,38 @@ export class TaskService extends DatabaseService {
 			const [id] = await this.db('tasks').insert(convertDataValues(toSave));
 
 			if (data.participants?.length) await this.setPaticipants(id, data.participants);
-			await this.setUsers(data.users, id);
-			await this.setThemes(data.themes, id);
+			if (data.users?.length) await this.setUsers(data.users, id);
+			if (data.themes?.length) await this.setThemes(data.themes, id);
 
 			const governmentExpense =
 				data.cost && !data.unitExpense
 					? await this.governmentExpenseService.create(
-						new GovernmentExpensesModel({
-							expense: data.title,
-							tenancyId: data.tenancyId,
-							dueDate: data.end,
-							value: data.cost,
-							task: { id, title: data.title },
-							active: true,
-							propositionId: Number(data.propositionId),
-						} as IGovernmentExpensesModel)
-					)
+							new GovernmentExpensesModel({
+								expense: data.title,
+								tenancyId: data.tenancyId,
+								dueDate: data.end,
+								value: data.cost,
+								task: { id, title: data.title },
+								active: true,
+								propositionId: Number(data.propositionId),
+							} as IGovernmentExpensesModel)
+					  )
 					: undefined;
 
 			const unitExpense =
 				data.cost && data.unitExpense
 					? await this.unitExpenseService.create(
-						new UnitExpenseModel({
-							expense: data.title,
-							tenancyId: data.tenancyId,
-							dueDate: data.end,
-							taskId: id,
-							unitId: data.unitId,
-							amount: 1,
-							active: true,
-							payments: [{ paymentForm: 'boleto', installments: 1, value: data.cost }],
-						} as IUnitExpenseModel)
-					)
+							new UnitExpenseModel({
+								expense: data.title,
+								tenancyId: data.tenancyId,
+								dueDate: data.end,
+								taskId: id,
+								unitId: data.unitId,
+								amount: 1,
+								active: true,
+								payments: [{ paymentForm: 'boleto', installments: 1, value: data.cost }],
+							} as IUnitExpenseModel)
+					  )
 					: undefined;
 
 			return {
@@ -114,12 +105,13 @@ export class TaskService extends DatabaseService {
 		try {
 			const fromDB = (await this.getTask(id, data.tenancyId)) as TaskViewModel;
 
-			existsOrError(fromDB.id, fromDB);
+			existsOrError(fromDB?.id, fromDB);
 			const toUpdate = new Task({ ...fromDB, ...data, tenancyId: fromDB.tenancyId });
 
 			await this.db('tasks').where({ id }).andWhere('tenancy_id', toUpdate.tenancyId).update(convertDataValues(toUpdate));
-			await this.setUsers(data.users, id);
-			await this.setThemes(data.themes, id);
+			if (data.users?.length) await this.setUsers(data.users, id);
+			if (data.themes?.length) await this.setThemes(data.themes, id);
+			if (data.participants?.length) await this.setPaticipants(id, data.participants);
 
 			return { message: 'Task Updated with success', data: { ...toUpdate } };
 		} catch (err) {
@@ -146,16 +138,16 @@ export class TaskService extends DatabaseService {
 			const res: any = [];
 			const fromDB = unitId
 				? await this.db(this.tablesToList)
-					.select(...this.fieldsToList)
-					.where('t.tenancy_id', tenancyId)
-					.andWhere('t.unit_id', unitId)
-					.andWhereRaw('u.id = t.user_id')
-					.andWhereRaw('un.id = t.unit_id')
+						.select(...this.fieldsToList)
+						.where('t.tenancy_id', tenancyId)
+						.andWhere('t.unit_id', unitId)
+						.andWhereRaw('u.id = t.user_id')
+						.andWhereRaw('un.id = t.unit_id')
 				: await this.db(this.tablesToList)
-					.select(...this.fieldsToList)
-					.where('t.tenancy_id', tenancyId)
-					.andWhereRaw('u.id = t.user_id')
-					.andWhereRaw('un.id = t.unit_id');
+						.select(...this.fieldsToList)
+						.where('t.tenancy_id', tenancyId)
+						.andWhereRaw('u.id = t.user_id')
+						.andWhereRaw('un.id = t.unit_id');
 
 			onLog('tasks from db: ', fromDB);
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
@@ -165,12 +157,7 @@ export class TaskService extends DatabaseService {
 				data.responsible = `${data.userFirstName} ${data.userLastName}`;
 				data.users = await this.getUsers(data.id, data.userId);
 
-				if (data.plaintiffId) {
-					const plaintiff = (await this.plaintiffService.getPlaintiff(data.plaintiffId, data.tenancyId)) as PlaintiffModel;
-
-					existsOrError(plaintiff.id, plaintiff);
-					data.plaintiff = plaintiff.name;
-				}
+				data.participants = await this.getParticipants(data.id);
 
 				if (data.demandId) {
 					const demand = await this.db('demands').where('id', data.demandId).select('name').first();
@@ -222,7 +209,6 @@ export class TaskService extends DatabaseService {
 					tenancy_id: 't.tenancy_id',
 					proposition_id: 't.proposition_id',
 					demand_id: 't.demand_id',
-					plaintiff_id: 't.plaintiff_id',
 				},
 				{ unit: 'u.name' },
 			];
@@ -231,17 +217,17 @@ export class TaskService extends DatabaseService {
 			const fromDB =
 				typeof value === 'number'
 					? await this.db(tables)
-						.select(...fields)
-						.where('t.id', value)
-						.andWhere('t.tenancy_id', tenancyId)
-						.andWhereRaw('u.id = t.unit_id')
-						.first()
+							.select(...fields)
+							.where('t.id', value)
+							.andWhere('t.tenancy_id', tenancyId)
+							.andWhereRaw('u.id = t.unit_id')
+							.first()
 					: await this.db(tables)
-						.select(...fields)
-						.where('t.title', value)
-						.andWhere('t.tenancy_id', tenancyId)
-						.andWhereRaw('u.id = t.unit_id')
-						.first();
+							.select(...fields)
+							.where('t.title', value)
+							.andWhere('t.tenancy_id', tenancyId)
+							.andWhereRaw('u.id = t.unit_id')
+							.first();
 
 			existsOrError(fromDB?.id, { message: 'Not found', status: NOT_FOUND });
 			const raw = convertDataValues(fromDB, 'camel');
@@ -256,16 +242,14 @@ export class TaskService extends DatabaseService {
 				? await this.db('demands').select('id', 'name', 'dead_line as deadline').where({ id: raw.demandId }).first()
 				: undefined;
 
-			const plaintiff = raw.plaintiffId
-				? await this.db('plaintiffs').select('id', 'name').where({ id: raw.plaintiffId }).first()
-				: undefined;
+			const participants = await this.getParticipants(raw.id);
 			const comments = (await this.getComments(raw.id, raw.tenancyId)) || [];
 
 			onLog('comments', comments);
 
 			const themes = await this.getThemes(raw.id);
 
-			return new TaskViewModel({ ...raw, proposition, demand, plaintiff, comments, users, themes });
+			return new TaskViewModel({ ...raw, proposition, demand, participants, comments, users, themes });
 		} catch (err) {
 			return err;
 		}
@@ -284,6 +268,28 @@ export class TaskService extends DatabaseService {
 			if (fromDB.cost) await this.db('government_expenses').where({ task_id: id }).andWhere({ tenancy_id: tenancyId }).del();
 
 			return { message: 'Task deleted with success', data: new Task(raw) };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getParticipants(id: number) {
+		try {
+			const participantsIds = await this.db('participants').where('task_id', id);
+			existsOrError(Array.isArray(participantsIds), { message: 'internal error', err: participantsIds, status: INTERNAL_SERVER_ERROR });
+			const res: IPlantiffTask[] = [];
+
+			for (const item of participantsIds) {
+				const fromDB = await this.db({ p: 'plaintiffs', c: 'contacts' })
+					.select({ id: 'p.id', name: 'p.name' }, { email: 'c.email', phone: 'c.phone' })
+					.where('p.id', item.plaintiff_id)
+					.whereRaw('c.plaintiff_id = p.id')
+					.first();
+
+				if (fromDB?.id) res.push(convertDataValues(fromDB, 'camel'));
+			}
+
+			return res;
 		} catch (err) {
 			return err;
 		}
@@ -317,9 +323,8 @@ export class TaskService extends DatabaseService {
 
 	private async setPaticipants(taskId: number, data: IPlantiffTask[]) {
 		try {
-			await this.db('participants').where('task_id', taskId).del()
+			await this.db('participants').where('task_id', taskId).del();
 			for (const item of data) {
-
 				await this.db('participants').insert(convertDataValues({ taskId, plaintiffId: item.id }));
 			}
 		} catch (err) {
