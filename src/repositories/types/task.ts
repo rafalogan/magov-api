@@ -1,4 +1,3 @@
-import { IPlantiffModel } from './plantiff';
 import { IID } from './shared';
 import { IUnitExpense } from './unit-expense';
 import { IComment } from 'src/repositories/types/comment';
@@ -14,18 +13,17 @@ export interface ITask extends IID {
 	userId: number;
 	unitId: number;
 	tenancyId: number;
-	propositionId?: number;
 	demandId?: number;
-	plaintiffId?: number;
+	propositionId?: number;
 }
 
 export interface ITaskModel extends ITask {
 	setUnitExpense: boolean;
 	unitExpense?: IUnitExpense;
-	plaintiff?: IPlantiffModel;
 	users: number[];
 	themes: string[];
 	comments?: IComment[];
+	participants: IPlantiffTask[];
 }
 
 export interface ITaskViewModel extends IID {
@@ -41,7 +39,7 @@ export interface ITaskViewModel extends IID {
 	tenancyId: number;
 	proposition?: IPropositionTask;
 	demand?: IDemandTask;
-	plaintiff?: IPlantiffTask;
+	participants: IPlantiffTask[];
 	comments?: ICommentTask[];
 	themes: IThemeTask[];
 }
@@ -61,6 +59,8 @@ export interface ICommentTask {
 export interface IPlantiffTask {
 	id: number;
 	name: string;
+	email: string;
+	phone: string;
 }
 
 export interface IDemandTask {

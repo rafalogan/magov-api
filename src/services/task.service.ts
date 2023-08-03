@@ -1,15 +1,8 @@
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { onLog } from 'src/core/handlers';
 import { Task } from 'src/repositories/entities';
-import {
-	GovernmentExpensesModel,
-	PlaintiffModel,
-	ReadOptionsModel,
-	TaskModel,
-	TaskViewModel,
-	UnitExpenseModel,
-} from 'src/repositories/models';
-import { IGovernmentExpensesModel, IServiceOptions, IUnitExpenseModel } from 'src/repositories/types';
+import { GovernmentExpensesModel, ReadOptionsModel, TaskModel, TaskViewModel, UnitExpenseModel } from 'src/repositories/models';
+import { IGovernmentExpensesModel, IPlantiffTask, IServiceOptions, IUnitExpenseModel } from 'src/repositories/types';
 import {
 	clearDuplicateItems,
 	convertBlobToString,
@@ -20,7 +13,6 @@ import {
 	notExistisOrError,
 } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
-import { PlaintiffService } from './plaintiff.service';
 import { GovernmentExpensesService } from './government-expenses.service';
 import { UnitExpenseService } from './unit-expense.service';
 
@@ -38,7 +30,6 @@ export class TaskService extends DatabaseService {
 			tenancy_id: 't.tenancy_id',
 			proposition_id: 't.proposition_id',
 			demand_id: 't.demand_id',
-			plaintiff_id: 't.plaintiff_id',
 		},
 		{ user_id: 'u.id', user_first_name: 'u.first_name', user_last_name: 'u.last_name' },
 		{ unit_id: 'un.id', unit: 'un.name' },
@@ -48,7 +39,6 @@ export class TaskService extends DatabaseService {
 
 	constructor(
 		options: IServiceOptions,
-		private plaintiffService: PlaintiffService,
 		private governmentExpenseService: GovernmentExpensesService,
 		private unitExpenseService: UnitExpenseService
 	) {
@@ -57,18 +47,19 @@ export class TaskService extends DatabaseService {
 
 	async create(data: TaskModel) {
 		try {
+			onLog('data to save', data);
 			const fromDB = (await this.getTask(data.title, data.tenancyId)) as TaskViewModel;
 
 			onLog('response getTask', fromDB);
 
 			notExistisOrError(fromDB?.id, { message: 'Task already existis', status: FORBIDDEN });
-			const plaintiffId = await this.setPlaintiffId(data);
-			onLog('plaintiffId', plaintiffId);
-			const toSave = new Task({ ...data, plaintiffId });
+			const toSave = new Task({ ...data });
 			onLog('task to save', toSave);
 			const [id] = await this.db('tasks').insert(convertDataValues(toSave));
-			await this.setUsers(data.users, id);
-			await this.setThemes(data.themes, id);
+
+			if (data.participants?.length) await this.setPaticipants(id, data.participants);
+			if (data.users?.length) await this.setUsers(data.users, id);
+			if (data.themes?.length) await this.setThemes(data.themes, id);
 
 			const governmentExpense =
 				data.cost && !data.unitExpense
@@ -114,13 +105,13 @@ export class TaskService extends DatabaseService {
 		try {
 			const fromDB = (await this.getTask(id, data.tenancyId)) as TaskViewModel;
 
-			existsOrError(fromDB.id, fromDB);
-			const plaintiffId = await this.setPlaintiffId(data);
-			const toUpdate = new Task({ ...fromDB, ...data, tenancyId: fromDB.tenancyId, plaintiffId });
+			existsOrError(fromDB?.id, fromDB);
+			const toUpdate = new Task({ ...fromDB, ...data, tenancyId: fromDB.tenancyId });
 
 			await this.db('tasks').where({ id }).andWhere('tenancy_id', toUpdate.tenancyId).update(convertDataValues(toUpdate));
-			await this.setUsers(data.users, id);
-			await this.setThemes(data.themes, id);
+			if (data.users?.length) await this.setUsers(data.users, id);
+			if (data.themes?.length) await this.setThemes(data.themes, id);
+			if (data.participants?.length) await this.setPaticipants(id, data.participants);
 
 			return { message: 'Task Updated with success', data: { ...toUpdate } };
 		} catch (err) {
@@ -157,8 +148,8 @@ export class TaskService extends DatabaseService {
 						.where('t.tenancy_id', tenancyId)
 						.andWhereRaw('u.id = t.user_id')
 						.andWhereRaw('un.id = t.unit_id');
-			onLog('tasks from db: ', fromDB);
 
+			onLog('tasks from db: ', fromDB);
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
 
 			for (const raw of fromDB) {
@@ -166,12 +157,7 @@ export class TaskService extends DatabaseService {
 				data.responsible = `${data.userFirstName} ${data.userLastName}`;
 				data.users = await this.getUsers(data.id, data.userId);
 
-				if (data.plaintiffId) {
-					const plaintiff = (await this.plaintiffService.getPlaintiff(data.plaintiffId, data.tenancyId)) as PlaintiffModel;
-
-					existsOrError(plaintiff.id, plaintiff);
-					data.plaintiff = plaintiff.name;
-				}
+				data.participants = await this.getParticipants(data.id);
 
 				if (data.demandId) {
 					const demand = await this.db('demands').where('id', data.demandId).select('name').first();
@@ -183,7 +169,11 @@ export class TaskService extends DatabaseService {
 				if (data.propositionId) {
 					const proposition = await this.db('propositions').select('title').where('id', data.propositionId).first();
 
-					existsOrError(proposition.title, { message: 'Internal error', error: proposition, status: INTERNAL_SERVER_ERROR });
+					existsOrError(proposition.title, {
+						message: 'Internal error',
+						error: proposition,
+						status: INTERNAL_SERVER_ERROR,
+					});
 
 					data.proposition = proposition.title;
 				}
@@ -219,7 +209,6 @@ export class TaskService extends DatabaseService {
 					tenancy_id: 't.tenancy_id',
 					proposition_id: 't.proposition_id',
 					demand_id: 't.demand_id',
-					plaintiff_id: 't.plaintiff_id',
 				},
 				{ unit: 'u.name' },
 			];
@@ -253,16 +242,14 @@ export class TaskService extends DatabaseService {
 				? await this.db('demands').select('id', 'name', 'dead_line as deadline').where({ id: raw.demandId }).first()
 				: undefined;
 
-			const plaintiff = raw.plaintiffId
-				? await this.db('plaintiffs').select('id', 'name').where({ id: raw.plaintiffId }).first()
-				: undefined;
+			const participants = await this.getParticipants(raw.id);
 			const comments = (await this.getComments(raw.id, raw.tenancyId)) || [];
 
 			onLog('comments', comments);
 
 			const themes = await this.getThemes(raw.id);
 
-			return new TaskViewModel({ ...raw, proposition, demand, plaintiff, comments, users, themes });
+			return new TaskViewModel({ ...raw, proposition, demand, participants, comments, users, themes });
 		} catch (err) {
 			return err;
 		}
@@ -286,12 +273,38 @@ export class TaskService extends DatabaseService {
 		}
 	}
 
+	private async getParticipants(id: number) {
+		try {
+			const participantsIds = await this.db('participants').where('task_id', id);
+			existsOrError(Array.isArray(participantsIds), { message: 'internal error', err: participantsIds, status: INTERNAL_SERVER_ERROR });
+			const res: IPlantiffTask[] = [];
+
+			for (const item of participantsIds) {
+				const fromDB = await this.db({ p: 'plaintiffs', c: 'contacts' })
+					.select({ id: 'p.id', name: 'p.name' }, { email: 'c.email', phone: 'c.phone' })
+					.where('p.id', item.plaintiff_id)
+					.whereRaw('c.plaintiff_id = p.id')
+					.first();
+
+				if (fromDB?.id) res.push(convertDataValues(fromDB, 'camel'));
+			}
+
+			return res;
+		} catch (err) {
+			return err;
+		}
+	}
+
 	private async getThemes(taskId: number) {
 		try {
 			const res: any = [];
 			const themesIds = await this.db('themes_tasks').select('theme_id').where('task_id', taskId);
 
-			existsOrError(Array.isArray(themesIds), { message: 'Internal error', error: themesIds, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Array.isArray(themesIds), {
+				message: 'Internal error',
+				error: themesIds,
+				status: INTERNAL_SERVER_ERROR,
+			});
 			const ids = themesIds.map(i => i['theme_id']);
 			onLog('tehmes id', ids);
 
@@ -303,6 +316,17 @@ export class TaskService extends DatabaseService {
 			}
 
 			return res;
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setPaticipants(taskId: number, data: IPlantiffTask[]) {
+		try {
+			await this.db('participants').where('task_id', taskId).del();
+			for (const item of data) {
+				await this.db('participants').insert(convertDataValues({ taskId, plaintiffId: item.id }));
+			}
 		} catch (err) {
 			return err;
 		}
@@ -353,22 +377,6 @@ export class TaskService extends DatabaseService {
 			for (const userId of ids) {
 				await this.db('users_tasks').insert(convertDataValues({ userId, taskId }));
 			}
-		} catch (err) {
-			return err;
-		}
-	}
-
-	private async setPlaintiffId(data: TaskModel) {
-		try {
-			if (data?.plaintiffId || data?.plaintiff?.id) return data.plaintiff?.id || data.plaintiffId;
-			const fromDB = await this.plaintiffService.getPlaintiff(data.plaintiff?.cpfCnpj as string, data.tenancyId);
-
-			onLog('plaintiff fom db to Task', fromDB);
-
-			if (fromDB?.id) return fromDB.id;
-			const dataSave = (await this.plaintiffService.create(data.plaintiff as PlaintiffModel)) as any;
-			onLog('plaintiff to save', dataSave);
-			return Number(dataSave.data.id);
 		} catch (err) {
 			return err;
 		}
