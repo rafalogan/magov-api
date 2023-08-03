@@ -64,7 +64,11 @@ export class ServicesFactory {
 	governmentRevenueService: GovernmentRevenueService;
 	notificationService: NotificationService;
 
-	constructor(private conn: Knex, private client: RedisClientType, private mailConfig: MailerConfig) {
+	constructor(
+		private conn: Knex,
+		private client: RedisClientType,
+		private mailConfig: MailerConfig
+	) {
 		this.unitService = new UnitService({ ...this.setServiceOptions() });
 		this.userService = new UserService({ ...this.setServiceOptions() }, this.unitService);
 		this.governmentExpenseService = new GovernmentExpensesService(this.setServiceOptions());
@@ -87,12 +91,7 @@ export class ServicesFactory {
 		this.salePaymentService = new SalePaymentService(this.setServiceOptions());
 		this.saleService = new SaleService(this.setServiceOptions(), this.userService);
 		this.productService = new ProductService(this.setServiceOptions());
-		this.taskService = new TaskService(
-			this.setServiceOptions(),
-			this.plaintiffService,
-			this.governmentExpenseService,
-			this.unitExpenseService
-		);
+		this.taskService = new TaskService(this.setServiceOptions(), this.governmentExpenseService, this.unitExpenseService);
 		this.paymentFormService = new PaymentFormService(this.setServiceOptions());
 		this.supplierService = new SupplierService(this.setServiceOptions());
 		this.typesRecipesService = new TypesRecipesService(this.setServiceOptions());
