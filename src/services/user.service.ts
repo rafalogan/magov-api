@@ -8,7 +8,10 @@ import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
 
 export class UserService extends DatabaseService {
-	constructor(options: IServiceOptions, private unitService: UnitService) {
+	constructor(
+		options: IServiceOptions,
+		private unitService: UnitService
+	) {
 		super(options);
 	}
 
@@ -28,7 +31,33 @@ export class UserService extends DatabaseService {
 	}
 
 	async read(options: ReadOptionsModel, id?: number) {
-		return id ? this.getUser(id) : options.unitId ? this.getUsersByUnit(options) : this.getUsers(options);
+		if (id) return this.getUser(id);
+		if (options?.tenancyId) return options.unitId ? this.getUsersByUnit(options) : this.getUsers(options);
+
+		const tables = { u: 'users', un: 'units' };
+		const fields = [
+			{
+				id: 'u.id',
+				first_name: 'u.first_name',
+				last_name: 'u.last_name',
+				office: 'u.office',
+				email: 'u.email',
+				cpf: 'u.cpf',
+				phone: 'u.phone',
+				level: 'u.level',
+				active: 'u.active',
+				tenancy_id: 'u.tenancy_id',
+			},
+			{ unit_id: 'un.id', unit_name: 'un.name' },
+		];
+
+		const fromDB = await this.db(tables)
+			.select(...fields)
+			.whereRaw('un.id = u.unit_id');
+
+		existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+		return fromDB.map(i => convertDataValues(i, 'camel'));
 	}
 
 	async update(data: UserModel, id: number): Promise<any> {

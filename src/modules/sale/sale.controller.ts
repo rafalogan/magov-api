@@ -8,7 +8,10 @@ import { ResponseHandle } from 'src/core/handlers';
 import { ReadOptionsModel, SaleModel, SalePaymentModel } from 'src/repositories/models';
 
 export class SaleController extends Controller {
-	constructor(private saleService: SaleService, private salePaymentService: SalePaymentService) {
+	constructor(
+		private saleService: SaleService,
+		private salePaymentService: SalePaymentService
+	) {
 		super();
 	}
 
