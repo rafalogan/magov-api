@@ -8,6 +8,8 @@ export class UserLogView {
 	inTableId: number;
 	logDate: Date;
 	userId: number;
+	user: string;
+	userEmail: string;
 	tenancyId: number;
 
 	constructor(data: IUserLogVew) {
@@ -17,6 +19,8 @@ export class UserLogView {
 		this.inTableId = Number(data.inTableId);
 		this.logDate = convertToDate(data.logDate);
 		this.userId = Number(data.userId);
+		this.user = `${data.firstName} ${data.lastName}`;
+		this.userEmail = data.userEmail;
 		this.tenancyId = Number(data.tenancyId);
 	}
 }

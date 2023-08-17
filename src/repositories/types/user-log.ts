@@ -9,4 +9,7 @@ export interface IUserLog {
 
 export interface IUserLogVew extends IUserLog {
 	id: number;
+	firstName: string;
+	lastName: string;
+	userEmail: string;
 }
