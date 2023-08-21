@@ -31,7 +31,7 @@ export class Payload {
 		this.office = data.office;
 		this.active = !!data.active;
 		this.level = Number(data.level);
-		this.address = data.address;
+		this.address = data.address as Address;
 		this.userRules = data.userRules;
 		this.tenancyId = data.tenancyId || null;
 		this.unit = data.unit;
