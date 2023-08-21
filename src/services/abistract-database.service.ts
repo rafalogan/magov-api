@@ -7,14 +7,17 @@ import { IAddress, IGetValuesOptions, ISaleProduct, IServiceOptions } from 'src/
 import { camelToSnake, convertDataValues, existsOrError, notExistisOrError } from 'src/utils';
 import { CacheService } from './abistract-cache.service';
 import { Address, FileEntity } from 'src/repositories/entities';
+import { UserLogService } from './user-log.service';
 
 export abstract class DatabaseService extends CacheService {
 	protected db: Knex;
+	protected userLogService: UserLogService;
 
 	constructor(options: IServiceOptions) {
 		super(options.cacheClient);
 
 		this.db = options.conn;
+		this.userLogService = options.userLogService;
 	}
 
 	save(data: any) {

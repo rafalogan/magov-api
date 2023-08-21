@@ -5,14 +5,11 @@ import { onError, onLog } from 'src/core/handlers';
 import { UserLog } from 'src/repositories/entities';
 import { PaginationModel, ReadOptionsModel, UserLogView } from 'src/repositories/models';
 
-import { IServiceOptions, IUserLog } from 'src/repositories/types';
+import { IUserLog } from 'src/repositories/types';
 import { convertDataValues, existsOrError } from 'src/utils';
 
 export class UserLogService {
-	private conn: Knex;
-	constructor(options: IServiceOptions) {
-		this.conn = options.conn;
-	}
+	constructor(private conn: Knex) {}
 
 	async create(data: IUserLog) {
 		try {

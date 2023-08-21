@@ -1,5 +1,6 @@
 import { RedisClientType } from 'redis';
 import { Knex } from 'knex';
+import { UserLogService } from 'src/services';
 
 export interface IID {
 	id?: number;
@@ -21,6 +22,7 @@ export interface IHttps {
 export interface IServiceOptions {
 	conn: Knex;
 	cacheClient: RedisClientType;
+	userLogService: UserLogService;
 	fields?: string[];
 }
 
