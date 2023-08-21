@@ -23,7 +23,7 @@ export class UserService extends DatabaseService {
 			notExistisOrError(fromDB?.id, { message: 'User already exists', status: FORBIDDEN });
 			notExistisOrError(fromDB?.err, fromDB);
 
-			if (data?.newTenancy) return this.setMasterUserTenancy(data);
+			if (data?.newTenancy) return this.setMasterUserTenancy(data, req);
 			if (data?.tenancyId && data.unitId) return this.setUserUnit(data, req);
 
 			return this.setMasterUser(data);
@@ -321,7 +321,7 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async setMasterUserTenancy(data: UserModel) {
+	private async setMasterUserTenancy(data: UserModel, req: Request) {
 		try {
 			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
 			let unit: any;
@@ -340,8 +340,10 @@ export class UserService extends DatabaseService {
 						...data.unit,
 						active: true,
 						tenancyId: Number(tenancyId),
-					})
+					}),
+					req
 				)) as any;
+
 				existsOrError(action?.unit, {
 					message: 'Error Unit Not saved',
 					err: action,
