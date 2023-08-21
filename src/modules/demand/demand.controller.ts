@@ -23,7 +23,7 @@ export class DemandController extends Controller {
 		const demand = new DemandModel({ ...req.body, tenancyId });
 
 		this.demandService
-			.save(demand)
+			.save(demand, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -34,7 +34,7 @@ export class DemandController extends Controller {
 		const demand = new DemandModel(req.body, Number(id));
 
 		this.demandService
-			.updateDemand(demand, Number(id), tenancyId)
+			.updateDemand(demand, Number(id), tenancyId, req)
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -55,7 +55,7 @@ export class DemandController extends Controller {
 		const tenancyId = Number(req.query.tenancyId) || getTenancyByToken(req);
 
 		this.demandService
-			.disabled(Number(id), tenancyId)
+			.disabled(Number(id), tenancyId, req)
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch((err: any) => ResponseHandle.onError({ res, err }));
 	}
@@ -64,7 +64,7 @@ export class DemandController extends Controller {
 		const { id } = req.params;
 
 		this.demandService
-			.favorite(Number(id))
+			.favorite(Number(id), req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
