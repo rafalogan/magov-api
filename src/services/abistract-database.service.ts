@@ -1,4 +1,5 @@
 import { Knex } from 'knex';
+import { Request } from 'express';
 import { INTERNAL_SERVER_ERROR } from 'http-status';
 
 import { onLog } from 'src/core/handlers';
@@ -20,13 +21,13 @@ export abstract class DatabaseService extends CacheService {
 		this.userLogService = options.userLogService;
 	}
 
-	save(data: any) {
-		return data.id ? this.update(data, data.id) : this.create(data);
+	save(data: any, req: Request) {
+		return data.id ? this.update(data, data.id, req) : this.create(data, req);
 	}
 
-	abstract create(data: any): Promise<any>;
+	abstract create(data: any, req: Request): Promise<any>;
 
-	abstract update(data: any, id: any): Promise<any>;
+	abstract update(data: any, id: any, req: Request): Promise<any>;
 
 	async getCount(tableName: string, tenacy?: number) {
 		if (tenacy) {

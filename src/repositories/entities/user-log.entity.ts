@@ -11,7 +11,7 @@ export class UserLog {
 
 	constructor(data: IUserLog) {
 		this.action = data.action?.trim();
-		this.inTable = data.action?.trim();
+		this.inTable = data.inTable?.trim();
 		this.inTableId = Number(data.inTableId);
 		this.logDate = convertToDate(data.logDate);
 		this.userId = Number(data.userId);
