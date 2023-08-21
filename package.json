@@ -1,6 +1,6 @@
 {
 	"name": "ma-governance-api",
-	"version": "1.11.1",
+	"version": "1.11.3",
 	"description": "Project of api in Ma Governance API",
 	"main": "index.js",
 	"scripts": {
@@ -126,7 +126,7 @@
 		"vitest": "^0.33.0"
 	},
 	"engines": {
-		"node": "v18.17.0",
+		"node": "v18.17.1",
 		"npm": "9.8.1"
 	}
 }
