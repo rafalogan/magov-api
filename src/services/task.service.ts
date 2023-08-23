@@ -1,5 +1,7 @@
+import { Request } from 'express';
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
-import { onLog } from 'src/core/handlers';
+
+import { getUserLogData, onLog } from 'src/core/handlers';
 import { Task } from 'src/repositories/entities';
 import { GovernmentExpensesModel, ReadOptionsModel, TaskModel, TaskViewModel, UnitExpenseModel } from 'src/repositories/models';
 import { IGovernmentExpensesModel, IPlantiffTask, IServiceOptions, IUnitExpenseModel } from 'src/repositories/types';
@@ -45,7 +47,7 @@ export class TaskService extends DatabaseService {
 		super(options);
 	}
 
-	async create(data: TaskModel) {
+	async create(data: TaskModel, req: Request) {
 		try {
 			onLog('data to save', data);
 			const fromDB = (await this.getTask(data.title, data.tenancyId)) as TaskViewModel;
@@ -92,6 +94,8 @@ export class TaskService extends DatabaseService {
 					  )
 					: undefined;
 
+			await this.userLogService.create(getUserLogData(req, 'tasks', id, 'savar'));
+
 			return {
 				message: 'Task saved with success',
 				data: { ...data, id, governmentExpense, unitExpense },
@@ -101,7 +105,7 @@ export class TaskService extends DatabaseService {
 		}
 	}
 
-	async update(data: TaskModel, id: number) {
+	async update(data: TaskModel, id: number, req: Request) {
 		try {
 			const fromDB = (await this.getTask(id, data.tenancyId)) as TaskViewModel;
 
@@ -112,6 +116,8 @@ export class TaskService extends DatabaseService {
 			if (data.users?.length) await this.setUsers(data.users, id);
 			if (data.themes?.length) await this.setThemes(data.themes, id);
 			if (data.participants?.length) await this.setPaticipants(id, data.participants);
+
+			await this.userLogService.create(getUserLogData(req, 'tasks', id, 'atualizar'));
 
 			return { message: 'Task Updated with success', data: { ...toUpdate } };
 		} catch (err) {
@@ -255,7 +261,7 @@ export class TaskService extends DatabaseService {
 		}
 	}
 
-	async disabled(id: number, tenancyId: number) {
+	async disabled(id: number, tenancyId: number, req: Request) {
 		try {
 			const fromDB = await this.db('tasks').where({ id }).andWhere('tenancy_id', tenancyId).first();
 
@@ -266,6 +272,7 @@ export class TaskService extends DatabaseService {
 			await this.db('tasks').where({ id }).andWhere('tenancy_id', tenancyId).del();
 
 			if (fromDB.cost) await this.db('government_expenses').where({ task_id: id }).andWhere({ tenancy_id: tenancyId }).del();
+			await this.userLogService.create(getUserLogData(req, 'tasks', id, 'apagar'));
 
 			return { message: 'Task deleted with success', data: new Task(raw) };
 		} catch (err) {

@@ -23,7 +23,7 @@ export class TaskController extends Controller {
 		const task = new TaskModel({ ...req.body, tenancyId, userId });
 
 		this.taskService
-			.save(task)
+			.save(task, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -34,7 +34,7 @@ export class TaskController extends Controller {
 		const task = new TaskModel({ ...req.body, tenancyId }, Number(id));
 
 		this.taskService
-			.save(task)
+			.save(task, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -55,7 +55,7 @@ export class TaskController extends Controller {
 		const tenancyId = getTenancyByToken(req) || Number(req.query.tenancyId);
 
 		this.taskService
-			.disabled(Number(id), tenancyId)
+			.disabled(Number(id), tenancyId, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
