@@ -24,7 +24,7 @@ export class GovernmentExpensesController extends Controller {
 		const toSave = new GovernmentExpensesModel({ ...req.body, tenancyId });
 
 		this.governmentExpensesService
-			.save(toSave)
+			.save(toSave, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -35,7 +35,7 @@ export class GovernmentExpensesController extends Controller {
 		const toUpdate = new GovernmentExpensesModel({ ...req.body, tenancyId }, Number(id));
 
 		this.governmentExpensesService
-			.save(toUpdate)
+			.save(toUpdate, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -56,7 +56,7 @@ export class GovernmentExpensesController extends Controller {
 		const tenancyId = getTenancyByToken(req) || Number(req.query.tenancyId);
 
 		this.governmentExpensesService
-			.disabled(Number(id), tenancyId)
+			.disabled(Number(id), tenancyId, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -71,7 +71,7 @@ export class GovernmentExpensesController extends Controller {
 		onLog('to reserves', toSave);
 
 		return this.governmentExpensesService
-			.setReserve(toSave, tenancyId)
+			.setReserve(toSave, tenancyId, req)
 			.then(data =>
 				ResponseHandle.onSuccess({
 					res,

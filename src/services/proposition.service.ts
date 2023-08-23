@@ -42,7 +42,8 @@ export class PropositionService extends DatabaseService {
 							tenancyId: data.tenancyId,
 							active: true,
 							propositionId: id,
-						} as IGovernmentExpensesModel)
+						} as IGovernmentExpensesModel),
+						req
 				  )
 				: undefined;
 			await this.setTasks(data.tasks, id, req);

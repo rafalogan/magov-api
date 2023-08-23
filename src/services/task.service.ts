@@ -74,7 +74,8 @@ export class TaskService extends DatabaseService {
 								task: { id, title: data.title },
 								active: true,
 								propositionId: Number(data.propositionId),
-							} as IGovernmentExpensesModel)
+							} as IGovernmentExpensesModel),
+							req
 					  )
 					: undefined;
 
@@ -94,7 +95,7 @@ export class TaskService extends DatabaseService {
 					  )
 					: undefined;
 
-			await this.userLogService.create(getUserLogData(req, 'tasks', id, 'savar'));
+			await this.userLogService.create(getUserLogData(req, 'tasks', id, 'salvar'));
 
 			return {
 				message: 'Task saved with success',
