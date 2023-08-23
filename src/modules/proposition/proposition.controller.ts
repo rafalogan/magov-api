@@ -25,7 +25,7 @@ export class PropositionController extends Controller {
 		const proposition = new PropositionModel({ ...req.body, tenancyId, file });
 
 		this.propositionService
-			.save(proposition)
+			.save(proposition, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data?.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -42,7 +42,7 @@ export class PropositionController extends Controller {
 		}
 
 		this.propositionService
-			.addUrl({ tenancyId, propositionUrl: req.body.url }, Number(id))
+			.addUrl({ tenancyId, propositionUrl: req.body.url }, Number(id), req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -54,7 +54,7 @@ export class PropositionController extends Controller {
 		const proposition = new PropositionModel({ ...req.body, tenancyId, file }, Number(id));
 
 		this.propositionService
-			.save(proposition)
+			.save(proposition, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data?.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -75,7 +75,7 @@ export class PropositionController extends Controller {
 		const tenancyId = getTenancyByToken(req) || Number(req.query.tenancyId);
 
 		this.propositionService
-			.disabled(Number(id), tenancyId)
+			.disabled(Number(id), tenancyId, req)
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data?.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -84,7 +84,7 @@ export class PropositionController extends Controller {
 		const { id } = req.params;
 
 		this.propositionService
-			.favorite(Number(id))
+			.favorite(Number(id), req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
