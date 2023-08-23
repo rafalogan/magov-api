@@ -13,7 +13,10 @@ import { MailService } from './mail.service';
 export class AuthService {
 	private authsecret = process.env.AUTHSECRET as string;
 
-	constructor(private userService: UserService, private mailsService: MailService) {}
+	constructor(
+		private userService: UserService,
+		private mailsService: MailService
+	) {}
 
 	validateCredentials(credentials: ICredentials) {
 		try {
@@ -62,10 +65,10 @@ export class AuthService {
 		return { status: UNAUTHORIZED, message: 'Login unauthorized! verify your credentials.' };
 	}
 
-	async signupOnApp(user: UserModel) {
+	async signupOnApp(user: UserModel, req: Request) {
 		try {
 			onLog('User to save:', user);
-			return this.userService.save(user);
+			return this.userService.save(user, req);
 		} catch (err) {
 			return err;
 		}
@@ -84,7 +87,14 @@ export class AuthService {
 		existsOrError(token, 'Token not found!');
 		existsOrError(payload, 'Payload not found!');
 
-		return valid ? { valid, status, message: 'Token valid to use.', token } : { valid, status, message: 'Invalid token!', token };
+		return valid
+			? { valid, status, message: 'Token valid to use.', token }
+			: {
+					valid,
+					status,
+					message: 'Invalid token!',
+					token,
+			  };
 	}
 
 	async verifyEmailUser(email: string, options: SendEmailOptions) {
@@ -92,34 +102,30 @@ export class AuthService {
 			const user = (await this.userService.getUser(email)) as UserViewModel;
 			onLog('user', user);
 
-			if (user?.email) {
-				await this.mailsService.send({ ...options, to: user.email });
+			existsOrError(user?.email, { status: httpStatus.NOT_FOUND, messsage: 'Email not found!' });
 
-				return { status: httpStatus.OK, message: 'E-mail send to user with success' };
-			}
+			await this.mailsService.send({ ...options, to: user.email });
 
-			throw { status: httpStatus.NOT_FOUND, messsage: 'Email not found!' };
+			return { status: httpStatus.OK, message: 'E-mail send to user with success' };
 		} catch (err) {
 			return err;
 		}
 	}
 
-	async recoveryPassword(data: RecoveryModel) {
+	async recoveryPassword(data: RecoveryModel, req: Request) {
 		try {
 			const user = (await this.userService.getUser(data.email)) as UserViewModel;
 
-			if (user?.email) {
-				const toSave = new UserModel({
-					...user,
-					confirmPassword: data.confirmPassword,
-					password: data.password,
-					userRules: user.userRules.map(r => Number(r.id)),
-				} as IUserModel);
+			existsOrError(user?.email, { status: httpStatus.NOT_FOUND, messsage: 'User not found.' });
 
-				return this.userService.update(toSave, user.id);
-			}
+			const toSave = new UserModel({
+				...user,
+				confirmPassword: data.confirmPassword,
+				password: data.password,
+				userRules: user.userRules.map(r => Number(r.id)),
+			} as IUserModel);
 
-			throw { status: httpStatus.NOT_FOUND, message: 'User not found.' };
+			return this.userService.update(toSave, user.id, req);
 		} catch (err) {
 			return err;
 		}
