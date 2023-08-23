@@ -25,17 +25,28 @@ export class PlaintiffService extends DatabaseService {
 			existsOrError(Number(id), { message: 'Internal server error', err: id, status: INTERNAL_SERVER_ERROR });
 
 			const [addressId] = await this.db('adresses').insert(convertDataValues({ ...data.address, plaintiffId: id }));
-			existsOrError(Number(addressId), { message: 'Internal server error', err: addressId, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Number(addressId), {
+				message: 'Internal server error',
+				err: addressId,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
 			const [contactId] = await this.db('contacts').insert(
 				convertDataValues({ email: data.email, phone: data.phone, plaintiffId: id, tenancyId: data.tenancyId })
 			);
-			existsOrError(Number(contactId), { message: 'Internal server error', err: contactId, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Number(contactId), {
+				message: 'Internal server error',
+				err: contactId,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
-			await this.userLogService.create(getUserLogData(req, 'plantiffs', id, 'savar'));
-			await this.userLogService.create(getUserLogData(req, 'contacts', contactId, 'savar'));
+			await this.userLogService.create(getUserLogData(req, 'plantiffs', id, 'salvar'));
+			await this.userLogService.create(getUserLogData(req, 'contacts', contactId, 'salvar'));
 
-			return { message: 'Plantiff saved successfully', data: { ...data, id, address: { ...data.address, id: addressId }, contactId } };
+			return {
+				message: 'Plantiff saved successfully',
+				data: { ...data, id, address: { ...data.address, id: addressId }, contactId },
+			};
 		} catch (err) {
 			return err;
 		}
@@ -78,7 +89,15 @@ export class PlaintiffService extends DatabaseService {
 				.then(res => {
 					existsOrError(Array.isArray(res), { message: 'Internal error', status: INTERNAL_SERVER_ERROR });
 					return res.map(i =>
-						convertDataValues({ ...i, id: Number(i.id), institute_type_id: Number(i.institute_type_id), active: !!i.active }, 'camel')
+						convertDataValues(
+							{
+								...i,
+								id: Number(i.id),
+								institute_type_id: Number(i.institute_type_id),
+								active: !!i.active,
+							},
+							'camel'
+						)
 					);
 				})
 				.catch(err => err);

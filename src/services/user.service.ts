@@ -354,6 +354,7 @@ export class UserService extends DatabaseService {
 			}
 
 			const address = this.setAddress(data.address, 'userId', id);
+			await this.userLogService.create(getUserLogData(req, 'users', id, 'salvar'));
 
 			deleteField(data, 'password');
 
@@ -375,7 +376,7 @@ export class UserService extends DatabaseService {
 
 			deleteField(data, 'password');
 
-			await this.userLogService.create(getUserLogData(req, 'users', id, 'savar'));
+			await this.userLogService.create(getUserLogData(req, 'users', id, 'salvar'));
 
 			return { message: 'User successful saved', user: { ...data, id, tenancyId, address } };
 		} catch (err) {

@@ -27,7 +27,7 @@ export class RevenueService extends DatabaseService {
 
 			if (data.document) await this.db('files').insert(convertDataValues({ ...data.document, revenueId: id }));
 			existsOrError(Number(id), { message: 'Internal Error', error: id, status: INTERNAL_SERVER_ERROR });
-			await this.userLogService.create(getUserLogData(req, 'revenues', id, 'savar'));
+			await this.userLogService.create(getUserLogData(req, 'revenues', id, 'salvar'));
 
 			return { message: 'Revenue saved with succsess', data: { ...data, id, origin: { ...data.origin, id: originId } } };
 		} catch (err) {

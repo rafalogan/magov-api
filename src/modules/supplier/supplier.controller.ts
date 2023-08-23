@@ -19,7 +19,7 @@ export class SupplierController {
 		const toSave = new Supplier({ ...req.body, tenancyId });
 
 		this.supplierService
-			.save(toSave)
+			.save(toSave, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -30,7 +30,7 @@ export class SupplierController {
 		const toUpdate = new Supplier({ ...req.body, tenancyId }, Number(id));
 
 		this.supplierService
-			.save(toUpdate)
+			.save(toUpdate, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

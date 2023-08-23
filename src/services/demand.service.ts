@@ -58,7 +58,7 @@ export class DemandService extends DatabaseService {
 			const plaintiffId = await this.setPlaintiff({ ...data.plaintiff, tenancyId: data.tenancyId, active: data.active });
 			existsOrError(Number(plaintiffId), { messsage: 'Error plaintiff not found', status: INTERNAL_SERVER_ERROR });
 
-			await this.userLogService.create(getUserLogData(req, 'plantiffs', Number(plaintiffId), 'savar/editar'));
+			await this.userLogService.create(getUserLogData(req, 'plantiffs', Number(plaintiffId), 'salvar/editar'));
 
 			const demand = new Demand({ ...data, plaintiffId: Number(plaintiffId) });
 			const id = await this.saveDemand(demand, data.keywords, data.themes, req);
@@ -78,7 +78,7 @@ export class DemandService extends DatabaseService {
 			if (isDataInArray(keywords)) await this.setKeywords(keywords, Number(id));
 			if (isDataInArray(themes)) await this.setThemes(themes, Number(id));
 
-			await this.userLogService.create(getUserLogData(req, 'demands', id, 'savar'));
+			await this.userLogService.create(getUserLogData(req, 'demands', id, 'salvar'));
 
 			return Number(id);
 		} catch (err) {
@@ -340,10 +340,14 @@ export class DemandService extends DatabaseService {
 		}
 	}
 
-	async favorite(id: number) {
+	async favorite(id: number, req: Request) {
 		return super
 			.favoriteItem('demands', id)
-			.then(res => res)
+			.then(async res => {
+				await this.userLogService.create(getUserLogData(req, 'demands', id, 'desabilitar'));
+
+				return res;
+			})
 			.catch(err => err);
 	}
 
@@ -418,7 +422,11 @@ export class DemandService extends DatabaseService {
 			const [contactId] = await this.db('contacts').insert(
 				convertDataValues({ email, phone, tenancyId: value.tenancyId, plaintiffId: id })
 			);
-			existsOrError(Number(contactId), { message: 'Internal Error on save Contact', err: contactId, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Number(contactId), {
+				message: 'Internal Error on save Contact',
+				err: contactId,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
 			const [addressId] = await this.db('adresses').insert(convertDataValues({ ...address, plaintiffId: id }));
 			existsOrError(Number(addressId), {

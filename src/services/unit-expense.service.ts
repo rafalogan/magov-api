@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
 import { IFile, IServiceOptions, IUnitExpenseModel, IUnitExpensePayment } from 'src/repositories/types';
@@ -5,14 +6,14 @@ import { DatabaseService } from './abistract-database.service';
 import { ReadOptionsModel, UnitExpenseModel, UnitExpenseViewModel } from 'src/repositories/models';
 import { convertBlobToString, convertDataValues, convertToDate, deleteField, existsOrError, isRequired } from 'src/utils';
 import { FileEntity, UnitExpense, UnitExpensePayment } from 'src/repositories/entities';
-import { onLog } from 'src/core/handlers';
+import { getUserLogData, onLog } from 'src/core/handlers';
 
 export class UnitExpenseService extends DatabaseService {
 	constructor(options: IServiceOptions) {
 		super(options);
 	}
 
-	async create(data: UnitExpenseModel) {
+	async create(data: UnitExpenseModel, req: Request) {
 		try {
 			onLog('data to save', data);
 			const supplierId = data.supplier ? await this.setSupplier(data.supplier, data.tenancyId) : undefined;
@@ -22,6 +23,7 @@ export class UnitExpenseService extends DatabaseService {
 			existsOrError(Number(id), { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
 			const payments = data.payments ? await this.setPayments(data.payments, id) : undefined;
 			const invoice = data.invoice ? await this.setInvoiceFile(new FileEntity(data?.invoice as IFile), id) : undefined;
+			await this.userLogService.create(getUserLogData(req, 'units_expenses', id, 'salvar'));
 
 			return { message: 'Unit Expense successfully created', data: { ...data, payments, invoice, id } };
 		} catch (err) {
@@ -29,7 +31,7 @@ export class UnitExpenseService extends DatabaseService {
 		}
 	}
 
-	async update(data: UnitExpenseModel, id: number) {
+	async update(data: UnitExpenseModel, id: number, req: Request) {
 		try {
 			onLog('id to update', id);
 			const fromDB = (await this.getExpense(id, data.tenancyId)) as UnitExpenseViewModel;
@@ -40,6 +42,7 @@ export class UnitExpenseService extends DatabaseService {
 			await this.db('units_expenses').where({ id }).andWhere('tenancy_id', fromDB.tenancyId).update(convertDataValues(toUpdate));
 			const payments = data.payments?.length ? await this.setPayments(data.payments, id) : data.payments;
 			const invoice = data.invoice ? await this.setInvoiceFile(data.invoice, id) : undefined;
+			await this.userLogService.create(getUserLogData(req, 'units_expenses', id, 'atualizar'));
 
 			return { message: 'Unit Expense successfully updated', data: { ...fromDB, ...data, payments, invoice } };
 		} catch (err) {
@@ -124,13 +127,14 @@ export class UnitExpenseService extends DatabaseService {
 		}
 	}
 
-	async disable(id: number, tenancyId: number) {
+	async disable(id: number, tenancyId: number, req: Request) {
 		try {
 			const fromDB = await this.db('units_expenses').where({ id }).andWhere('tenancy_id', tenancyId).first();
 			existsOrError(fromDB.id, { message: 'Expense Not found', status: NOT_FOUND });
 			const toDesabled = new UnitExpense({ ...convertDataValues(fromDB, 'camel'), active: false });
 
 			await this.db('units_expenses').where({ id }).andWhere('tenancy_id', tenancyId).update(convertDataValues(toDesabled));
+			await this.userLogService.create(getUserLogData(req, 'units_expenses', id, 'desabilitar'));
 			return { message: 'Expense successfully disabled', data: toDesabled };
 		} catch (err) {
 			return err;

@@ -24,7 +24,7 @@ export class CommentController extends Controller {
 		const comment = new Comment({ ...req.body, tenancyId });
 
 		this.commentService
-			.save(comment)
+			.save(comment, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -35,7 +35,7 @@ export class CommentController extends Controller {
 		const comment = new Comment({ ...req.body, tenancyId }, Number(id));
 
 		this.commentService
-			.save(comment)
+			.save(comment, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

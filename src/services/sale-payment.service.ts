@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
 import { ISalePayment, IServiceOptions } from 'src/repositories/types';
@@ -5,30 +6,33 @@ import { DatabaseService } from './abistract-database.service';
 import { convertDataValues, existsOrError } from 'src/utils';
 import { SalePaymentModel } from 'src/repositories/models';
 import { SalePayment } from 'src/repositories/entities';
+import { getUserLogData } from 'src/core/handlers';
 
 export class SalePaymentService extends DatabaseService {
 	constructor(options: IServiceOptions) {
 		super(options);
 	}
 
-	async create(data: SalePaymentModel) {
+	async create(data: SalePaymentModel, req: Request) {
 		const toSave = new SalePayment(data);
 
 		return this.db('sales_payments')
 			.insert(convertDataValues(toSave))
-			.then(([id]) => {
+			.then(async ([id]) => {
 				try {
 					existsOrError(Number(id), { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: id });
 				} catch (err) {
 					return err;
 				}
 
+				await this.userLogService.create(getUserLogData(req, 'sales_payments', id, 'salvar'));
+
 				return { ...data, id };
 			})
 			.catch(err => err);
 	}
 
-	async update(data: SalePaymentModel, id: number) {
+	async update(data: SalePaymentModel, id: number, req: Request) {
 		try {
 			const fromDB = (await this.getSalePayment(id)) as SalePaymentModel;
 
@@ -36,6 +40,7 @@ export class SalePaymentService extends DatabaseService {
 			const toUpdate = new SalePayment({ ...fromDB, ...data });
 
 			await this.db('sales_payments').where({ id }).update(convertDataValues(toUpdate));
+			await this.userLogService.create(getUserLogData(req, 'sales_payments', id, 'atualizar'));
 
 			return toUpdate;
 		} catch (err) {
@@ -68,11 +73,13 @@ export class SalePaymentService extends DatabaseService {
 		}
 	}
 
-	async delete(id: number) {
+	async delete(id: number, req: Request) {
 		try {
 			const fromDB = (await this.getSalePayment(id)) as SalePaymentModel;
 			existsOrError(fromDB?.id, fromDB);
+
 			await this.db('sales_payments').where({ id }).del();
+			await this.userLogService.create(getUserLogData(req, 'sales_payments', id, 'apagar'));
 
 			return { message: 'Payment deleted successfully', data: fromDB };
 		} catch (err) {

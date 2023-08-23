@@ -27,7 +27,7 @@ export class UnitService extends DatabaseService {
 			}
 			await this.setAddress({ ...data.address, unitId: id }, 'unitId', Number(id));
 
-			await this.userLogService.create(getUserLogData(req, 'units', id, 'savar'));
+			await this.userLogService.create(getUserLogData(req, 'units', id, 'salvar'));
 			return { message: 'Unit created successfully.', unit: { ...data, ...unit, id } };
 		} catch (err) {
 			return err;
@@ -163,7 +163,11 @@ export class UnitService extends DatabaseService {
 	private async getProducts(unitId: number) {
 		try {
 			const unitsProducts = await this.db('units_products').where('unit_id', unitId);
-			existsOrError(Array.isArray(unitsProducts), { message: 'Internal Error', err: unitsProducts, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Array.isArray(unitsProducts), {
+				message: 'Internal Error',
+				err: unitsProducts,
+				status: INTERNAL_SERVER_ERROR,
+			});
 			const res: any[] = [];
 
 			for (const data of unitsProducts) {
@@ -187,7 +191,11 @@ export class UnitService extends DatabaseService {
 				const { id: productId, amount } = product;
 				const fromDB = await this.db('units_products').where('product_id', productId).andWhere('unit_id', unitId).first();
 
-				notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+				notExistisOrError(fromDB?.severity === 'ERROR', {
+					message: 'Internal Error',
+					err: fromDB,
+					status: INTERNAL_SERVER_ERROR,
+				});
 
 				if (fromDB?.unit_id && fromDB?.product_id) {
 					await this.db('units_products')

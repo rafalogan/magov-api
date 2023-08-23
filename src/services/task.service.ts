@@ -91,7 +91,8 @@ export class TaskService extends DatabaseService {
 								amount: 1,
 								active: true,
 								payments: [{ paymentForm: 'boleto', installments: 1, value: data.cost }],
-							} as IUnitExpenseModel)
+							} as IUnitExpenseModel),
+							req
 					  )
 					: undefined;
 
@@ -284,7 +285,11 @@ export class TaskService extends DatabaseService {
 	private async getParticipants(id: number) {
 		try {
 			const participantsIds = await this.db('participants').where('task_id', id);
-			existsOrError(Array.isArray(participantsIds), { message: 'internal error', err: participantsIds, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Array.isArray(participantsIds), {
+				message: 'internal error',
+				err: participantsIds,
+				status: INTERNAL_SERVER_ERROR,
+			});
 			const res: IPlantiffTask[] = [];
 
 			for (const item of participantsIds) {
