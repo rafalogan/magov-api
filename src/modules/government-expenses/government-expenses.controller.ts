@@ -61,7 +61,7 @@ export class GovernmentExpensesController extends Controller {
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
-	reserve(req: Request, res: Response) {
+	async reserve(req: Request, res: Response) {
 		const { id } = req.params;
 		const tenancyId = getTenancyByToken(req) || Number(req.query.tenancyId);
 
