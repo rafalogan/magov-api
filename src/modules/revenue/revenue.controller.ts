@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 
 import { Controller } from 'src/core/controllers';
 import { RevenueService } from 'src/services';
-import { existsOrError, isRequired, notExistisOrError, requiredFields, setFileToSave } from 'src/utils';
+import { isRequired, notExistisOrError, requiredFields, setFileToSave } from 'src/utils';
 import { getTenancyByToken, onLog, ResponseHandle } from 'src/core/handlers';
 import { ReadOptionsModel, RevenueModel } from 'src/repositories/models';
 
@@ -24,7 +24,7 @@ export class RevenueController extends Controller {
 		const revenue = new RevenueModel({ ...req.body, tenancyId, document, active: true });
 
 		this.revenueService
-			.save(revenue)
+			.save(revenue, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -37,7 +37,7 @@ export class RevenueController extends Controller {
 		const revenue = new RevenueModel({ ...req.body, tenancyId, document }, Number(id));
 		onLog('update revenue', revenue);
 		this.revenueService
-			.save(revenue)
+			.save(revenue, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -58,7 +58,7 @@ export class RevenueController extends Controller {
 		const tenancyId = Number(req.query.tenancyId) || getTenancyByToken(req);
 
 		this.revenueService
-			.disabled(Number(id), tenancyId)
+			.disabled(Number(id), tenancyId, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

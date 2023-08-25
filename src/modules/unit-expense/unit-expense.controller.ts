@@ -28,7 +28,7 @@ export class UnitExpenseController extends Controller {
 		const unitExpense = new UnitExpenseModel({ ...req.body, invoice, tenancyId, payments });
 
 		this.unitExpenseService
-			.save(unitExpense)
+			.save(unitExpense, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -49,7 +49,7 @@ export class UnitExpenseController extends Controller {
 		const unitExpense = new UnitExpenseModel({ ...req.body, tenancyId, payments, invoice }, Number(id));
 
 		this.unitExpenseService
-			.save(unitExpense)
+			.save(unitExpense, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -70,7 +70,7 @@ export class UnitExpenseController extends Controller {
 		const tenancyId = getTenancyByToken(req) || Number(req.query.tenancyId);
 
 		this.unitExpenseService
-			.disable(Number(id), tenancyId)
+			.disable(Number(id), tenancyId, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

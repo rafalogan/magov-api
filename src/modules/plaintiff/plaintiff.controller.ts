@@ -23,7 +23,7 @@ export class PlaintiffController extends Controller {
 		const plaintiff = new PlaintiffModel({ ...req.body, tenancyId });
 
 		this.plaintiffService
-			.save(plaintiff)
+			.save(plaintiff, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -34,7 +34,7 @@ export class PlaintiffController extends Controller {
 		const plaintiff = new PlaintiffModel({ ...req.body, tenancyId }, Number(id));
 
 		this.plaintiffService
-			.save(plaintiff)
+			.save(plaintiff, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -55,7 +55,7 @@ export class PlaintiffController extends Controller {
 		const tenancyId = Number(req.query.tenancyId) || getTenancyByToken(req);
 
 		this.plaintiffService
-			.disable(Number(id), tenancyId)
+			.disable(Number(id), tenancyId, req)
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

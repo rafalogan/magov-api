@@ -28,7 +28,7 @@ export class UserController extends Controller {
 		onLog('User to save', user);
 
 		this.userService
-			.save(user)
+			.save(user, req)
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
 	}
@@ -40,7 +40,7 @@ export class UserController extends Controller {
 		const user = new UserModel({ ...req.body, address, image }, Number(id));
 
 		this.userService
-			.save(user)
+			.save(user, req)
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
 	}
@@ -63,7 +63,7 @@ export class UserController extends Controller {
 		const { id } = req.params;
 
 		this.userService
-			.remove(Number(id))
+			.remove(Number(id), req)
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
 	}

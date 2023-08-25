@@ -1,5 +1,7 @@
+import { Request } from 'express';
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
-import { onLog } from 'src/core/handlers';
+
+import { getUserLogData, onLog } from 'src/core/handlers';
 import { Demand, Plaintiff } from 'src/repositories/entities';
 import { DemandModel, DemandViewModel, ReadOptionsModel } from 'src/repositories/models';
 import { IDemand, IPlantiff, IPlantiffModel, IServiceOptions, ITheme } from 'src/repositories/types';
@@ -17,29 +19,32 @@ import { DatabaseService } from './abistract-database.service';
 import { KeywordService } from './keyword.service';
 
 export class DemandService extends DatabaseService {
-	constructor(options: IServiceOptions, private keywordService: KeywordService) {
+	constructor(
+		options: IServiceOptions,
+		private keywordService: KeywordService
+	) {
 		super(options);
 	}
 
-	async create(data: DemandModel) {
+	async create(data: DemandModel, req: Request) {
 		try {
 			const fromDB = await this.db('demands').where('name', data.name).andWhere('tenancy_id', data.tenancyId).first();
 			notExistisOrError(fromDB?.id, { message: 'Demand already existis', status: FORBIDDEN });
 
-			if (data?.plaintiff?.id) return this.createSimpleDemand(data);
-			return this.createDemandAndPlantiff(data);
+			if (data?.plaintiff?.id) return this.createSimpleDemand(data, req);
+			return this.createDemandAndPlantiff(data, req);
 		} catch (err) {
 			return err;
 		}
 	}
 
-	async createSimpleDemand(data: DemandModel) {
+	async createSimpleDemand(data: DemandModel, req: Request) {
 		try {
 			const plaintiffId = Number(data.plaintiff.id);
 			existsOrError(Number(plaintiffId), { messsage: 'Error plaintiff not found', status: INTERNAL_SERVER_ERROR });
 
 			const demand = new Demand({ ...data, plaintiffId });
-			const id = await this.saveDemand(demand, data.keywords, data.themes);
+			const id = await this.saveDemand(demand, data.keywords, data.themes, req);
 			existsOrError(Number(id), id);
 
 			return { message: 'Demand saved successfully', data: { ...data, id } };
@@ -48,13 +53,15 @@ export class DemandService extends DatabaseService {
 		}
 	}
 
-	async createDemandAndPlantiff(data: DemandModel) {
+	async createDemandAndPlantiff(data: DemandModel, req: Request) {
 		try {
 			const plaintiffId = await this.setPlaintiff({ ...data.plaintiff, tenancyId: data.tenancyId, active: data.active });
 			existsOrError(Number(plaintiffId), { messsage: 'Error plaintiff not found', status: INTERNAL_SERVER_ERROR });
 
+			await this.userLogService.create(getUserLogData(req, 'plantiffs', Number(plaintiffId), 'salvar/editar'));
+
 			const demand = new Demand({ ...data, plaintiffId: Number(plaintiffId) });
-			const id = await this.saveDemand(demand, data.keywords, data.themes);
+			const id = await this.saveDemand(demand, data.keywords, data.themes, req);
 			existsOrError(Number(id), id);
 
 			return { message: 'Demand saved successfully', data: { ...data, id } };
@@ -63,7 +70,7 @@ export class DemandService extends DatabaseService {
 		}
 	}
 
-	async saveDemand(data: Demand, keywords: string[], themes: string[]) {
+	async saveDemand(data: Demand, keywords: string[], themes: string[], req: Request) {
 		try {
 			const [id] = await this.db('demands').insert(convertDataValues({ ...data, active: true }));
 			existsOrError(Number(id), { messsage: 'Internal Server Error', err: id, status: INTERNAL_SERVER_ERROR });
@@ -71,13 +78,15 @@ export class DemandService extends DatabaseService {
 			if (isDataInArray(keywords)) await this.setKeywords(keywords, Number(id));
 			if (isDataInArray(themes)) await this.setThemes(themes, Number(id));
 
+			await this.userLogService.create(getUserLogData(req, 'demands', id, 'salvar'));
+
 			return Number(id);
 		} catch (err) {
 			return err;
 		}
 	}
 
-	async updateDemand(data: DemandModel, id: number, tenancyId: number) {
+	async updateDemand(data: DemandModel, id: number, tenancyId: number, req: Request) {
 		try {
 			const demand = (await this.getDemand(id)) as DemandViewModel;
 
@@ -99,6 +108,7 @@ export class DemandService extends DatabaseService {
 				id
 			);
 			await this.db('demands').where({ id }).update(convertDataValues(demandToUpdate));
+			await this.userLogService.create(getUserLogData(req, 'demands', id, 'atualizar'));
 
 			return {
 				message: 'Demand updated successfully',
@@ -115,7 +125,7 @@ export class DemandService extends DatabaseService {
 		}
 	}
 
-	async update(data: DemandModel, id: number) {
+	async update(data: DemandModel, id: number, req: Request) {
 		try {
 			const demand = (await this.getDemand(id)) as DemandViewModel;
 
@@ -134,6 +144,7 @@ export class DemandService extends DatabaseService {
 			const demandToUpdate = new Demand({ ...demand, ...data, plaintiffId: data.plaintiff.id as number }, id);
 			await this.db('demands').where({ id }).update(convertDataValues(demandToUpdate));
 
+			await this.userLogService.create(getUserLogData(req, 'demands', id, 'atualizar'));
 			return {
 				message: 'Demand updated successfully',
 				data: {
@@ -160,7 +171,7 @@ export class DemandService extends DatabaseService {
 		}
 	}
 
-	async disabled(id: number, tenancyId: number) {
+	async disabled(id: number, tenancyId: number, req: Request) {
 		try {
 			const data = (await this.getDemand(id)) as DemandViewModel;
 			existsOrError(data.id, { message: 'Denand not found', status: NOT_FOUND });
@@ -169,6 +180,7 @@ export class DemandService extends DatabaseService {
 			const toDesabled = new Demand({ ...data, plaintiffId: data.plaintiff.id as number, active: false } as IDemand);
 			await this.db('demands').where({ id }).update(convertDataValues(toDesabled));
 
+			await this.userLogService.create(getUserLogData(req, 'demands', id, 'desabilitar'));
 			return { message: 'Demand disabled successfully', data: { ...data, active: false } };
 		} catch (err) {
 			return err;
@@ -328,10 +340,14 @@ export class DemandService extends DatabaseService {
 		}
 	}
 
-	async favorite(id: number) {
+	async favorite(id: number, req: Request) {
 		return super
 			.favoriteItem('demands', id)
-			.then(res => res)
+			.then(async res => {
+				await this.userLogService.create(getUserLogData(req, 'demands', id, 'desabilitar'));
+
+				return res;
+			})
 			.catch(err => err);
 	}
 
@@ -406,7 +422,11 @@ export class DemandService extends DatabaseService {
 			const [contactId] = await this.db('contacts').insert(
 				convertDataValues({ email, phone, tenancyId: value.tenancyId, plaintiffId: id })
 			);
-			existsOrError(Number(contactId), { message: 'Internal Error on save Contact', err: contactId, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Number(contactId), {
+				message: 'Internal Error on save Contact',
+				err: contactId,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
 			const [addressId] = await this.db('adresses').insert(convertDataValues({ ...address, plaintiffId: id }));
 			existsOrError(Number(addressId), {

@@ -24,7 +24,7 @@ export class UnitController extends Controller {
 		const unit = new UnitModel({ ...req.body, address, tenancyId, plan: { id: req.body.planId } });
 
 		this.unitService
-			.save(unit)
+			.save(unit, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err, status: err.status, message: err.message }));
 	}
@@ -44,7 +44,7 @@ export class UnitController extends Controller {
 		onLog('Unit to update', unit);
 
 		this.unitService
-			.save(unit)
+			.save(unit, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err, status: err.status, message: err.message }));
 	}
@@ -83,7 +83,7 @@ export class UnitController extends Controller {
 		}
 
 		this.unitService
-			.desactve(Number(id), tenancyId)
+			.desactve(Number(id), tenancyId, req)
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err, message: err.message, status: err.status }));
 	}

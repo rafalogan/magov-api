@@ -27,3 +27,4 @@ export * from './sale-payment.entity';
 export * from './types-recipes.entity';
 export * from './notification.entity';
 export * from './government-reserve.entity';
+export * from './user-log.entity';

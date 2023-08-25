@@ -28,3 +28,4 @@ export * from './supplier.service';
 export * from './types-recipes.service';
 export * from './government-revenue.service';
 export * from './notification.service';
+export * from './user-log.service';

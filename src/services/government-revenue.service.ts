@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
 import { GovernmentRevenueModel, GovernmentRevenueViewModel, ReadOptionsModel } from 'src/repositories/models';
@@ -5,20 +6,23 @@ import { IPropositionExpensesGovernment, IRevenueModel, IServiceOptions } from '
 import { DatabaseService } from './abistract-database.service';
 import { convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
 import { Revenue } from 'src/repositories/entities';
-import { onLog } from 'src/core/handlers';
+import { getUserLogData, onLog } from 'src/core/handlers';
 
 export class GovernmentRevenueService extends DatabaseService {
 	constructor(options: IServiceOptions) {
 		super(options);
 	}
 
-	async create(data: GovernmentRevenueModel) {
+	async create(data: GovernmentRevenueModel, req: Request) {
 		try {
 			const fromDB = (await this.getGovRevenue(data.revenue, data.tenancyId)) as GovernmentRevenueViewModel;
+
 			onLog('fromDB to save', fromDB);
 			notExistisOrError(fromDB?.id, { message: 'Revenue already exists', status: FORBIDDEN });
 
 			const originId = (await this.getTypeOfRecipe(data.origin)) as number;
+
+			onLog('origin id', originId);
 			existsOrError(Number(originId), originId);
 
 			const toSave = new Revenue({
@@ -30,13 +34,15 @@ export class GovernmentRevenueService extends DatabaseService {
 			existsOrError(Number(id), { message: 'Internal error', err: id, status: INTERNAL_SERVER_ERROR });
 
 			if (data.expenses?.length) await this.setPropositionOfRevenue(data.expenses, id);
+			await this.userLogService.create(getUserLogData(req, 'revenues', id, 'salvar'));
+
 			return { message: 'Revenue saved successfully.', data: { ...data, id } };
 		} catch (err) {
 			return err;
 		}
 	}
 
-	async update(data: GovernmentRevenueModel, id: number) {
+	async update(data: GovernmentRevenueModel, id: number, req: Request) {
 		try {
 			const fromDB = (await this.getGovRevenue(id, data.tenancyId)) as GovernmentRevenueViewModel;
 			existsOrError(fromDB?.id, fromDB);
@@ -57,6 +63,8 @@ export class GovernmentRevenueService extends DatabaseService {
 			);
 
 			await this.db('revenues').update(convertDataValues(toUpdate)).where({ id }).andWhere('tenancy_id', fromDB.tenancyId);
+			await this.userLogService.create(getUserLogData(req, 'revenues', id, 'atualizar'));
+
 			return { message: 'Revenue updated successfully', data: { ...toUpdate, expenses: data.expenses } };
 		} catch (err) {
 			return err;
@@ -186,13 +194,14 @@ export class GovernmentRevenueService extends DatabaseService {
 		}
 	}
 
-	async disebled(id: number, tenancyId: number) {
+	async disebled(id: number, tenancyId: number, req: Request) {
 		try {
 			const fromDB = (await this.getGovRevenue(id, tenancyId)) as GovernmentRevenueViewModel;
 			existsOrError(fromDB?.id, fromDB);
 			existsOrError(fromDB.active, { message: 'Revenue already disabled', status: FORBIDDEN });
 
 			await this.db('revenues').where({ id }).andWhere('tenancy_id', tenancyId).update({ active: false });
+			await this.userLogService.create(getUserLogData(req, 'revenues', id, 'desabilitar'));
 
 			return { message: 'Revenue successfully disabled', data: { ...fromDB, active: false } };
 		} catch (err) {
@@ -221,7 +230,7 @@ export class GovernmentRevenueService extends DatabaseService {
 	private async getTypeOfRecipe(origin: string) {
 		try {
 			const fromDB = await this.db('origins').where({ origin }).first();
-			notExistisOrError(fromDB.severity === 'ERROR', {
+			notExistisOrError(fromDB?.severity === 'ERROR', {
 				message: 'Internal error',
 				err: fromDB,
 				status: INTERNAL_SERVER_ERROR,

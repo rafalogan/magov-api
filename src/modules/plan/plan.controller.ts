@@ -24,7 +24,7 @@ export class PlanController extends Controller {
 		const plan = new Plan(req.body);
 
 		this.planService
-			.save(plan)
+			.save(plan, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -36,7 +36,7 @@ export class PlanController extends Controller {
 		const plan = new Plan(req.body, Number(id));
 
 		this.planService
-			.save(plan)
+			.save(plan, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

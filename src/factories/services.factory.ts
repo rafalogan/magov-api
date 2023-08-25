@@ -31,10 +31,12 @@ import {
 	TypesRecipesService,
 	UnitExpenseService,
 	UnitService,
+	UserLogService,
 	UserService,
 } from 'src/services';
 
 export class ServicesFactory {
+	userLogService: UserLogService;
 	authService: AuthService;
 	userService: UserService;
 	planService: PlanService;
@@ -69,6 +71,7 @@ export class ServicesFactory {
 		private client: RedisClientType,
 		private mailConfig: MailerConfig
 	) {
+		this.userLogService = new UserLogService(conn);
 		this.unitService = new UnitService({ ...this.setServiceOptions() });
 		this.userService = new UserService({ ...this.setServiceOptions() }, this.unitService);
 		this.governmentExpenseService = new GovernmentExpensesService(this.setServiceOptions());
@@ -99,5 +102,5 @@ export class ServicesFactory {
 		this.notificationService = new NotificationService(this.mailService);
 	}
 
-	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client });
+	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client, userLogService: this.userLogService });
 }

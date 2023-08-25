@@ -2,6 +2,7 @@ import { Request } from 'express';
 import jwt from 'jwt-simple';
 
 import { Payload } from 'src/repositories/models';
+import { IUserLog } from 'src/repositories/types';
 
 export const getPayload = (req: Request) => {
 	const token = extractToken(req);
@@ -27,3 +28,10 @@ export const getUserIdByToken = (req: Request) => getPayload(req)?.id as number;
 export const getTenancyByToken = (req: Request) => getPayload(req)?.tenancyId as number;
 
 export const getIdByReq = (req: Request) => Number(req.params.id);
+
+export const getUserLogData = (req: Request, inTable: string, inTableId: number, action: string): IUserLog => {
+	const userId = getUserIdByToken(req);
+	const tenancyId = getTenancyByToken(req);
+	const logDate = new Date();
+	return { action, inTable, inTableId, userId, tenancyId, logDate };
+};

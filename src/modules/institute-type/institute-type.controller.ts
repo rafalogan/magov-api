@@ -1,9 +1,9 @@
-import { BAD_REQUEST, FORBIDDEN } from 'http-status';
+import { BAD_REQUEST } from 'http-status';
 import { Request, Response } from 'express';
 
 import { Controller } from 'src/core/controllers';
 import { InstituteTypeService } from 'src/services';
-import { existsOrError, isRequired, notExistisOrError } from 'src/utils';
+import { existsOrError, isRequired } from 'src/utils';
 import { ResponseHandle } from 'src/core/handlers';
 import { InstituteType } from 'src/repositories/entities';
 
@@ -22,7 +22,7 @@ export class InstituteTypeController extends Controller {
 		const instituteType = new InstituteType({ ...req.body, active: req.body.active || true });
 
 		this.instituteTypeService
-			.save(instituteType)
+			.save(instituteType, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -32,7 +32,7 @@ export class InstituteTypeController extends Controller {
 		const instituteType = new InstituteType(req.body, Number(id));
 
 		this.instituteTypeService
-			.save(instituteType)
+			.save(instituteType, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

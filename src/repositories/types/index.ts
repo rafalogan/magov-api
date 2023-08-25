@@ -29,3 +29,4 @@ export * from './supplier';
 export * from './sale';
 export * from './government-expenses';
 export * from './types-recipes';
+export * from './user-log';

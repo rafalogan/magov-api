@@ -21,7 +21,7 @@ export class ThemeController extends Controller {
 		const theme = new Theme(req.body);
 
 		this.themeService
-			.save(theme)
+			.save(theme, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, status: err.status }));
 	}
@@ -31,7 +31,7 @@ export class ThemeController extends Controller {
 		const theme = new Theme(req.body, Number(id));
 
 		this.themeService
-			.save(theme)
+			.save(theme, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err, status: err.status }));
 	}

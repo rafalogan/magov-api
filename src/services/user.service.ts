@@ -1,5 +1,7 @@
+import { Request } from 'express';
 import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
-import { onLog } from 'src/core/handlers';
+
+import { getUserLogData, onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { PaginationModel, ReadOptionsModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserViewModel } from 'src/repositories/types';
@@ -15,14 +17,14 @@ export class UserService extends DatabaseService {
 		super(options);
 	}
 
-	async create(data: UserModel) {
+	async create(data: UserModel, req: Request) {
 		try {
 			const fromDB = (await this.getUser(data.email)) as any;
 			notExistisOrError(fromDB?.id, { message: 'User already exists', status: FORBIDDEN });
 			notExistisOrError(fromDB?.err, fromDB);
 
-			if (data?.newTenancy) return this.setMasterUserTenancy(data);
-			if (data?.tenancyId && data.unitId) return this.setUserUnit(data);
+			if (data?.newTenancy) return this.setMasterUserTenancy(data, req);
+			if (data?.tenancyId && data.unitId) return this.setUserUnit(data, req);
 
 			return this.setMasterUser(data);
 		} catch (err) {
@@ -60,7 +62,7 @@ export class UserService extends DatabaseService {
 		return fromDB.map(i => convertDataValues(i, 'camel'));
 	}
 
-	async update(data: UserModel, id: number): Promise<any> {
+	async update(data: UserModel, id: number, req: Request): Promise<any> {
 		try {
 			const userFromDb = (await this.getUser(id)) as UserViewModel;
 
@@ -77,6 +79,8 @@ export class UserService extends DatabaseService {
 
 			const res = { ...userFromDb, ...data };
 			deleteField(res, 'password');
+
+			await this.userLogService.create(getUserLogData(req, 'users', id, 'atualizar'));
 
 			return { message: 'User update with success', data: res };
 		} catch (err) {
@@ -260,7 +264,7 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	async remove(id: number) {
+	async remove(id: number, req: Request) {
 		try {
 			const userFromDb = (await this.db('users').where({ id }).first()) as IUser;
 			if (userFromDb) {
@@ -269,6 +273,9 @@ export class UserService extends DatabaseService {
 				await this.db('users')
 					.where({ id })
 					.update({ ...convertDataValues(user) });
+
+				await this.userLogService.create(getUserLogData(req, 'users', id, 'desabilitar'));
+
 				return {
 					message: 'User disabled with success',
 					user: { id: user.id, email: user.email, active: !!user.active },
@@ -314,7 +321,7 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async setMasterUserTenancy(data: UserModel) {
+	private async setMasterUserTenancy(data: UserModel, req: Request) {
 		try {
 			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
 			let unit: any;
@@ -333,8 +340,10 @@ export class UserService extends DatabaseService {
 						...data.unit,
 						active: true,
 						tenancyId: Number(tenancyId),
-					})
+					}),
+					req
 				)) as any;
+
 				existsOrError(action?.unit, {
 					message: 'Error Unit Not saved',
 					err: action,
@@ -345,6 +354,7 @@ export class UserService extends DatabaseService {
 			}
 
 			const address = this.setAddress(data.address, 'userId', id);
+			await this.userLogService.create(getUserLogData(req, 'users', id, 'salvar'));
 
 			deleteField(data, 'password');
 
@@ -354,7 +364,7 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async setUserUnit(data: UserModel) {
+	private async setUserUnit(data: UserModel, req: Request) {
 		try {
 			const tenancyId = await this.setTenancy(data.tenancyId);
 			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
@@ -365,6 +375,8 @@ export class UserService extends DatabaseService {
 			const address = this.setAddress(data.address, 'userId', id);
 
 			deleteField(data, 'password');
+
+			await this.userLogService.create(getUserLogData(req, 'users', id, 'salvar'));
 
 			return { message: 'User successful saved', user: { ...data, id, tenancyId, address } };
 		} catch (err) {

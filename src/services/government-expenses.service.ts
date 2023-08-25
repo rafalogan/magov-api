@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
 import { IGExpenseBudget, IGovernmentExpensesModel, IServiceOptions } from 'src/repositories/types';
@@ -5,14 +6,14 @@ import { DatabaseService } from './abistract-database.service';
 import { GovernmentExpensesModel, ReadOptionsModel } from 'src/repositories/models';
 import { convertBlobToString, convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
 import { GovernmentExpenses, GovernmentReserve } from 'src/repositories/entities';
-import { onLog } from 'src/core/handlers';
+import { getUserLogData, onLog } from 'src/core/handlers';
 
 export class GovernmentExpensesService extends DatabaseService {
 	constructor(options: IServiceOptions) {
 		super(options);
 	}
 
-	async create(data: GovernmentExpensesModel) {
+	async create(data: GovernmentExpensesModel, req: Request) {
 		try {
 			const fromDB = (await this.getExpense(data.expense, data.tenancyId)) as GovernmentExpensesModel;
 			notExistisOrError(fromDB?.id, fromDB);
@@ -20,13 +21,15 @@ export class GovernmentExpensesService extends DatabaseService {
 			const [id] = await this.db('government_expenses').insert(convertDataValues(toSave));
 			const budgets = data.budgets ? await this.setBudgets(data.budgets, id, data.dueDate) : undefined;
 
+			await this.userLogService.create(getUserLogData(req, 'government_expenses', id, 'salvar'));
+
 			return { message: 'Government Expense successfully saved', data: { ...toSave, id, budgets } };
 		} catch (err) {
 			return err;
 		}
 	}
 
-	async update(data: GovernmentExpensesModel, id: number) {
+	async update(data: GovernmentExpensesModel, id: number, req: Request) {
 		try {
 			const fromDB = (await this.getExpense(id, data.tenancyId)) as GovernmentExpenses;
 			existsOrError(fromDB?.id, fromDB);
@@ -35,7 +38,9 @@ export class GovernmentExpensesService extends DatabaseService {
 				...data,
 				tenancyId: fromDB.tenancyId,
 			} as IGovernmentExpensesModel);
+
 			await this.db('government_expenses').update(convertDataValues(toUpdate)).where({ id }).andWhere('tenancy_id', fromDB.tenancyId);
+			await this.userLogService.create(getUserLogData(req, 'government_expenses', id, 'atualizar'));
 
 			return { message: 'Government expense successfully updated', data: toUpdate };
 		} catch (err) {
@@ -105,14 +110,16 @@ export class GovernmentExpensesService extends DatabaseService {
 		}
 	}
 
-	async disabled(id: number, tenancyId: number) {
+	async disabled(id: number, tenancyId: number, req: Request) {
 		try {
 			const fromDB = (await this.getExpense(id, tenancyId)) as GovernmentExpensesModel;
 			existsOrError(fromDB?.id, fromDB);
 			existsOrError(fromDB.active, { message: 'Expense already disabled', status: FORBIDDEN });
 
 			const toDisabled = new GovernmentExpenses({ ...fromDB, active: false } as IGovernmentExpensesModel);
+
 			await this.db('government_expenses').where({ id }).andWhere('tenancy_id', tenancyId).update(convertDataValues(toDisabled));
+			await this.userLogService.create(getUserLogData(req, 'government_expenses', id, 'desabilitar'));
 
 			return { message: 'Government expense successfully disabled', data: toDisabled };
 		} catch (err) {
@@ -120,7 +127,7 @@ export class GovernmentExpensesService extends DatabaseService {
 		}
 	}
 
-	async setReserve(data: GovernmentReserve, tenancyId: number) {
+	async setReserve(data: GovernmentReserve, tenancyId: number, req: Request) {
 		try {
 			const fromDB = (await this.getExpense(data.id, tenancyId)) as GovernmentExpensesModel;
 
@@ -139,6 +146,7 @@ export class GovernmentExpensesService extends DatabaseService {
 					const toSave = { governmentExpenseId: data.id, revenueId: item.id, value: revenueValue, date };
 
 					await this.db('government_expenses_payment').insert(convertDataValues(toSave));
+					await this.userLogService.create(getUserLogData(req, 'government_expenses_payment', item.id, 'salvar'));
 				}
 			}
 
