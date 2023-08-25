@@ -1,5 +1,7 @@
+import { Request } from 'express';
 import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
-import { onLog } from 'src/core/handlers';
+
+import { getUserLogData, onLog } from 'src/core/handlers';
 import { Plaintiff } from 'src/repositories/entities';
 
 import { PlaintiffModel, ReadOptionsModel } from 'src/repositories/models';
@@ -12,7 +14,7 @@ export class PlaintiffService extends DatabaseService {
 		super(options);
 	}
 
-	async create(data: PlaintiffModel) {
+	async create(data: PlaintiffModel, req: Request) {
 		try {
 			const fromBD = await this.getPlaintiff(`${data.cpfCnpj}`, data.tenancyId as number);
 
@@ -23,20 +25,34 @@ export class PlaintiffService extends DatabaseService {
 			existsOrError(Number(id), { message: 'Internal server error', err: id, status: INTERNAL_SERVER_ERROR });
 
 			const [addressId] = await this.db('adresses').insert(convertDataValues({ ...data.address, plaintiffId: id }));
-			existsOrError(Number(addressId), { message: 'Internal server error', err: addressId, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Number(addressId), {
+				message: 'Internal server error',
+				err: addressId,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
 			const [contactId] = await this.db('contacts').insert(
 				convertDataValues({ email: data.email, phone: data.phone, plaintiffId: id, tenancyId: data.tenancyId })
 			);
-			existsOrError(Number(contactId), { message: 'Internal server error', err: contactId, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Number(contactId), {
+				message: 'Internal server error',
+				err: contactId,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
-			return { message: 'Plantiff saved successfully', data: { ...data, id, address: { ...data.address, id: addressId }, contactId } };
+			await this.userLogService.create(getUserLogData(req, 'plantiffs', id, 'salvar'));
+			await this.userLogService.create(getUserLogData(req, 'contacts', contactId, 'salvar'));
+
+			return {
+				message: 'Plantiff saved successfully',
+				data: { ...data, id, address: { ...data.address, id: addressId }, contactId },
+			};
 		} catch (err) {
 			return err;
 		}
 	}
 
-	async update(data: PlaintiffModel, id: number) {
+	async update(data: PlaintiffModel, id: number, req: Request) {
 		try {
 			const fromBD = await this.getPlaintiff(id, data.tenancyId as number);
 
@@ -51,6 +67,8 @@ export class PlaintiffService extends DatabaseService {
 			await this.db('contacts')
 				.where({ plaintiff_id: fromBD.id })
 				.update(convertDataValues({ email: data.email || fromBD.email, phone: data.phone || fromBD.phone }));
+
+			await this.userLogService.create(getUserLogData(req, 'plantiffs', id, 'atualiar'));
 
 			return { message: 'Plaintiff updated', data: { ...fromBD, ...data, tenancyId: fromBD.tenancyId } };
 		} catch (err) {
@@ -71,7 +89,15 @@ export class PlaintiffService extends DatabaseService {
 				.then(res => {
 					existsOrError(Array.isArray(res), { message: 'Internal error', status: INTERNAL_SERVER_ERROR });
 					return res.map(i =>
-						convertDataValues({ ...i, id: Number(i.id), institute_type_id: Number(i.institute_type_id), active: !!i.active }, 'camel')
+						convertDataValues(
+							{
+								...i,
+								id: Number(i.id),
+								institute_type_id: Number(i.institute_type_id),
+								active: !!i.active,
+							},
+							'camel'
+						)
 					);
 				})
 				.catch(err => err);
@@ -129,13 +155,14 @@ export class PlaintiffService extends DatabaseService {
 		}
 	}
 
-	async disable(id: number, tenancyId: number) {
+	async disable(id: number, tenancyId: number, req: Request) {
 		try {
 			const fromBD = await this.getPlaintiff(id, tenancyId);
 			existsOrError(fromBD?.id, { message: 'Plaintiffs not found', status: NOT_FOUND });
 			const toDesabled = new Plaintiff({ ...fromBD, active: false });
 
 			await this.db('plaintiffs').where({ id }).andWhere({ tenancy_id: tenancyId }).update(convertDataValues(toDesabled));
+			await this.userLogService.create(getUserLogData(req, 'plantiffs', id, 'desabilitar'));
 
 			return { message: 'Plaintiffs deleted', data: { ...fromBD, active: false } };
 		} catch (err) {

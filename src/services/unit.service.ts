@@ -1,5 +1,6 @@
+import { Request } from 'express';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
-import { onLog } from 'src/core/handlers';
+import { getUserLogData, onLog } from 'src/core/handlers';
 
 import { Unit } from 'src/repositories/entities';
 import { ReadOptionsModel, UnitModel } from 'src/repositories/models';
@@ -12,7 +13,7 @@ export class UnitService extends DatabaseService {
 		super(options);
 	}
 
-	async create(data: UnitModel) {
+	async create(data: UnitModel, req: Request) {
 		try {
 			onLog('unit to save', data);
 			const unit = new Unit({ ...data, active: true } as IUnit);
@@ -26,13 +27,14 @@ export class UnitService extends DatabaseService {
 			}
 			await this.setAddress({ ...data.address, unitId: id }, 'unitId', Number(id));
 
+			await this.userLogService.create(getUserLogData(req, 'units', id, 'salvar'));
 			return { message: 'Unit created successfully.', unit: { ...data, ...unit, id } };
 		} catch (err) {
 			return err;
 		}
 	}
 
-	async update(data: UnitModel, id: number) {
+	async update(data: UnitModel, id: number, req: Request) {
 		try {
 			const unit = (await this.getUnit(id, data.tenancyId)) as UnitModel;
 
@@ -49,6 +51,7 @@ export class UnitService extends DatabaseService {
 			await this.db('units').where({ id }).andWhere('tenancy_id', unit.tenancyId).update(convertDataValues(toSave));
 			if (data.address) await this.setAddress({ ...data.address, unitId: unit.id }, 'unitId', unit.id);
 
+			await this.userLogService.create(getUserLogData(req, 'units', id, 'atualizar'));
 			return { message: 'Unit updated successfully.', unit: { ...unit, ...data } };
 		} catch (err) {
 			return err;
@@ -139,7 +142,7 @@ export class UnitService extends DatabaseService {
 		}
 	}
 
-	async desactve(id: number, tenancyId: number) {
+	async desactve(id: number, tenancyId: number, req: Request) {
 		try {
 			const unit = (await this.getUnit(id, tenancyId)) as UnitModel;
 
@@ -149,6 +152,7 @@ export class UnitService extends DatabaseService {
 			const toDisabled = new Unit({ ...unit, active: false });
 			onLog('unit to desactved', toDisabled);
 			await this.db('units').where({ id }).andWhere('tenancy_id', tenancyId).update(convertDataValues(toDisabled));
+			await this.userLogService.create(getUserLogData(req, 'units', id, 'desativar'));
 
 			return { message: 'Unit successfully desactved.', unit: { ...unit, active: false } };
 		} catch (err) {
@@ -159,7 +163,11 @@ export class UnitService extends DatabaseService {
 	private async getProducts(unitId: number) {
 		try {
 			const unitsProducts = await this.db('units_products').where('unit_id', unitId);
-			existsOrError(Array.isArray(unitsProducts), { message: 'Internal Error', err: unitsProducts, status: INTERNAL_SERVER_ERROR });
+			existsOrError(Array.isArray(unitsProducts), {
+				message: 'Internal Error',
+				err: unitsProducts,
+				status: INTERNAL_SERVER_ERROR,
+			});
 			const res: any[] = [];
 
 			for (const data of unitsProducts) {
@@ -183,7 +191,11 @@ export class UnitService extends DatabaseService {
 				const { id: productId, amount } = product;
 				const fromDB = await this.db('units_products').where('product_id', productId).andWhere('unit_id', unitId).first();
 
-				notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+				notExistisOrError(fromDB?.severity === 'ERROR', {
+					message: 'Internal Error',
+					err: fromDB,
+					status: INTERNAL_SERVER_ERROR,
+				});
 
 				if (fromDB?.unit_id && fromDB?.product_id) {
 					await this.db('units_products')

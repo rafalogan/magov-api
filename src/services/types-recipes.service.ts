@@ -1,16 +1,18 @@
+import { Request } from 'express';
 import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
 import { IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { TypesRecipes } from 'src/repositories/entities';
 import { convertDataValues, existsOrError, notExistisOrError } from 'src/utils';
+import { getUserLogData } from 'src/core/handlers';
 
 export class TypesRecipesService extends DatabaseService {
 	constructor(options: IServiceOptions) {
 		super(options);
 	}
 
-	async create(data: TypesRecipes) {
+	async create(data: TypesRecipes, req: Request) {
 		try {
 			const fromDB = (await this.getTypeRecipe(data.origin)) as any;
 			notExistisOrError(fromDB?.id, { message: 'type recipe already exists', status: FORBIDDEN });
@@ -19,6 +21,7 @@ export class TypesRecipesService extends DatabaseService {
 			const toSave = { ...data, government: true };
 			const [id] = await this.db('origins').insert(convertDataValues(toSave));
 			existsOrError(Number(id), { message: 'Internal error', err: id, status: INTERNAL_SERVER_ERROR });
+			await this.userLogService.create(getUserLogData(req, 'origins', id, 'salvar'));
 
 			return { message: 'Type Recipe successful saved', data: { ...toSave, id } };
 		} catch (err) {
@@ -26,13 +29,14 @@ export class TypesRecipesService extends DatabaseService {
 		}
 	}
 
-	async update(data: TypesRecipes, id: number) {
+	async update(data: TypesRecipes, id: number, req: Request) {
 		try {
 			const fromDB = (await this.getTypeRecipe(id)) as TypesRecipes;
 			existsOrError(fromDB?.id, fromDB);
 
 			const toUpdate = new TypesRecipes({ ...fromDB, ...data }, id);
 			await this.db('origins').update(toUpdate).where({ id });
+			await this.userLogService.create(getUserLogData(req, 'origins', id, 'atualizar'));
 
 			return { message: 'Type Recipe updated successfully', data: toUpdate };
 		} catch (err) {
@@ -65,7 +69,7 @@ export class TypesRecipesService extends DatabaseService {
 		}
 	}
 
-	async delete(id: number) {
+	async delete(id: number, req: Request) {
 		try {
 			const fromDB = (await this.getTypeRecipe(id)) as TypesRecipes;
 			existsOrError(fromDB?.id, { message: 'type already deleted', status: FORBIDDEN });
@@ -74,6 +78,7 @@ export class TypesRecipesService extends DatabaseService {
 			notExistisOrError(revenues, { message: 'exists revenues for this type, it is not possible to delete this type', status: FORBIDDEN });
 
 			await this.db('origins').where({ id }).del();
+			await this.userLogService.create(getUserLogData(req, 'origins', id, 'apagar'));
 
 			return { message: `Type recipe nº ${id} deleted successfully`, data: fromDB };
 		} catch (err) {

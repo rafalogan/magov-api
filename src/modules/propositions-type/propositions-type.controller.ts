@@ -22,7 +22,7 @@ export class PropositionsTypeController extends Controller {
 		const propositionsType = new PropositionsTypeModel({ ...req.body, document });
 
 		this.propositionsTypeService
-			.save(propositionsType)
+			.save(propositionsType, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -33,7 +33,7 @@ export class PropositionsTypeController extends Controller {
 		const propositionsType = new PropositionsTypeModel({ ...req.body, document }, Number(id));
 
 		this.propositionsTypeService
-			.save(propositionsType)
+			.save(propositionsType, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

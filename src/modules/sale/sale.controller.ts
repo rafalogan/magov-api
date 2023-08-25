@@ -26,7 +26,7 @@ export class SaleController extends Controller {
 		const sale = new SaleModel({ ...req.body, contract });
 
 		this.saleService
-			.save(sale)
+			.save(sale, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -41,7 +41,7 @@ export class SaleController extends Controller {
 		const payment = new SalePaymentModel(req.body);
 
 		this.salePaymentService
-			.save(payment)
+			.save(payment, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -52,7 +52,7 @@ export class SaleController extends Controller {
 		const sale = new SaleModel({ ...req.body, contract }, Number(id));
 
 		this.saleService
-			.save(sale)
+			.save(sale, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -62,7 +62,7 @@ export class SaleController extends Controller {
 		const payment = new SalePaymentModel(req.body, Number(id));
 
 		this.salePaymentService
-			.save(payment)
+			.save(payment, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -91,7 +91,7 @@ export class SaleController extends Controller {
 		const { id } = req.params;
 
 		this.saleService
-			.delete(Number(id))
+			.delete(Number(id), req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -100,7 +100,7 @@ export class SaleController extends Controller {
 		const { id } = req.params;
 
 		this.salePaymentService
-			.delete(Number(id))
+			.delete(Number(id), req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

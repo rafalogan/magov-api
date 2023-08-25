@@ -1,5 +1,7 @@
+import { Request } from 'express';
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
-import { onLog } from 'src/core/handlers';
+
+import { getUserLogData, onLog } from 'src/core/handlers';
 import { FileEntity, Proposition, Task } from 'src/repositories/entities';
 import { GovernmentExpensesModel, PropositionModel, PropositionsReadOptionsModel, PropositionViewModel } from 'src/repositories/models';
 import { IGovernmentExpensesModel, IProposition, IPropositonAddURL, IServiceOptions } from 'src/repositories/types';
@@ -8,11 +10,14 @@ import { DatabaseService } from './abistract-database.service';
 import { GovernmentExpensesService } from './government-expenses.service';
 
 export class PropositionService extends DatabaseService {
-	constructor(options: IServiceOptions, private governmentExpenseService: GovernmentExpensesService) {
+	constructor(
+		options: IServiceOptions,
+		private governmentExpenseService: GovernmentExpensesService
+	) {
 		super(options);
 	}
 
-	async create(data: PropositionModel) {
+	async create(data: PropositionModel, req: Request) {
 		try {
 			const fromDB = (await this.getProprosition(data.title, data.tenancyId)) as PropositionViewModel;
 
@@ -37,11 +42,15 @@ export class PropositionService extends DatabaseService {
 							tenancyId: data.tenancyId,
 							active: true,
 							propositionId: id,
-						} as IGovernmentExpensesModel)
+						} as IGovernmentExpensesModel),
+						req
 				  )
 				: undefined;
-			await this.setTasks(data.tasks, id);
+			await this.setTasks(data.tasks, id, req);
+
 			const file = data?.file ? await this.setFile(data.file, 'propositionId', id) : undefined;
+
+			await this.userLogService.create(getUserLogData(req, 'propositions', id, 'salvar'));
 
 			return { message: 'Proposition saved with success', data: { ...data, id, governmentExpense, file } };
 		} catch (err) {
@@ -49,7 +58,7 @@ export class PropositionService extends DatabaseService {
 		}
 	}
 
-	async update(data: PropositionModel, id: number) {
+	async update(data: PropositionModel, id: number, req: Request) {
 		try {
 			const fromDB = (await this.getProprosition(id, data.tenancyId)) as PropositionViewModel;
 
@@ -78,8 +87,10 @@ export class PropositionService extends DatabaseService {
 				await this.setDemands(data.demands, id);
 			}
 
-			if (data?.tasks?.length) await this.setTasks(data.tasks, id);
+			if (data?.tasks?.length) await this.setTasks(data.tasks, id, req);
 			if (data?.file) await this.setFile(data.file, 'propositionId', id);
+
+			await this.userLogService.create(getUserLogData(req, 'propositions', id, 'atualizar'));
 
 			return { message: 'Proposition updated with success', data: { ...toUpdate, ...data } };
 		} catch (err) {
@@ -233,16 +244,19 @@ export class PropositionService extends DatabaseService {
 		}
 	}
 
-	async disabled(id: number, tenancyId: number) {
+	async disabled(id: number, tenancyId: number, req: Request) {
 		try {
 			const fromDB = (await this.getProprosition(id, tenancyId)) as PropositionViewModel;
 			existsOrError(fromDB.id, { message: 'Not found', status: NOT_FOUND });
 
 			const toDesabled = new Proposition({ ...fromDB, active: false });
+
 			await this.db('propositions').where({ id }).andWhere({ tenancy_id: tenancyId }).update(convertDataValues(toDesabled));
 			if (fromDB.expense) {
 				await this.db('government_expenses').where('proposition_id', id).andWhere('tenancy_id', fromDB.tenancyId).update({ active: false });
 			}
+
+			await this.userLogService.create(getUserLogData(req, 'propositions', id, 'desabilitar'));
 
 			return { message: 'Proposition disabled with success', data: { ...fromDB, ...toDesabled } };
 		} catch (err) {
@@ -250,14 +264,17 @@ export class PropositionService extends DatabaseService {
 		}
 	}
 
-	async favorite(id: number) {
+	async favorite(id: number, req: Request) {
 		return super
 			.favoriteItem('propositions', id)
-			.then(res => res)
+			.then(async res => {
+				await this.userLogService.create(getUserLogData(req, 'propositions', id, 'favoritar'));
+				return res;
+			})
 			.catch(err => err);
 	}
 
-	async addUrl(data: IPropositonAddURL, id: number) {
+	async addUrl(data: IPropositonAddURL, id: number, req: Request) {
 		try {
 			const { propositionUrl, tenancyId } = data;
 			const fromDB = (await this.getProprosition(id, tenancyId)) as any;
@@ -268,6 +285,7 @@ export class PropositionService extends DatabaseService {
 
 			onLog('to update proposition', toUpdate);
 			await this.db('propositions').where({ id }).andWhere('tenancy_id', tenancyId).update(convertDataValues(toUpdate));
+			await this.userLogService.create(getUserLogData(req, 'propositions', id, 'adicionar URL'));
 
 			return { message: `Url: ${propositionUrl}, sucessfully added` };
 		} catch (err) {
@@ -285,11 +303,11 @@ export class PropositionService extends DatabaseService {
 		}
 	}
 
-	private async setTasks(tasks: Task[], propositionId: number) {
+	private async setTasks(tasks: Task[], propositionId: number, req: Request) {
 		try {
 			for (const task of tasks) {
 				onLog('task to save', task);
-				await this.setPropositionTask(task, propositionId);
+				await this.setPropositionTask(task, propositionId, req);
 			}
 		} catch (err) {
 			return err;
@@ -307,7 +325,7 @@ export class PropositionService extends DatabaseService {
 		}
 	}
 
-	private async setPropositionTask(data: Task, propositionId: number) {
+	private async setPropositionTask(data: Task, propositionId: number, req: Request) {
 		try {
 			const fromDB = await this.db('tasks').where({ title: data.title }).andWhere({ tenancy_id: data.tenancyId }).first();
 
@@ -325,12 +343,17 @@ export class PropositionService extends DatabaseService {
 							tenancyId: fromDB.tenancy_id,
 						})
 					);
+
+				await this.userLogService.create(getUserLogData(req, 'tasks', fromDB?.id, 'atualizar'));
+
 				return;
 			}
 
 			const [id] = await this.db('tasks').insert(convertDataValues({ ...data, propositionId }));
 			onLog('save task', id);
 			existsOrError(Number(id), { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
+
+			await this.userLogService.create(getUserLogData(req, 'tasks', id, 'salvar'));
 		} catch (err) {
 			return err;
 		}

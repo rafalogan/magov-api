@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import { INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import dayjs from 'dayjs';
 
@@ -7,14 +8,17 @@ import { UserService } from './user.service';
 import { PaginationModel, ReadOptionsModel, SaleModel, SalePaymentModel, SaleViewModel } from 'src/repositories/models';
 import { Sale, Seller } from 'src/repositories/entities';
 import { convertDataValues, deleteField, existsOrError } from 'src/utils';
-import { onLog } from 'src/core/handlers';
+import { getUserLogData, onLog } from 'src/core/handlers';
 
 export class SaleService extends DatabaseService {
-	constructor(options: IServiceOptions, private userService: UserService) {
+	constructor(
+		options: IServiceOptions,
+		private userService: UserService
+	) {
 		super(options);
 	}
 
-	async create(data: SaleModel) {
+	async create(data: SaleModel, req: Request) {
 		try {
 			onLog('products to save', data.products);
 			const sellerId = (await this.setSeller(new Seller({ ...data }))) as number;
@@ -44,6 +48,7 @@ export class SaleService extends DatabaseService {
 
 			await this.setUnitProducts(data.products, data.unitId);
 			await this.setProducts(data.products, id);
+			await this.userLogService.create(getUserLogData(req, 'sales', id, 'salvar'));
 
 			return { message: 'Sale successifuly saved', data: { ...data, id } };
 		} catch (err) {
@@ -51,7 +56,7 @@ export class SaleService extends DatabaseService {
 		}
 	}
 
-	async update(data: SaleModel, id: number) {
+	async update(data: SaleModel, id: number, req: Request) {
 		try {
 			onLog('product to update', data);
 			const fromDB = (await this.getSale(id)) as SaleViewModel;
@@ -75,6 +80,8 @@ export class SaleService extends DatabaseService {
 				await this.setUnitProducts(data.products, unitId);
 				await this.setUnitProducts(data.products, id);
 			}
+
+			await this.userLogService.create(getUserLogData(req, 'sales', id, 'atualizar'));
 
 			return { message: 'Sale successifuly updated', data: { ...toUpdate, contract } };
 		} catch (err) {
@@ -276,7 +283,7 @@ export class SaleService extends DatabaseService {
 		}
 	}
 
-	async delete(id: number) {
+	async delete(id: number, req: Request) {
 		try {
 			const fromDB = await this.db('sales').where({ id }).first();
 
@@ -291,6 +298,7 @@ export class SaleService extends DatabaseService {
 
 			const deleteSale = await this.db('sales').where({ id }).del();
 			existsOrError(Number(deleteSale), { message: 'internal error', status: INTERNAL_SERVER_ERROR, err: deleteSale });
+			await this.userLogService.create(getUserLogData(req, 'sales', id, 'deletar'));
 
 			return { message: 'Sale successifuly deleted', data: convertDataValues(fromDB, 'camel') };
 		} catch (err) {

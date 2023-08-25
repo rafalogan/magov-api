@@ -48,7 +48,7 @@ export class AuthController {
 		onLog('User to signup', user);
 
 		this.authService
-			.signupOnApp(user)
+			.signupOnApp(user, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
 	}
@@ -99,7 +99,7 @@ export class AuthController {
 		const data = new RecoveryModel(req.body);
 
 		this.authService
-			.recoveryPassword(data)
+			.recoveryPassword(data, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
 	}

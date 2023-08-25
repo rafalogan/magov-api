@@ -1,5 +1,7 @@
+import { Request } from 'express';
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
-import { onLog } from 'src/core/handlers';
+
+import { getUserLogData, onLog } from 'src/core/handlers';
 import { Revenue, Origin } from 'src/repositories/entities';
 import { ReadOptionsModel, RevenueModel } from 'src/repositories/models';
 import { IRevenueModel, IServiceOptions } from 'src/repositories/types';
@@ -11,19 +13,21 @@ export class RevenueService extends DatabaseService {
 		super(options);
 	}
 
-	async create(data: RevenueModel) {
+	async create(data: RevenueModel, req: Request) {
 		try {
 			const fromDB = (await this.getRevenue(data.revenue, data.tenancyId)) as RevenueModel;
 
 			notExistisOrError(fromDB.id, { message: 'Revenue already exists', status: FORBIDDEN });
-			const originId = await this.setOriginId(data.origin);
+			const originId = await this.setOriginId(data.origin, req);
 
 			existsOrError(Number(originId), { message: 'Internal Error', error: originId, status: INTERNAL_SERVER_ERROR });
 			onLog('data', data);
 			const toSave = new Revenue({ ...data, originId } as IRevenueModel);
 			const [id] = await this.db('revenues').insert(convertDataValues(toSave));
+
 			if (data.document) await this.db('files').insert(convertDataValues({ ...data.document, revenueId: id }));
 			existsOrError(Number(id), { message: 'Internal Error', error: id, status: INTERNAL_SERVER_ERROR });
+			await this.userLogService.create(getUserLogData(req, 'revenues', id, 'salvar'));
 
 			return { message: 'Revenue saved with succsess', data: { ...data, id, origin: { ...data.origin, id: originId } } };
 		} catch (err) {
@@ -31,7 +35,7 @@ export class RevenueService extends DatabaseService {
 		}
 	}
 
-	async update(data: RevenueModel, id: number) {
+	async update(data: RevenueModel, id: number, req: Request) {
 		try {
 			const fromDB = (await this.getRevenue(id, data.tenancyId)) as RevenueModel;
 
@@ -39,14 +43,15 @@ export class RevenueService extends DatabaseService {
 			equalsOrError(fromDB.tenancyId, data.tenancyId, { message: 'user forbidden', status: FORBIDDEN });
 			let originId = fromDB.origin.id;
 			if (data.document) {
-				await this.deleteFileRevenue(fromDB.document?.filename as string);
+				await this.deleteFileRevenue(fromDB.document?.filename as string, req);
 				await this.db('files').insert(convertDataValues({ ...data.document, revenueId: fromDB.id }));
 			}
 
-			if (data.origin) originId = await this.setOriginId(data.origin);
+			if (data.origin) originId = await this.setOriginId(data.origin, req);
 
 			const toUpdate = new Revenue({ ...fromDB, ...data, tenancyId: fromDB.tenancyId, originId } as IRevenueModel);
 			await this.db('revenues').where({ id }).update(convertDataValues(toUpdate));
+			await this.userLogService.create(getUserLogData(req, 'revenues', id, 'atualizar'));
 
 			return { messsage: 'Revenue updated with succsess', data: toUpdate };
 		} catch (err) {
@@ -135,7 +140,7 @@ export class RevenueService extends DatabaseService {
 		}
 	}
 
-	async disabled(id: number, tenancyId: number) {
+	async disabled(id: number, tenancyId: number, req: Request) {
 		try {
 			const revenue = await this.db('revenues').where({ id }).andWhere('tenancy_id', tenancyId).first();
 			existsOrError(revenue.id, { message: 'Not Found', status: NOT_FOUND });
@@ -143,6 +148,7 @@ export class RevenueService extends DatabaseService {
 			const toDisable = new Revenue(convertDataValues({ ...revenue, active: false }, 'camel'));
 
 			await this.db('revenues').where({ id }).update(convertDataValues(toDisable));
+			await this.userLogService.create(getUserLogData(req, 'revenues', id, 'desabilitar'));
 
 			return { message: 'Revenue disabled with succsess', data: toDisable };
 		} catch (err) {
@@ -150,7 +156,7 @@ export class RevenueService extends DatabaseService {
 		}
 	}
 
-	private async setOriginId(value: Origin) {
+	private async setOriginId(value: Origin, req: Request) {
 		try {
 			if (value.id) return value.id;
 
@@ -160,6 +166,7 @@ export class RevenueService extends DatabaseService {
 
 			const [id] = await this.db('origins').insert(convertDataValues(value));
 			existsOrError(Number(id), { message: 'Internal Error', error: id, status: INTERNAL_SERVER_ERROR });
+			await this.userLogService.create(getUserLogData(req, 'origins', id, 'salvar'));
 
 			return Number(id);
 		} catch (err) {
@@ -167,11 +174,13 @@ export class RevenueService extends DatabaseService {
 		}
 	}
 
-	private async deleteFileRevenue(filename: string) {
+	private async deleteFileRevenue(filename: string, req: Request) {
 		try {
 			const fromDB = await this.db('files').where({ filename }).first();
 
 			if (fromDB.id) await this.db('files').where({ filename }).del();
+			await this.userLogService.create(getUserLogData(req, 'files', fromDB?.id, 'deletar'));
+
 			return deleteFile(filename);
 		} catch (err) {
 			return err;

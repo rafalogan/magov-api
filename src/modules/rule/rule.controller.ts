@@ -22,7 +22,7 @@ export class RuleController extends Controller {
 		const rule = new Rule(req.body);
 
 		this.ruleService
-			.save(rule)
+			.save(rule, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -32,7 +32,7 @@ export class RuleController extends Controller {
 		const rule = new Rule(req.body, Number(id));
 
 		this.ruleService
-			.save(rule)
+			.save(rule, req)
 			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

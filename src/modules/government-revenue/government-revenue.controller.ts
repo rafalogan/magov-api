@@ -19,11 +19,13 @@ export class GovernmentRevenueController extends Controller {
 			return ResponseHandle.onError({ res, err });
 		}
 
+		const origin = req.body.typeOfRecipe ?? req.body.origin;
+
 		const tenancyId = getTenancyByToken(req) || Number(req.body.tenancyId);
-		const revenue = new GovernmentRevenueModel({ ...req.body, tenancyId });
+		const revenue = new GovernmentRevenueModel({ ...req.body, tenancyId, origin });
 
 		this.governmentRevenueService
-			.save(revenue)
+			.save(revenue, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -31,10 +33,11 @@ export class GovernmentRevenueController extends Controller {
 	edit(req: Request, res: Response) {
 		const { id } = req.params;
 		const tenancyId = getTenancyByToken(req) || Number(req.body.tenancyId);
-		const revenue = new GovernmentRevenueModel({ ...req.body, tenancyId }, Number(id));
+		const origin = req.body.typeOfRecipe ?? req.body.origin;
+		const revenue = new GovernmentRevenueModel({ ...req.body, tenancyId, origin }, Number(id));
 
 		this.governmentRevenueService
-			.save(revenue)
+			.save(revenue, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -61,17 +64,17 @@ export class GovernmentRevenueController extends Controller {
 		}
 
 		this.governmentRevenueService
-			.disebled(Number(id), tenancyId)
+			.disebled(Number(id), tenancyId, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
 	private verifyRequest(req: Request) {
-		const { origin, unitId, revenue, receive, documentNumber, value } = req.body;
+		const { origin, typeOfRecipe, unitId, revenue, receive, documentNumber, value } = req.body;
 		const tenancyId = getTenancyByToken(req) || Number(req.body.tenancyId);
 
 		const requireds = requiredFields([
-			{ field: origin, message: isRequired('typeOfRecipe') },
+			{ field: origin || typeOfRecipe, message: isRequired('typeOfRecipe or origin') },
 			{ field: unitId, message: isRequired('unitId') },
 			{ field: revenue, message: isRequired('revenue') },
 			{ field: receive, message: isRequired('receive') },

@@ -20,7 +20,7 @@ export class TypesRecipesController extends Controller {
 		}
 
 		this.typesRecipesService
-			.save(new TypesRecipes({ ...req.body }))
+			.save(new TypesRecipes({ ...req.body }), req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -30,7 +30,7 @@ export class TypesRecipesController extends Controller {
 		const toUpdate = new TypesRecipes({ ...req.body }, Number(id));
 
 		this.typesRecipesService
-			.save(toUpdate)
+			.save(toUpdate, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -53,7 +53,7 @@ export class TypesRecipesController extends Controller {
 		}
 
 		this.typesRecipesService
-			.delete(Number(id))
+			.delete(Number(id), req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
