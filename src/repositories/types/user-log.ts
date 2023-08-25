@@ -1,3 +1,5 @@
+import { IPaginationOptions } from './shared';
+
 export interface IUserLog {
 	action: string;
 	inTable: string;
@@ -12,4 +14,9 @@ export interface IUserLogVew extends IUserLog {
 	firstName: string;
 	lastName: string;
 	userEmail: string;
+}
+
+export interface IUserLogReadOptions extends IPaginationOptions {
+	userId?: number;
+	tenancyId: number;
 }

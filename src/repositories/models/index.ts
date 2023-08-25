@@ -31,3 +31,4 @@ export * from './sale-payment.model';
 export * from './government-revenue.model';
 export * from './government-revenue-view.model';
 export * from './user-log-view.model';
+export * from './read-user-log-options.model';
