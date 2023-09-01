@@ -64,6 +64,7 @@ export class PropositionsTypeService extends DatabaseService {
 
 						result.push(data);
 					}
+
 					return this.setVAlues(result);
 				})
 				.catch(err => err);
