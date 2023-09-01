@@ -637,26 +637,23 @@ const modelsTypes: IPropositionsTypeViewModel[] = [
 ];
 
 const insertItem = async (knex: Knex, items: IPropositionsTypeViewModel[], parentId?: number): Promise<void> => {
-	for (const item of items) {
-		const { name, description, active, subTypes } = item;
-
+	return items.forEach(async i => {
+		const { name, description, active, subTypes } = i;
 		if (subTypes?.length) {
 			const [id] = await knex('types').insert({ name, description, active, parent_id: parentId });
 
-			await insertItem(knex, subTypes, id);
+			return insertItem(knex, subTypes, id);
 		}
 
-		await knex('types').insert({ name, description, active, parent_id: parentId });
-	}
-	return;
+		return knex('types').insert({ name, description, active, parent_id: parentId });
+	});
 };
 
 const delItem = async (knex: Knex, items: IPropositionsTypeViewModel[]): Promise<void> => {
-	for (const item of items) {
-		if (item.subTypes?.length) await delItem(knex, item.subTypes);
-		await knex('types').where('name', item.name).del();
-	}
-	return;
+	return items.forEach(async i => {
+		if (i.subTypes?.length) return delItem(knex, i.subTypes);
+		return knex('types').where('name', i.name).del();
+	});
 };
 
 export async function up(knex: Knex): Promise<void> {
