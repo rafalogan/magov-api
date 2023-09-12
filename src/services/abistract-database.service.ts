@@ -138,7 +138,7 @@ export abstract class DatabaseService extends CacheService {
 			existsOrError(fromDb?.id, { message: 'Not Found', status: INTERNAL_SERVER_ERROR });
 			await this.db(tableName)
 				.where({ id })
-				.update({ ...fromDb, favorite: true });
+				.update({ ...fromDb, favorite: !fromDb?.favorite });
 
 			return { message: `Register nº ${id} favorite` };
 		} catch (err) {
