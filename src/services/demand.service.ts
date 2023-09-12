@@ -225,8 +225,9 @@ export class DemandService extends DatabaseService {
 				item.favorite = !!item.favorite;
 				const keywords = await this.getKeywords(item.id);
 				const task = await this.setTasksperDemands(item.id);
+				const themes = await this.getThemes(item.id);
 
-				demands.push({ ...item, keywords, task });
+				demands.push({ ...item, keywords, task, themes });
 			}
 
 			return demands;
@@ -349,6 +350,24 @@ export class DemandService extends DatabaseService {
 				return res;
 			})
 			.catch(err => err);
+	}
+
+	private async getThemes(demandId: number) {
+		try {
+			const themesIds = await this.db('demands_themes').where({ demand_id: demandId });
+			const themes: ITheme[] = [];
+
+			for (const item of themesIds) {
+				const id = Number(item.theme_id);
+				const fromDB = await this.db('themes').where({ id }).first();
+
+				if (fromDB?.id) themes.push({ id: Number(fromDB.id), name: fromDB.name, active: !!fromDB.active });
+			}
+
+			return themes;
+		} catch (err) {
+			return err;
+		}
 	}
 
 	private async getKeywords(demandId: number) {
