@@ -344,7 +344,7 @@ export class DemandService extends DatabaseService {
 		return super
 			.favoriteItem('demands', id)
 			.then(async res => {
-				await this.userLogService.create(getUserLogData(req, 'demands', id, 'desabilitar'));
+				await this.userLogService.create(getUserLogData(req, 'demands', id, 'favorire'));
 
 				return res;
 			})
