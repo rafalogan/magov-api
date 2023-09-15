@@ -30,7 +30,7 @@ export class DemandModel {
 		this.deadLine = convertToDate(data.deadLine);
 		this.createdAt = data.createdAt ? convertToDate(data.createdAt) : new Date();
 		this.approximateIncome = setValueNumberToView(data.approximateIncome) as number;
-		this.status = data.status?.trim();
+		this.status = !data?.status ? undefined : typeof data.status === 'string' ? data?.status?.trim() : `${data.status}`;
 		this.unitId = Number(data.unitId);
 		this.userId = Number(data.userId);
 		this.tenancyId = data.tenancyId;

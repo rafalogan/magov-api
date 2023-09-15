@@ -2,9 +2,9 @@ import { Request } from 'express';
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
 import { getUserLogData, onLog } from 'src/core/handlers';
-import { Demand, Plaintiff } from 'src/repositories/entities';
+import { Demand, Plaintiff, Task } from 'src/repositories/entities';
 import { DemandModel, DemandViewModel, ReadOptionsModel } from 'src/repositories/models';
-import { IDemand, IPlantiff, IPlantiffModel, IServiceOptions, ITheme } from 'src/repositories/types';
+import { IDemand, IPlantiff, IPlantiffModel, IPlantiffTask, IServiceOptions, ITheme } from 'src/repositories/types';
 import {
 	convertBlobToString,
 	convertDataValues,
@@ -78,6 +78,20 @@ export class DemandService extends DatabaseService {
 			if (isDataInArray(keywords)) await this.setKeywords(keywords, Number(id));
 			if (isDataInArray(themes)) await this.setThemes(themes, Number(id));
 
+			const task = new Task({
+				title: data.name,
+				description: data.description,
+				start: data.createdAt,
+				end: data.deadLine,
+				level: data.level,
+				status: Number(data?.status) || 1,
+				userId: data.userId,
+				unitId: data.unitId,
+				tenancyId: data.tenancyId,
+				demandId: id,
+			});
+
+			await this.setTask(task, [{ id: data.plaintiffId, name: '', email: '', phone: '' }], themes);
 			await this.userLogService.create(getUserLogData(req, 'demands', id, 'salvar'));
 
 			return Number(id);
@@ -225,8 +239,9 @@ export class DemandService extends DatabaseService {
 				item.favorite = !!item.favorite;
 				const keywords = await this.getKeywords(item.id);
 				const task = await this.setTasksperDemands(item.id);
+				const themes = await this.getThemes(item.id);
 
-				demands.push({ ...item, keywords, task });
+				demands.push({ ...item, keywords, task, themes });
 			}
 
 			return demands;
@@ -344,11 +359,55 @@ export class DemandService extends DatabaseService {
 		return super
 			.favoriteItem('demands', id)
 			.then(async res => {
-				await this.userLogService.create(getUserLogData(req, 'demands', id, 'desabilitar'));
+				await this.userLogService.create(getUserLogData(req, 'demands', id, 'favorire'));
 
 				return res;
 			})
 			.catch(err => err);
+	}
+
+	private async setTask(task: Task, participants: IPlantiffTask[], themes: string[], users?: number[]) {
+		try {
+			const [id] = await this.db('tasks').insert(convertDataValues(task));
+
+			participants.forEach(async i => {
+				await this.db('participants').insert(convertDataValues({ taskId: id, plaintiffId: i.id }));
+			});
+
+			themes.forEach(async i => {
+				const theme = await this.db('themes').where({ name: i }).first();
+
+				if (theme?.id) {
+					await this.db('themes_tasks').insert(convertDataValues({ taskId: id, themeId: theme.id }));
+				}
+			});
+
+			if (users?.length) {
+				users.forEach(async i => {
+					await this.db('users_tasks').insert(convertDataValues({ userId: i, taskId: id }));
+				});
+			}
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getThemes(demandId: number) {
+		try {
+			const themesIds = await this.db('demands_themes').where({ demand_id: demandId });
+			const themes: ITheme[] = [];
+
+			for (const item of themesIds) {
+				const id = Number(item.theme_id);
+				const fromDB = await this.db('themes').where({ id }).first();
+
+				if (fromDB?.id) themes.push({ id: Number(fromDB.id), name: fromDB.name, active: !!fromDB.active });
+			}
+
+			return themes;
+		} catch (err) {
+			return err;
+		}
 	}
 
 	private async getKeywords(demandId: number) {
