@@ -135,12 +135,16 @@ export abstract class DatabaseService extends CacheService {
 		try {
 			const fromDb = await this.db(tableName).where({ id }).first();
 
+			onLog('item to favorite', fromDb);
+
 			existsOrError(fromDb?.id, { message: 'Not Found', status: INTERNAL_SERVER_ERROR });
+			const oldData = !!fromDb?.favorite;
+
 			await this.db(tableName)
 				.where({ id })
-				.update({ ...fromDb, favorite: true });
+				.update({ ...fromDb, favorite: !oldData });
 
-			return { message: `Register nº ${id} favorite` };
+			return { message: `Register nº ${id} favorite: ${!oldData}` };
 		} catch (err) {
 			return err;
 		}

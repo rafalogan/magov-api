@@ -26,7 +26,7 @@ export class Demand {
 		this.active = !!data.active;
 		this.deadLine = convertToDate(data.deadLine);
 		this.createdAt = convertToDate(data.createdAt);
-		this.status = data.status?.trim();
+		this.status = !data?.status ? undefined : typeof data?.status === 'string' ? data?.status?.trim() : `${data.status}`;
 		this.approximateIncome = setValueNumberToDadaBase(data.approximateIncome) as number;
 		this.unitId = Number(data.unitId);
 		this.userId = Number(data.userId);

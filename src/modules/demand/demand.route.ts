@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { DemandController } from './demand.controller';
 
 export class DemandRoute extends Routes {
-	constructor(options: RouteOptions, private demandController: DemandController) {
+	constructor(
+		options: RouteOptions,
+		private demandController: DemandController
+	) {
 		super(options.app, options.auth);
 	}
 
