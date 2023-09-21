@@ -46,25 +46,28 @@ export class PropositionModel {
 	private setTasks(data: IPropositionModel) {
 		const { menu, expense, unitId, tenancyId, themes, keywords, title, deadline, userId } = data;
 		const tasks: Task[] = [];
-		tasks.push(
-			new Task(
-				{
-					title,
-					description: menu,
-					end: deadline,
-					cost: expense,
-					start: new Date(),
-					status: 1,
-					unitId,
-					tenancyId,
-					level: 1,
-					userId: userId,
-					themes,
-					keywords,
-				} as ITask,
-				Number(data?.id)
-			)
-		);
+
+		if (!data?.tasks?.length) {
+			tasks.push(
+				new Task(
+					{
+						title,
+						description: menu,
+						end: deadline,
+						cost: expense,
+						start: new Date(),
+						status: 1,
+						unitId,
+						tenancyId,
+						level: 1,
+						userId: userId,
+						themes,
+						keywords,
+					} as ITask,
+					Number(data?.id)
+				)
+			);
+		}
 
 		for (const item of data.tasks) {
 			tasks.push(
