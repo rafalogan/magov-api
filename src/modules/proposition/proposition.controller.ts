@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { BAD_REQUEST } from 'http-status';
 
 import { Controller } from 'src/core/controllers';
-import { getTenancyByToken, ResponseHandle } from 'src/core/handlers';
+import { getTenancyByToken, getUserIdByToken, ResponseHandle } from 'src/core/handlers';
 import { PropositionModel, PropositionsReadOptionsModel } from 'src/repositories/models';
 import { ITaskProposition } from 'src/repositories/types';
 import { PropositionService } from 'src/services';
@@ -22,6 +22,7 @@ export class PropositionController extends Controller {
 
 		const tenancyId = Number(req.body) || getTenancyByToken(req);
 		const file = req.file?.originalname ? setFileToSave(req) : undefined;
+		const userId = getUserIdByToken(req);
 		const proposition = new PropositionModel({ ...req.body, tenancyId, file });
 
 		this.propositionService
