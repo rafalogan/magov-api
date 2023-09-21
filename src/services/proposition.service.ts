@@ -93,7 +93,7 @@ export class PropositionService extends DatabaseService {
 				await this.setDemands(data.demands, id);
 			}
 
-			if (data?.tasks?.length) await this.setTasks(data.tasks, id, req);
+			if (data?.tasks?.length) await this.setTasks(data, id, req);
 			if (data?.file) await this.setFile(data.file, 'propositionId', id);
 
 			await this.userLogService.create(getUserLogData(req, 'propositions', id, 'atualizar'));
