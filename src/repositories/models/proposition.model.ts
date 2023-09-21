@@ -11,6 +11,7 @@ export class PropositionModel {
 	expense?: number;
 	parentId?: number;
 	unitId: number;
+	userId: number;
 	typeId: number;
 	propositionUrl?: string;
 	file?: FileEntity;
@@ -30,6 +31,7 @@ export class PropositionModel {
 		this.expense = data.expense;
 		this.parentId = setInstanceId(data.parentId);
 		this.unitId = Number(data.unitId);
+		this.userId = Number(data.userId);
 		this.typeId = Number(data.typeId);
 		this.propositionUrl = data.propositionUrl || undefined;
 		this.tenancyId = Number(data.tenancyId);
@@ -42,24 +44,50 @@ export class PropositionModel {
 	}
 
 	private setTasks(data: IPropositionModel) {
-		const { menu, expense, unitId, tenancyId } = data;
-		return data.tasks.map(
-			item =>
+		const { menu, expense, unitId, tenancyId, themes, keywords, title, deadline, userId } = data;
+		const tasks: Task[] = [];
+		tasks.push(
+			new Task(
+				{
+					title,
+					description: menu,
+					end: deadline,
+					cost: expense,
+					start: new Date(),
+					status: 1,
+					unitId,
+					tenancyId,
+					level: 1,
+					userId: userId,
+					themes,
+					keywords,
+				} as ITask,
+				Number(data?.id)
+			)
+		);
+
+		for (const item of data.tasks) {
+			tasks.push(
 				new Task(
 					{
 						title: item.task,
 						description: menu,
-						end: item.deadline,
+						end: item.deadline || deadline,
 						cost: expense,
 						start: new Date(),
-						status: 0,
+						status: 1,
 						unitId,
 						tenancyId,
 						level: item.level,
 						userId: item.userId,
+						themes,
+						keywords,
 					} as ITask,
 					Number(item?.id)
 				)
-		);
+			);
+		}
+
+		return tasks;
 	}
 }
