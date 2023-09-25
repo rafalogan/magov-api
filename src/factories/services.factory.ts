@@ -25,6 +25,7 @@ import {
 	RuleService,
 	SalePaymentService,
 	SaleService,
+	ScreenService,
 	SupplierService,
 	TaskService,
 	ThemeService,
@@ -65,6 +66,7 @@ export class ServicesFactory {
 	typesRecipesService: TypesRecipesService;
 	governmentRevenueService: GovernmentRevenueService;
 	notificationService: NotificationService;
+	screenService: ScreenService;
 
 	constructor(
 		private conn: Knex,
@@ -100,6 +102,7 @@ export class ServicesFactory {
 		this.typesRecipesService = new TypesRecipesService(this.setServiceOptions());
 		this.governmentRevenueService = new GovernmentRevenueService(this.setServiceOptions());
 		this.notificationService = new NotificationService(this.mailService);
+		this.screenService = new ScreenService(this.setServiceOptions());
 	}
 
 	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client, userLogService: this.userLogService });
