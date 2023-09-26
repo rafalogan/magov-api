@@ -4,7 +4,7 @@ import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { getUserLogData, onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { PaginationModel, ReadOptionsModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
-import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserViewModel } from 'src/repositories/types';
+import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserRule, IUserRuleView, IUserViewModel } from 'src/repositories/types';
 import { convertDataValues, deleteField, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
@@ -208,15 +208,15 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-							.select(...fields)
-							.where('u.id', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first()
+						.select(...fields)
+						.where('u.id', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first()
 					: await this.db(tables)
-							.select(...fields)
-							.where('u.email', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first();
+						.select(...fields)
+						.where('u.email', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first();
 
 			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
 			notExistisOrError(fromDb.severity === 'ERROR', {
@@ -228,27 +228,18 @@ export class UserService extends DatabaseService {
 			const { id } = raw;
 
 			const unitAndPlan: any = await this.getUnitAndPlan(raw.unitId);
-
-			const rules = await this.getValues({
-				tableIds: 'users_rules',
-				fieldIds: 'rule_id',
-				whereIds: 'user_id',
-				value: id,
-				table: 'rules',
-				fields: ['id', 'name'],
-			});
-
+			const rules = await this.getUserRules(id);
 			const image = await this.getflie(id);
 
 			const plans = !raw.unitId
 				? await this.getValues({
-						tableIds: 'tenancies_plans',
-						fieldIds: 'plan_id',
-						whereIds: 'tenancy_id',
-						value: raw.tenancyId,
-						table: 'products',
-						fields: ['id', 'name'],
-				  })
+					tableIds: 'tenancies_plans',
+					fieldIds: 'plan_id',
+					whereIds: 'tenancy_id',
+					value: raw.tenancyId,
+					table: 'products',
+					fields: ['id', 'name'],
+				})
 				: undefined;
 
 			return new UserViewModel({
@@ -316,6 +307,27 @@ export class UserService extends DatabaseService {
 				.where({ id: tenancyId })
 				.update(convertDataValues(new Tenancy({ ...raw, totalUsers: raw.totalUsers + 1 })));
 			return Number(tenancyId);
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getUserRules(userId: number) {
+		try {
+			const rulesUsersDB = await this.db('users_rules').where('user_id', userId);
+			const res: IUserRuleView[] = [];
+
+			for (const item of rulesUsersDB) {
+				const fromDB = await this.db({ s: 'screens', r: 'rules' })
+					.select({ screen_id: 's.id', screen_name: 's.name' }, { rule_id: 'r.id', rule_name: 'r.name' })
+					.where('s.id', item.screen_id)
+					.andWhere('r.id', item.rule_id)
+					.first();
+
+				if (fromDB?.screen_id) res.push(convertDataValues(fromDB, 'camel'));
+			}
+
+			return res;
 		} catch (err) {
 			return err;
 		}
@@ -484,19 +496,22 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async saveUserRules(data: number[], userId: number) {
+	private async saveUserRules(data: IUserRule[], userId: number) {
 		try {
-			for (const id of data) {
-				const rule = await this.db('rules').where({ id }).first();
+			for (const item of data) {
+				const screenDB = await this.db('rules').where('id', item.screenId).first();
+				const rule = await this.db('rules').where('id', item.ruleId).first();
 
-				if (rule) await this.db('users_rules').insert({ user_id: userId, rule_id: id }).first();
+				if (rule?.id && screenDB?.id) {
+					await this.db('users_rules').insert(convertDataValues({ ...item, userId }));
+				}
 			}
 		} catch (err) {
 			return err;
 		}
 	}
 
-	private async userRulesUpdate(data: number[], userId: number) {
+	private async userRulesUpdate(data: IUserRule[], userId: number) {
 		try {
 			await this.db('users_rules').where({ user_id: userId }).delete();
 			await this.saveUserRules(data, userId);
