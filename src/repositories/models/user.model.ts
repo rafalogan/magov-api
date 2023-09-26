@@ -1,6 +1,6 @@
 import { clearString, hashString, setInstanceId } from 'src/utils';
 
-import { IUnitModel, IUserModel, IUserPlan } from '../types';
+import { IUnitModel, IUserModel, IUserPlan, IUserRule } from '../types';
 import { Address, FileEntity } from 'src/repositories/entities';
 import { UnitModel } from './unit.model';
 
@@ -17,7 +17,7 @@ export class UserModel {
 	level: number;
 	unitId?: number;
 	tenancyId?: number;
-	userRules: number[];
+	userRules: IUserRule[];
 	address: Address;
 	plans?: IUserPlan[];
 	unit?: UnitModel;
@@ -37,12 +37,18 @@ export class UserModel {
 		this.level = Number(data.level);
 		this.unitId = setInstanceId(data.unitId);
 		this.tenancyId = setInstanceId(data.tenancyId);
-		this.userRules = Array.isArray(data?.userRules) ? data.userRules?.map(Number) : [];
+		this.userRules = this.setUserRules(data.userRules);
 		this.address = new Address(data.address);
 		this.plans = this.setUserPlans(data.plans);
 		this.unit = this.setUserUit(data.unit, this.plans);
 		this.image = data.image ? new FileEntity(data.image) : undefined;
 		this.newTenancy = !!data.newTenancy;
+	}
+
+	private setUserRules(data?: IUserRule[]): IUserRule[] {
+		if (!data) return [];
+
+		return data.map(i => ({ screenId: i.screenId, ruleId: i.ruleId }));
 	}
 
 	private setUserPlans(plans?: IUserPlan[]) {
@@ -54,7 +60,7 @@ export class UserModel {
 						({
 							id: Number(i.id),
 							amount: Number(i.amount) || 1,
-						} as IUserPlan)
+						}) as IUserPlan
 			  );
 	}
 
