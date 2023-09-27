@@ -39,7 +39,7 @@
 		"Postgres",
 		"Redis"
 	],
-	"author": "",
+	"author": "RafaDraw",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
