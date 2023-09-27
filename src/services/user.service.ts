@@ -4,8 +4,8 @@ import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { getUserLogData, onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { PaginationModel, ReadOptionsModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
-import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserViewModel } from 'src/repositories/types';
-import { convertDataValues, deleteField, existsOrError, notExistisOrError } from 'src/utils';
+import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserRule, IUserRuleView, IUserViewModel } from 'src/repositories/types';
+import { convertDataValues, deleteField, deleteFile, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
 
@@ -70,14 +70,14 @@ export class UserService extends DatabaseService {
 			const user = new User({ ...userFromDb, ...data, tenancyId: userFromDb.tenancyId } as IUser);
 
 			if (data.userRules) await this.userRulesUpdate(data.userRules, id);
-			if (data.image) await this.setUserImage(data.image, id);
+			const image = data.image ? await this.setUserImage(data.image, id) : undefined;
 			if (data.address) await this.saveAddress(data.address, id);
 
 			await this.db('users')
 				.where({ id })
 				.update({ ...convertDataValues(user) });
 
-			const res = { ...userFromDb, ...data };
+			const res = { ...userFromDb, ...data, image };
 			deleteField(res, 'password');
 
 			await this.userLogService.create(getUserLogData(req, 'users', id, 'atualizar'));
@@ -228,17 +228,9 @@ export class UserService extends DatabaseService {
 			const { id } = raw;
 
 			const unitAndPlan: any = await this.getUnitAndPlan(raw.unitId);
-
-			const rules = await this.getValues({
-				tableIds: 'users_rules',
-				fieldIds: 'rule_id',
-				whereIds: 'user_id',
-				value: id,
-				table: 'rules',
-				fields: ['id', 'name'],
-			});
-
+			const userRules = await this.getUserRules(id);
 			const image = await this.getflie(id);
+			onLog('user image', image);
 
 			const plans = !raw.unitId
 				? await this.getValues({
@@ -254,7 +246,7 @@ export class UserService extends DatabaseService {
 			return new UserViewModel({
 				...raw,
 				...unitAndPlan,
-				rules,
+				userRules,
 				address: { ...raw },
 				image,
 				plans,
@@ -321,6 +313,27 @@ export class UserService extends DatabaseService {
 		}
 	}
 
+	private async getUserRules(userId: number) {
+		try {
+			const rulesUsersDB = await this.db('users_rules').where('user_id', userId);
+			const res: IUserRuleView[] = [];
+
+			for (const item of rulesUsersDB) {
+				const fromDB = await this.db({ s: 'app_screens', r: 'rules' })
+					.select({ screen_id: 's.id', screen_name: 's.name' }, { rule_id: 'r.id', rule_name: 'r.name' })
+					.where('s.id', item.screen_id)
+					.andWhere('r.id', item.rule_id)
+					.first();
+
+				if (fromDB?.screen_id) res.push(convertDataValues(fromDB, 'camel'));
+			}
+
+			return res;
+		} catch (err) {
+			return err;
+		}
+	}
+
 	private async setMasterUserTenancy(data: UserModel, req: Request) {
 		try {
 			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
@@ -330,6 +343,8 @@ export class UserService extends DatabaseService {
 
 			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
 			const [id] = await this.db('users').insert(convertDataValues(toSave));
+
+			existsOrError(Number(id), { message: 'Internl error', err: id, status: INTERNAL_SERVER_ERROR });
 
 			if (data.userRules?.length) await this.saveUserRules(data.userRules, id);
 			if (data.image) await this.setUserImage(data.image, id);
@@ -353,7 +368,7 @@ export class UserService extends DatabaseService {
 				unit = action?.unit;
 			}
 
-			const address = this.setAddress(data.address, 'userId', id);
+			const address = await this.setAddress(data.address, 'userId', id);
 			await this.userLogService.create(getUserLogData(req, 'users', id, 'salvar'));
 
 			deleteField(data, 'password');
@@ -371,8 +386,12 @@ export class UserService extends DatabaseService {
 
 			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
 			const [id] = await this.db('users').insert(convertDataValues(toSave));
+
 			existsOrError(Number(id), { message: 'internl error', err: id, status: INTERNAL_SERVER_ERROR });
-			const address = this.setAddress(data.address, 'userId', id);
+
+			if (data?.userRules.length) await this.saveUserRules(data.userRules, id);
+			if (data?.image) await this.setUserImage(data.image, id);
+			const address = await this.setAddress(data.address, 'userId', id);
 
 			deleteField(data, 'password');
 
@@ -484,19 +503,22 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async saveUserRules(data: number[], userId: number) {
+	private async saveUserRules(data: IUserRule[], userId: number) {
 		try {
-			for (const id of data) {
-				const rule = await this.db('rules').where({ id }).first();
+			for (const item of data) {
+				const screenDB = await this.db('rules').where('id', item.screenId).first();
+				const rule = await this.db('rules').where('id', item.ruleId).first();
 
-				if (rule) await this.db('users_rules').insert({ user_id: userId, rule_id: id }).first();
+				if (rule?.id && screenDB?.id) {
+					await this.db('users_rules').insert(convertDataValues({ ...item, userId }));
+				}
 			}
 		} catch (err) {
 			return err;
 		}
 	}
 
-	private async userRulesUpdate(data: number[], userId: number) {
+	private async userRulesUpdate(data: IUserRule[], userId: number) {
 		try {
 			await this.db('users_rules').where({ user_id: userId }).delete();
 			await this.saveUserRules(data, userId);
@@ -507,12 +529,11 @@ export class UserService extends DatabaseService {
 
 	private async setUserImage(file: FileEntity, userId: number) {
 		try {
-			const fileFromDb = await this.db('files').where({ user_id: userId }).first();
-			if (fileFromDb) {
-				await this.db('files')
-					.where({ user_id: userId })
-					.update(convertDataValues({ ...file, userId }));
-				return file;
+			const fileFromDb = await this.db('files').where('user_id', userId).first();
+
+			if (fileFromDb?.filename) {
+				await deleteFile(fileFromDb.filename);
+				await this.db('files').where('user_id', userId).del();
 			}
 
 			await this.db('files').insert(convertDataValues({ ...file, userId }));

@@ -1,5 +1,5 @@
 import { Address, FileEntity } from '../entities';
-import { IUserPlan, IUserRule, IUserUnit, IUserViewModel } from '../types';
+import { IUserPlan, IUserRuleView, IUserUnit, IUserViewModel } from '../types';
 
 export class UserViewModel {
 	id: number;
@@ -12,7 +12,7 @@ export class UserViewModel {
 	office: string;
 	active: boolean;
 	level: number;
-	userRules: IUserRule[];
+	userRules: IUserRuleView[];
 	tenancyId?: number;
 	address?: Address;
 	unit?: IUserUnit;
@@ -31,12 +31,23 @@ export class UserViewModel {
 		this.office = data.office.trim();
 		this.active = !!data.active;
 		this.level = data.level;
-		this.userRules = data.userRules || [];
+		this.userRules = this.setUserRules(data.userRules);
 		this.tenancyId = Number(data.tenancyId) || undefined;
 		this.address = data.address ? new Address(data.address) : undefined;
 		this.unit = data.unit;
 		this.plan = data.plan;
 		this.image = data.image ? new FileEntity(data.image) : undefined;
 		this.plans = data.plans;
+	}
+
+	private setUserRules(data?: IUserRuleView[]): IUserRuleView[] {
+		if (!data) return [];
+
+		return data.map(i => ({
+			screenId: Number(i.screenId),
+			screenName: i.screenName?.trim(),
+			ruleId: Number(i.ruleId),
+			ruleName: i.ruleName?.trim(),
+		}));
 	}
 }
