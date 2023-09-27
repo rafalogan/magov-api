@@ -122,7 +122,7 @@ export class AuthService {
 				...user,
 				confirmPassword: data.confirmPassword,
 				password: data.password,
-				userRules: user.userRules.map(r => Number(r.id)),
+				userRules: user.userRules.map(r => ({ screenId: r.screenId, ruleId: r.ruleId })),
 			} as IUserModel);
 
 			return this.userService.update(toSave, user.id, req);
