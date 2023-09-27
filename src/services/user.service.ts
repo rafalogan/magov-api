@@ -5,7 +5,7 @@ import { getUserLogData, onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { PaginationModel, ReadOptionsModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserRule, IUserRuleView, IUserViewModel } from 'src/repositories/types';
-import { convertDataValues, deleteField, existsOrError, notExistisOrError } from 'src/utils';
+import { convertDataValues, deleteField, deleteFile, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
 
@@ -70,14 +70,14 @@ export class UserService extends DatabaseService {
 			const user = new User({ ...userFromDb, ...data, tenancyId: userFromDb.tenancyId } as IUser);
 
 			if (data.userRules) await this.userRulesUpdate(data.userRules, id);
-			if (data.image) await this.setUserImage(data.image, id);
+			const image = data.image ? await this.setUserImage(data.image, id) : undefined;
 			if (data.address) await this.saveAddress(data.address, id);
 
 			await this.db('users')
 				.where({ id })
 				.update({ ...convertDataValues(user) });
 
-			const res = { ...userFromDb, ...data };
+			const res = { ...userFromDb, ...data, image };
 			deleteField(res, 'password');
 
 			await this.userLogService.create(getUserLogData(req, 'users', id, 'atualizar'));
@@ -208,15 +208,15 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-						.select(...fields)
-						.where('u.id', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.first()
+							.select(...fields)
+							.where('u.id', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first()
 					: await this.db(tables)
-						.select(...fields)
-						.where('u.email', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.first();
+							.select(...fields)
+							.where('u.email', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first();
 
 			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
 			notExistisOrError(fromDb.severity === 'ERROR', {
@@ -228,24 +228,25 @@ export class UserService extends DatabaseService {
 			const { id } = raw;
 
 			const unitAndPlan: any = await this.getUnitAndPlan(raw.unitId);
-			const rules = await this.getUserRules(id);
+			const userRules = await this.getUserRules(id);
 			const image = await this.getflie(id);
+			onLog('user image', image);
 
 			const plans = !raw.unitId
 				? await this.getValues({
-					tableIds: 'tenancies_plans',
-					fieldIds: 'plan_id',
-					whereIds: 'tenancy_id',
-					value: raw.tenancyId,
-					table: 'products',
-					fields: ['id', 'name'],
-				})
+						tableIds: 'tenancies_plans',
+						fieldIds: 'plan_id',
+						whereIds: 'tenancy_id',
+						value: raw.tenancyId,
+						table: 'products',
+						fields: ['id', 'name'],
+				  })
 				: undefined;
 
 			return new UserViewModel({
 				...raw,
 				...unitAndPlan,
-				rules,
+				userRules,
 				address: { ...raw },
 				image,
 				plans,
@@ -318,7 +319,7 @@ export class UserService extends DatabaseService {
 			const res: IUserRuleView[] = [];
 
 			for (const item of rulesUsersDB) {
-				const fromDB = await this.db({ s: 'screens', r: 'rules' })
+				const fromDB = await this.db({ s: 'app_screens', r: 'rules' })
 					.select({ screen_id: 's.id', screen_name: 's.name' }, { rule_id: 'r.id', rule_name: 'r.name' })
 					.where('s.id', item.screen_id)
 					.andWhere('r.id', item.rule_id)
@@ -343,6 +344,8 @@ export class UserService extends DatabaseService {
 			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
 			const [id] = await this.db('users').insert(convertDataValues(toSave));
 
+			existsOrError(Number(id), { message: 'Internl error', err: id, status: INTERNAL_SERVER_ERROR });
+
 			if (data.userRules?.length) await this.saveUserRules(data.userRules, id);
 			if (data.image) await this.setUserImage(data.image, id);
 
@@ -365,7 +368,7 @@ export class UserService extends DatabaseService {
 				unit = action?.unit;
 			}
 
-			const address = this.setAddress(data.address, 'userId', id);
+			const address = await this.setAddress(data.address, 'userId', id);
 			await this.userLogService.create(getUserLogData(req, 'users', id, 'salvar'));
 
 			deleteField(data, 'password');
@@ -383,8 +386,12 @@ export class UserService extends DatabaseService {
 
 			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
 			const [id] = await this.db('users').insert(convertDataValues(toSave));
+
 			existsOrError(Number(id), { message: 'internl error', err: id, status: INTERNAL_SERVER_ERROR });
-			const address = this.setAddress(data.address, 'userId', id);
+
+			if (data?.userRules.length) await this.saveUserRules(data.userRules, id);
+			if (data?.image) await this.setUserImage(data.image, id);
+			const address = await this.setAddress(data.address, 'userId', id);
 
 			deleteField(data, 'password');
 
@@ -522,12 +529,11 @@ export class UserService extends DatabaseService {
 
 	private async setUserImage(file: FileEntity, userId: number) {
 		try {
-			const fileFromDb = await this.db('files').where({ user_id: userId }).first();
-			if (fileFromDb) {
-				await this.db('files')
-					.where({ user_id: userId })
-					.update(convertDataValues({ ...file, userId }));
-				return file;
+			const fileFromDb = await this.db('files').where('user_id', userId).first();
+
+			if (fileFromDb?.filename) {
+				await deleteFile(fileFromDb.filename);
+				await this.db('files').where('user_id', userId).del();
 			}
 
 			await this.db('files').insert(convertDataValues({ ...file, userId }));
