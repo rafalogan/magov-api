@@ -19,8 +19,15 @@ export interface IUser extends IID {
 }
 
 export interface IUserRule {
-	id: number;
-	name: string;
+	screenId: number;
+	ruleId: number;
+}
+
+export interface IUserRuleView {
+	screenId: number;
+	screenName: string;
+	ruleId: number;
+	ruleName: string;
 }
 
 export interface IUserUnit {
@@ -29,7 +36,7 @@ export interface IUserUnit {
 }
 
 export interface IUserModel extends IUser {
-	userRules: number[];
+	userRules: IUserRule[];
 	address: IAddress;
 	plans: IUserPlan[];
 	unit?: IUnitModel;
@@ -43,7 +50,7 @@ export interface IUserPlan {
 }
 
 export interface IUserViewModel extends IUser {
-	userRules: IUserRule[];
+	userRules: IUserRuleView[];
 	address: IAddress;
 	unit: IUserUnit;
 	plan: IUserPlan;

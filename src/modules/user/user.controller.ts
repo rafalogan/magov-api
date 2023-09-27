@@ -23,8 +23,9 @@ export class UserController extends Controller {
 		onLog('Address user', address);
 		const image = setUserImage(req);
 		const tenancyId = getTenancyByToken(req) || req.body.tenancyId;
+		const userRules = this.setUserRules(req)
 
-		const user = new UserModel({ ...req.body, tenancyId, address, image });
+		const user = new UserModel({ ...req.body, tenancyId, address, image, userRules });
 		onLog('User to save', user);
 
 		this.userService
@@ -37,7 +38,8 @@ export class UserController extends Controller {
 		const { id } = req.params;
 		const address = setAddress(req);
 		const image = setUserImage(req);
-		const user = new UserModel({ ...req.body, address, image }, Number(id));
+		const userRules = this.setUserRules(req)
+		const user = new UserModel({ ...req.body, address, image, userRules }, Number(id));
 
 		this.userService
 			.save(user, req)
@@ -66,6 +68,19 @@ export class UserController extends Controller {
 			.remove(Number(id), req)
 			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
+	}
+
+	private setUserRules(req: Request) {
+		const { userRules } = req.body;
+
+
+		onLog('userRules', userRules);
+		onLog('type of userRules', typeof userRules);
+
+		if (!userRules) return []
+		if (Array.isArray(userRules)) return userRules;
+
+		return JSON.parse(userRules)
 	}
 
 	private async isUserValid(req: Request) {
