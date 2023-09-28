@@ -3,13 +3,7 @@ import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-s
 
 import { getUserLogData, onLog } from 'src/core/handlers';
 import { FileEntity, Proposition, Task } from 'src/repositories/entities';
-import {
-	GovernmentExpensesModel,
-	PropositionModel,
-	PropositionsReadOptionsModel,
-	PropositionViewModel,
-	TaskModel,
-} from 'src/repositories/models';
+import { GovernmentExpensesModel, PropositionModel, PropositionsReadOptionsModel, PropositionViewModel } from 'src/repositories/models';
 import { IGovernmentExpensesModel, IProposition, IPropositonAddURL, IServiceOptions } from 'src/repositories/types';
 import { convertBlobToString, convertDataValues, existsOrError, isRequired, notExistisOrError, setValueNumberToView } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
@@ -342,7 +336,7 @@ export class PropositionService extends DatabaseService {
 				const toUpdate = new Task({ ...convertDataValues(fromDB, 'camel'), ...data, propositionId, tenancyId: Number(fromDB.tenancy_id) });
 
 				await this.db('tasks').where({ id: fromDB.id }).andWhere({ tenancy_id: data.tenancyId }).update(convertDataValues(toUpdate));
-				await this.setThemesTasks(themes, Number(fromDB.id))
+				await this.setThemesTasks(themes, Number(fromDB.id));
 
 				await this.userLogService.create(getUserLogData(req, 'tasks', fromDB?.id, 'atualizar'));
 
@@ -352,7 +346,7 @@ export class PropositionService extends DatabaseService {
 			const [id] = await this.db('tasks').insert(convertDataValues({ ...data, propositionId }));
 			onLog('save task', id);
 			existsOrError(Number(id), { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
-			await this.setThemesTasks(themes, Number(id))
+			await this.setThemesTasks(themes, Number(id));
 
 			await this.userLogService.create(getUserLogData(req, 'tasks', id, 'salvar'));
 		} catch (err) {
@@ -369,9 +363,8 @@ export class PropositionService extends DatabaseService {
 
 				if (theme?.id) {
 					const { id: themeId } = theme;
-					await this.db('themes_tasks').insert(convertDataValues({ themeId, taskId }))
+					await this.db('themes_tasks').insert(convertDataValues({ themeId, taskId }));
 				}
-
 			}
 		} catch (err) {
 			return err;
