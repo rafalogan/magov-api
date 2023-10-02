@@ -43,24 +43,29 @@ export class ContactService extends DatabaseService {
 			const page = options.page || 1;
 			const total = await this.getCount('contacts', tenancyId);
 			const pagination = new PaginationModel({ page, limit, total });
+			const tables = { ...this.tables, it: 'institutes_types' };
+			const fields = [
+				{ plaintiff_id: 'c.plaintiff_id', email: 'c.email', phone: 'c.phone', tenancy_id: 'c.tenancy_id', active: 'c.active' },
+				{ contact: 'p.name', institute: 'p.institute' },
+				{ institute_type: 'it.name', institute_type_id: 'it.id' },
+				{ district: 'a.district', city: 'a.city', uf: 'a.uf' },
+			];
 			onLog('tenancyId', tenancyId);
 
-			return this.db({ ...this.tables, d: 'demands' })
-				.select(...this.fields, { demand: 'd.name' })
+			const fromDB = await this.db(tables)
+				.select(...fields)
 				.where('c.tenancy_id', tenancyId)
-				.andWhereRaw('d.plaintiff_id = c.plaintiff_id')
 				.andWhereRaw('p.id = c.plaintiff_id')
+				.andWhereRaw('it.id = p.institute_type_id')
 				.andWhereRaw('a.plaintiff_id = c.plaintiff_id')
 				.limit(limit)
 				.offset(page * limit - limit)
-				.orderBy(orderBy || 'id', order || 'asc')
-				.then(res => {
-					existsOrError(Array.isArray(res), { message: 'Internal error', error: res, status: INTERNAL_SERVER_ERROR });
-					const data = res.map(i => new ContactModel(convertDataValues(i, 'camel')));
+				.orderBy(orderBy || 'c.id', order || 'asc');
 
-					return { data, pagination };
-				})
-				.catch(err => err);
+			existsOrError(Array.isArray(fromDB), { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
+			const data = fromDB.map(i => new ContactModel(convertDataValues(i, 'camel')));
+
+			return { data, pagination };
 		} catch (err) {
 			return err;
 		}

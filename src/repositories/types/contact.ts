@@ -14,9 +14,11 @@ export interface IContactModel {
 }
 
 export interface IContactViewModel extends IContact {
-	demand?: string;
 	plaintiff: string;
 	institute: string;
+	instituteType: string;
+	instituteTypeId: number;
+	district: string;
 	city: string;
 	uf: string;
 }
