@@ -7,18 +7,19 @@ import { convertDataValues, existsOrError, isRequired } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 
 export class ContactService extends DatabaseService {
-	tables = { c: 'contacts', p: 'plaintiffs', a: 'adresses' };
+	tables = { c: 'contacts', p: 'plaintiffs', a: 'adresses', it: 'institutes_types' };
 	fields = [
 		{
-			id: 'c.id',
+			plaintiff_id: 'c.plaintiff_id',
 			email: 'c.email',
 			phone: 'c.phone',
 			tenancy_id: 'c.tenancy_id',
 			active: 'c.active',
-			plaintiff_id: 'c.plaintiff_id',
 		},
 		{ plaintiff: 'p.name', institute: 'p.institute' },
-		{ city: 'a.city', uf: 'a.uf' },
+		{ institute_type: 'it.name', institute_type_id: 'it.id' },
+
+		{ district: 'a.district', city: 'a.city', uf: 'a.uf' },
 	];
 
 	constructor(options: IServiceOptions) {
@@ -43,17 +44,10 @@ export class ContactService extends DatabaseService {
 			const page = options.page || 1;
 			const total = await this.getCount('contacts', tenancyId);
 			const pagination = new PaginationModel({ page, limit, total });
-			const tables = { ...this.tables, it: 'institutes_types' };
-			const fields = [
-				{ plaintiff_id: 'c.plaintiff_id', email: 'c.email', phone: 'c.phone', tenancy_id: 'c.tenancy_id', active: 'c.active' },
-				{ contact: 'p.name', institute: 'p.institute' },
-				{ institute_type: 'it.name', institute_type_id: 'it.id' },
-				{ district: 'a.district', city: 'a.city', uf: 'a.uf' },
-			];
 			onLog('tenancyId', tenancyId);
 
-			const fromDB = await this.db(tables)
-				.select(...fields)
+			const fromDB = await this.db(this.tables)
+				.select(...this.fields)
 				.where('c.tenancy_id', tenancyId)
 				.andWhereRaw('p.id = c.plaintiff_id')
 				.andWhereRaw('it.id = p.institute_type_id')
@@ -75,13 +69,17 @@ export class ContactService extends DatabaseService {
 		try {
 			const fromDB = await this.db(this.tables)
 				.select(...this.fields)
-				.where('c.id', id)
+				.where('c.plaintiff_id', id)
 				.andWhere('c.tenancy_id', tenancyId)
 				.andWhereRaw('p.id = c.plaintiff_id')
+				.andWhereRaw('it.id = p.institute_type_id')
 				.andWhereRaw('a.plaintiff_id = c.plaintiff_id')
 				.first();
 
-			existsOrError(fromDB?.id, { message: 'Contact not found', status: NOT_FOUND });
+			onLog('valiue from db', fromDB);
+
+			existsOrError(fromDB, { message: 'Contact not found', status: NOT_FOUND });
+			existsOrError(fromDB?.plaintiff_id, { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
 
 			return new ContactModel(convertDataValues(fromDB, 'camel'));
 		} catch (err) {

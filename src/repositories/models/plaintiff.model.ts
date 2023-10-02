@@ -18,6 +18,7 @@ export class PlaintiffModel {
 	email: string;
 	parentId?: number;
 	tenancyId?: number;
+	instituteType: string;
 	instituteTypeId: number;
 	address: Address;
 
@@ -37,6 +38,7 @@ export class PlaintiffModel {
 		this.email = data.email.toLowerCase().trim();
 		this.parentId = setInstanceId(data?.parentId);
 		this.tenancyId = setInstanceId(data?.tenancyId);
+		this.instituteType = data.instituteType?.trim();
 		this.instituteTypeId = Number(data.instituteTypeId);
 		this.address = new Address(data.address);
 	}
