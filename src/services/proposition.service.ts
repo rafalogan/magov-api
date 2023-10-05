@@ -81,6 +81,20 @@ export class PropositionService extends DatabaseService {
 		}
 	}
 
+	async getDataToEditor(id: number) {
+		try {
+			const fromDB = await this.db('propositions').where({ id }).select('id', 'text_editor').first();
+
+			existsOrError(fromDB, { message: 'Propositions not found', status: NOT_FOUND });
+			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Server Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			const data = convertDataValues(fromDB, 'camel');
+			return { ...data, id: Number(data.id) }
+		} catch (err) {
+			return err;
+		}
+	}
+
 	async insertTextEditor(data: IPropositionTextEditor, req: Request) {
 		try {
 			const fromDB = await this.db('propositions').where('id', data.id).first();
@@ -123,14 +137,14 @@ export class PropositionService extends DatabaseService {
 
 			const fromDB = unitId
 				? await this.db(table)
-						.select(...fields)
-						.where('p.tenancy_id', tenancyId)
-						.andWhereRaw(`p.unit_id = ${unitId}`)
-						.andWhereRaw('t.id = p.type_id')
+					.select(...fields)
+					.where('p.tenancy_id', tenancyId)
+					.andWhereRaw(`p.unit_id = ${unitId}`)
+					.andWhereRaw('t.id = p.type_id')
 				: await this.db(table)
-						.select(...fields)
-						.where('p.tenancy_id', tenancyId)
-						.andWhereRaw('t.id = p.type_id');
+					.select(...fields)
+					.where('p.tenancy_id', tenancyId)
+					.andWhereRaw('t.id = p.type_id');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
 			const raw = fromDB.map((i: any) => convertDataValues(i, 'camel'));
