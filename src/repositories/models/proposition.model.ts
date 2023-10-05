@@ -5,7 +5,7 @@ import { FileEntity, Task } from 'src/repositories/entities';
 export class PropositionModel {
 	id?: number;
 	title: string;
-	menu: string;
+	menu?: string;
 	deadline: Date;
 	active: boolean;
 	expense?: number;
@@ -21,11 +21,12 @@ export class PropositionModel {
 	themes: string[];
 	demands?: number[];
 	tasks: Task[];
+	textEditor?: string;
 
 	constructor(data: IPropositionModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
 		this.title = data.title.trim();
-		this.menu = convertBlobToString(data.menu) as string;
+		this.menu = convertBlobToString(data.menu);
 		this.deadline = convertToDate(data.deadline);
 		this.active = !!data.active;
 		this.expense = data.expense;
@@ -41,6 +42,7 @@ export class PropositionModel {
 		this.themes = data.themes;
 		this.demands = data.demands;
 		this.tasks = this.setTasks(data);
+		this.textEditor = convertBlobToString(data.textEditor);
 	}
 
 	private setBudgets(data?: IGExpenseBudget[]): IGExpenseBudget[] {

@@ -4,7 +4,7 @@ import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-s
 import { getUserLogData, onLog } from 'src/core/handlers';
 import { FileEntity, Proposition, Task } from 'src/repositories/entities';
 import { GovernmentExpensesModel, PropositionModel, PropositionsReadOptionsModel, PropositionViewModel } from 'src/repositories/models';
-import { IGExpenseBudget, IProposition, IPropositonAddURL, IServiceOptions } from 'src/repositories/types';
+import { IProposition, IPropositionTextEditor, IPropositonAddURL, IServiceOptions } from 'src/repositories/types';
 import { convertBlobToString, convertDataValues, existsOrError, isRequired, notExistisOrError, setValueNumberToView } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { GovernmentExpensesService } from './government-expenses.service';
@@ -55,11 +55,6 @@ export class PropositionService extends DatabaseService {
 				await this.setGovernmentExpense(data, id, req);
 			}
 
-			if (!data?.expense && data?.budgets?.length) {
-				await this.db('budget_proposals').where({ proposition_id: id }).del();
-				await this.setBudgets(data.budgets, id);
-			}
-
 			if (data?.keywords?.length) {
 				await this.db('propositions_keywords').where({ proposition_id: id }).del();
 				await this.setKeywords(data.keywords, id);
@@ -81,6 +76,24 @@ export class PropositionService extends DatabaseService {
 			await this.userLogService.create(getUserLogData(req, 'propositions', id, 'atualizar'));
 
 			return { message: 'Proposition updated with success', data: { ...toUpdate, ...data } };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	async insertTextEditor(data: IPropositionTextEditor, req: Request) {
+		try {
+			const fromDB = await this.db('propositions').where('id', data.id).first();
+
+			existsOrError(fromDB, { message: 'Proposition not found', status: NOT_FOUND });
+			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			const toUpdate = new Proposition({ ...convertDataValues(fromDB, 'camel'), textEditor: data.textEditor });
+
+			await this.db('propositions').where('id', data.id).update(convertDataValues(toUpdate));
+			await this.userLogService.create(getUserLogData(req, 'propositions', data.id, 'atualizar'));
+
+			return { message: 'file to editor insert sucessfully', data: { ...toUpdate } };
 		} catch (err) {
 			return err;
 		}
@@ -327,27 +340,6 @@ export class PropositionService extends DatabaseService {
 			await this.governmentExpenseService.create(governmentExpense, req);
 
 			return governmentExpense;
-		} catch (err) {
-			return err;
-		}
-	}
-
-	private async setBudgets(budgets: IGExpenseBudget[], propositionId: number) {
-		try {
-			const { id: governmentExpensesId } = await this.db('government_expenses').where('proposition_id', propositionId).first();
-			for (const item of budgets) {
-				const { id: revenueId } = item;
-
-				onLog('revenue', revenueId);
-
-				await this.db('budget_proposals').insert(convertDataValues({ revenueId, propositionId }));
-
-				if (Number(governmentExpensesId)) {
-					await this.db('government_expenses_payment').insert(
-						convertDataValues({ governmentExpensesId, revenueId, value: Number(item.value) * 100, date: new Date() })
-					);
-				}
-			}
 		} catch (err) {
 			return err;
 		}
