@@ -40,6 +40,8 @@ export class DemandViewModel {
 			...data,
 			name: data.plaintiff,
 			id: data.plaintiffId,
+			instituteTypeId: data.instituteTypeId,
+			instituteType: '',
 			address: { ...data, id: undefined },
 		});
 		this.tenancyId = data.tenancyId;
