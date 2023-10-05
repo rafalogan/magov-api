@@ -19,7 +19,7 @@ export class ContactController {
 
 		this.contactService
 			.read(options, Number(id))
-			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
+			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data.status }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
