@@ -21,6 +21,7 @@ export class PropositionViewModel {
 	demands?: IDemandPoprosition[];
 	propositions?: ISubProposition[];
 	tasks?: ITaskProposition[];
+	textEditor?: string;
 
 	constructor(data: IPropositionViewModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -41,6 +42,7 @@ export class PropositionViewModel {
 		this.demands = this.setDemands(data.demands);
 		this.propositions = this.setSubPropositions(data.propositions);
 		this.tasks = this.setTasks(data.tasks);
+		this.textEditor = convertBlobToString(data.textEditor);
 	}
 
 	private setBudgets(value?: IGExpenseBudget[]): IGExpenseBudget[] {

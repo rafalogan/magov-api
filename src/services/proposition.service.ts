@@ -89,7 +89,7 @@ export class PropositionService extends DatabaseService {
 			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Server Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 
 			const data = convertDataValues(fromDB, 'camel');
-			return { ...data, id: Number(data.id) }
+			return { ...data, id: Number(data.id), textEditor: convertBlobToString(data.textEditor) };
 		} catch (err) {
 			return err;
 		}
@@ -131,20 +131,21 @@ export class PropositionService extends DatabaseService {
 					menu: 'p.menu',
 					expense: 'p.expense',
 					link: 'p.proposition_url',
+					text_editor: 'p.text_editor',
 				},
 				{ type_id: 't.id', type: 't.name' },
 			];
 
 			const fromDB = unitId
 				? await this.db(table)
-					.select(...fields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhereRaw(`p.unit_id = ${unitId}`)
-					.andWhereRaw('t.id = p.type_id')
+						.select(...fields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw(`p.unit_id = ${unitId}`)
+						.andWhereRaw('t.id = p.type_id')
 				: await this.db(table)
-					.select(...fields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhereRaw('t.id = p.type_id');
+						.select(...fields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw('t.id = p.type_id');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
 			const raw = fromDB.map((i: any) => convertDataValues(i, 'camel'));
@@ -177,8 +178,9 @@ export class PropositionService extends DatabaseService {
 				const keywords = keywordsRaw.map((i: any) => i.keyword).join(', ');
 				const expense = setValueNumberToView(item.expense);
 				const menu = convertBlobToString(item.menu);
+				const textEditor = convertBlobToString(item.textEditor);
 
-				res.push({ ...item, favorite, active, expense, themes, keywords, menu, budgets });
+				res.push({ ...item, favorite, active, expense, themes, keywords, menu, budgets, textEditor });
 			}
 
 			return res;
