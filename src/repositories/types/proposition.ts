@@ -1,11 +1,12 @@
 import { IFile } from './file';
+import { IGExpenseBudget } from './government-expenses';
 import { IKeyword } from './keyword';
 import { IID, IReadOptions } from './shared';
 import { ITheme } from './theme';
 
 export interface IProposition extends IID {
 	title: string;
-	menu: string;
+	menu: Blob | string;
 	deadline: Date | string;
 	active: boolean;
 	favorite?: boolean;
@@ -15,11 +16,12 @@ export interface IProposition extends IID {
 	typeId: number;
 	tenancyId: number;
 	propositionUrl?: string;
+	textEditor?: Blob | string;
 }
 
 export interface IPropositionModel extends IProposition {
 	userId: number;
-	budgets?: number[];
+	budgets?: IGExpenseBudget[];
 	keywords: string[];
 	themes: string[];
 	demands?: number[];
@@ -69,4 +71,9 @@ export interface IPropositionsReadOptions extends IReadOptions {
 export interface IPropositonAddURL {
 	tenancyId: number;
 	propositionUrl: string;
+}
+
+export interface IPropositionTextEditor {
+	id: number;
+	textEditor: Blob | string;
 }

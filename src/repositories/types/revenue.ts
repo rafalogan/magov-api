@@ -50,6 +50,7 @@ export interface IGovernmentRevenueViewModel extends IID, ITenancyIdRequired {
 	unit: IUnitGovernmentRevenue;
 	expenses: IPropositionExpensesGovernment[];
 	region: string;
+	balance?: number;
 }
 
 export interface IPropositionExpensesGovernment {
@@ -80,4 +81,5 @@ export interface IRevenueModel extends IRevenue {
 	document?: IFile;
 	origin?: IOrigin | string;
 	government: boolean;
+	balance?: number;
 }

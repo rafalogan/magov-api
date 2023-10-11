@@ -6,7 +6,7 @@ import { IPropositionExpensesGovernment, IRevenueModel, IServiceOptions } from '
 import { DatabaseService } from './abistract-database.service';
 import { convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
 import { Revenue } from 'src/repositories/entities';
-import { getUserLogData, onLog } from 'src/core/handlers';
+import { getUserLogData, onError, onLog } from 'src/core/handlers';
 
 export class GovernmentRevenueService extends DatabaseService {
 	constructor(options: IServiceOptions) {
@@ -124,8 +124,9 @@ export class GovernmentRevenueService extends DatabaseService {
 				const expenses = await this.getPropositionOfRevenue(raw.id);
 				const unit = { id: raw.unitId, unit: raw.unit };
 				const region = `${raw.city}-${raw.uf}`;
+				const balance = await this.getBalance(Number(item?.id), Number(item?.value));
 
-				res.push(new GovernmentRevenueViewModel({ ...raw, unit, expenses, region }));
+				res.push(new GovernmentRevenueViewModel({ ...raw, unit, expenses, region, balance }));
 			}
 			onLog('response', res);
 
@@ -187,8 +188,9 @@ export class GovernmentRevenueService extends DatabaseService {
 			const unit = { id: fromDB.unit_id, unit: fromDB.unit };
 			const type = { id: fromDB.type_id, typeOfRecipe: fromDB.type_of_recipe };
 			const region = `${fromDB.city}-${fromDB.uf}`;
+			const balance = await this.getBalance(Number(fromDB?.id), Number(fromDB?.value));
 
-			return new GovernmentRevenueViewModel({ ...convertDataValues(fromDB, 'camel'), unit, type, propositions, region });
+			return new GovernmentRevenueViewModel({ ...convertDataValues(fromDB, 'camel'), unit, type, propositions, region, balance });
 		} catch (err) {
 			return err;
 		}
@@ -205,6 +207,20 @@ export class GovernmentRevenueService extends DatabaseService {
 
 			return { message: 'Revenue successfully disabled', data: { ...fromDB, active: false } };
 		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getBalance(revenueId: number, revenueValue: number) {
+		try {
+			const GEPayDB = await this.db('government_expenses_payment').select('value').where('revenue_id', revenueId);
+			existsOrError(Array.isArray(GEPayDB), { message: 'Internal Error', err: GEPayDB, status: INTERNAL_SERVER_ERROR });
+
+			const expenses = GEPayDB.map(({ value }) => Number(value)).reduce((total: number, value: number) => total + value, 0) || 0;
+
+			return revenueValue - expenses;
+		} catch (err: any) {
+			onError('erro to get balance', err);
 			return err;
 		}
 	}

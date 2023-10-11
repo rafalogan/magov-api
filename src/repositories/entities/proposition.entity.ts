@@ -4,7 +4,7 @@ import { IProposition } from '../types';
 export class Proposition {
 	id?: number;
 	title: string;
-	menu: string;
+	menu?: string;
 	deadline: Date;
 	active: boolean;
 	favorite?: boolean;
@@ -14,6 +14,7 @@ export class Proposition {
 	unitId: number;
 	typeId: number;
 	tenancyId: number;
+	textEditor?: string;
 
 	constructor(data: IProposition, id?: number) {
 		this.id = setInstanceId(id || data?.id);
@@ -28,6 +29,7 @@ export class Proposition {
 		this.typeId = Number(data.typeId);
 		this.tenancyId = Number(data.tenancyId);
 		this.propositionUrl = data.propositionUrl || undefined;
+		this.textEditor = convertBlobToString(data.textEditor);
 	}
 
 	private setExpense(value?: number) {
