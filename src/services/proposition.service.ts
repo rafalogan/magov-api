@@ -4,7 +4,7 @@ import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-s
 import { getUserLogData, onLog } from 'src/core/handlers';
 import { FileEntity, Proposition, Task } from 'src/repositories/entities';
 import { GovernmentExpensesModel, PropositionModel, PropositionsReadOptionsModel, PropositionViewModel } from 'src/repositories/models';
-import { IGovernmentExpensesModel, IProposition, IPropositonAddURL, IServiceOptions } from 'src/repositories/types';
+import { IProposition, IPropositionTextEditor, IPropositonAddURL, IServiceOptions } from 'src/repositories/types';
 import { convertBlobToString, convertDataValues, existsOrError, isRequired, notExistisOrError, setValueNumberToView } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { GovernmentExpensesService } from './government-expenses.service';
@@ -26,26 +26,10 @@ export class PropositionService extends DatabaseService {
 			const [id] = await this.db('propositions').insert(convertDataValues(toSave));
 
 			existsOrError(Number(id), { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
-			if (data.budgets?.length) await this.setBudgets(data.budgets, id);
 			if (data.keywords.length !== 0) await this.setKeywords(data.keywords, id);
 			if (data.themes.length !== 0) await this.setThemes(data.themes, id);
 			if (data.demands?.length !== 0) await this.setDemands(data.demands as number[], id);
-			const governmentExpense = data.expense
-				? await this.governmentExpenseService.create(
-					new GovernmentExpensesModel({
-						expense: data.title,
-						description: data.menu,
-						dueDate: data.deadline,
-						value: data.expense,
-						proposition: { id, title: data.title },
-						budgets: data.budgets?.map(i => ({ id: Number(i) })),
-						tenancyId: data.tenancyId,
-						active: true,
-						propositionId: id,
-					} as IGovernmentExpensesModel),
-					req
-				)
-				: undefined;
+			const governmentExpense = data?.expense ? await this.setGovernmentExpense(data, id, req) : undefined;
 			await this.setTasks(data, id, req);
 
 			const file = data?.file ? await this.setFile(data.file, 'propositionId', id) : undefined;
@@ -67,9 +51,8 @@ export class PropositionService extends DatabaseService {
 			const toUpdate = new Proposition({ ...fromDB, ...data, tenancyId: fromDB.tenancyId, active });
 			await this.db('propositions').where({ id }).andWhere({ tenancy_id: fromDB.tenancyId }).update(convertDataValues(toUpdate));
 
-			if (data?.budgets?.length) {
-				await this.db('budget_proposals').where({ proposition_id: id }).del();
-				await this.setBudgets(data.budgets, id);
+			if (data?.expense) {
+				await this.setGovernmentExpense(data, id, req);
 			}
 
 			if (data?.keywords?.length) {
@@ -98,6 +81,38 @@ export class PropositionService extends DatabaseService {
 		}
 	}
 
+	async getDataToEditor(id: number) {
+		try {
+			const fromDB = await this.db('propositions').where({ id }).select('id', 'text_editor').first();
+
+			existsOrError(fromDB, { message: 'Propositions not found', status: NOT_FOUND });
+			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Server Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			const data = convertDataValues(fromDB, 'camel');
+			return { ...data, id: Number(data.id), textEditor: convertBlobToString(data.textEditor) };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	async insertTextEditor(data: IPropositionTextEditor, req: Request) {
+		try {
+			const fromDB = await this.db('propositions').where('id', data.id).first();
+
+			existsOrError(fromDB, { message: 'Proposition not found', status: NOT_FOUND });
+			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			const toUpdate = new Proposition({ ...convertDataValues(fromDB, 'camel'), textEditor: data.textEditor });
+
+			await this.db('propositions').where('id', data.id).update(convertDataValues(toUpdate));
+			await this.userLogService.create(getUserLogData(req, 'propositions', data.id, 'atualizar'));
+
+			return { message: 'file to editor insert sucessfully', data: { ...toUpdate } };
+		} catch (err) {
+			return err;
+		}
+	}
+
 	async read(options: PropositionsReadOptionsModel, id?: number) {
 		try {
 			const { tenancyId, unitId } = options;
@@ -116,20 +131,21 @@ export class PropositionService extends DatabaseService {
 					menu: 'p.menu',
 					expense: 'p.expense',
 					link: 'p.proposition_url',
+					text_editor: 'p.text_editor',
 				},
 				{ type_id: 't.id', type: 't.name' },
 			];
 
 			const fromDB = unitId
 				? await this.db(table)
-					.select(...fields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhereRaw(`p.unit_id = ${unitId}`)
-					.andWhereRaw('t.id = p.type_id')
+						.select(...fields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw(`p.unit_id = ${unitId}`)
+						.andWhereRaw('t.id = p.type_id')
 				: await this.db(table)
-					.select(...fields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhereRaw('t.id = p.type_id');
+						.select(...fields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw('t.id = p.type_id');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
 			const raw = fromDB.map((i: any) => convertDataValues(i, 'camel'));
@@ -154,14 +170,7 @@ export class PropositionService extends DatabaseService {
 					fields: ['id', 'keyword'],
 				})) as any;
 
-				const budgets = await this.getValues({
-					value: item.id,
-					tableIds: 'budget_proposals',
-					fieldIds: 'revenue_id',
-					whereIds: 'proposition_id',
-					table: 'revenues',
-					fields: ['id', 'revenue', 'value'],
-				});
+				const budgets = await this.getBudgets(item.id);
 
 				const favorite = !!item.favorite;
 				const active = !!item.active;
@@ -169,8 +178,9 @@ export class PropositionService extends DatabaseService {
 				const keywords = keywordsRaw.map((i: any) => i.keyword).join(', ');
 				const expense = setValueNumberToView(item.expense);
 				const menu = convertBlobToString(item.menu);
+				const textEditor = convertBlobToString(item.textEditor);
 
-				res.push({ ...item, favorite, active, expense, themes, keywords, menu, budgets });
+				res.push({ ...item, favorite, active, expense, themes, keywords, menu, budgets, textEditor });
 			}
 
 			return res;
@@ -195,14 +205,7 @@ export class PropositionService extends DatabaseService {
 				fields: ['id', 'name'],
 			});
 
-			const budgets = await this.getValues({
-				value: fromDB.id,
-				tableIds: 'budget_proposals',
-				fieldIds: 'revenue_id',
-				whereIds: 'proposition_id',
-				table: 'revenues',
-				fields: ['id', 'revenue', 'value'],
-			});
+			const budgets = await this.getBudgets(fromDB.id);
 
 			const keywords = await this.getValues({
 				value: fromDB.id,
@@ -315,12 +318,61 @@ export class PropositionService extends DatabaseService {
 		}
 	}
 
-	private async setBudgets(budgets: number[], propositionId: number) {
+	private async setGovernmentExpense(data: PropositionModel, propositionId: number, req: Request) {
 		try {
-			for (const revenueId of budgets) {
-				onLog('revenue', revenueId);
-				await this.db('budget_proposals').insert(convertDataValues({ revenueId, propositionId }));
+			const fromDB = await this.db('government_expenses').where('proposition_id', propositionId).first();
+
+			if (fromDB?.id) {
+				const governmentExpense = new GovernmentExpensesModel(
+					{
+						expense: data.title,
+						description: data.menu,
+						dueDate: data.deadline,
+						value: Number(data.expense),
+						budgets: data.budgets,
+						tenancyId: data.tenancyId,
+						active: true,
+						propositionId,
+					},
+					Number(fromDB.id)
+				);
+
+				await this.governmentExpenseService.update(governmentExpense, Number(fromDB.id), req);
+
+				return governmentExpense;
 			}
+
+			const governmentExpense = new GovernmentExpensesModel({
+				expense: data.title,
+				description: data.menu,
+				dueDate: data.deadline,
+				value: Number(data.expense),
+				budgets: data.budgets,
+				tenancyId: data.tenancyId,
+				active: true,
+				propositionId,
+			});
+
+			await this.governmentExpenseService.create(governmentExpense, req);
+
+			return governmentExpense;
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getBudgets(propositionId: number) {
+		try {
+			const fromDB = await this.db({ ge: 'government_expenses', gep: 'government_expenses_payment', r: 'revenues' })
+				.select({ id: 'r.id', revenue: 'r.revenue' }, { value: 'gep.value', date: 'gep.date' })
+				.where('ge.proposition_id', propositionId)
+				.andWhereRaw('gep.government_expense_id = ge.id')
+				.andWhereRaw('r.id = gep.revenue_id')
+				.orderBy('gep.date', 'desc');
+
+			existsOrError(Array.isArray(fromDB), { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			return fromDB.map(i => convertDataValues(i, 'camel'));
 		} catch (err) {
 			return err;
 		}
@@ -336,7 +388,7 @@ export class PropositionService extends DatabaseService {
 				const toUpdate = new Task({ ...convertDataValues(fromDB, 'camel'), ...data, propositionId, tenancyId: Number(fromDB.tenancy_id) });
 
 				await this.db('tasks').where({ id: fromDB.id }).andWhere({ tenancy_id: data.tenancyId }).update(convertDataValues(toUpdate));
-				await this.setThemesTasks(themes, Number(fromDB.id));
+				await this.setThemesTasks(themes, Number(fromDB));
 
 				await this.userLogService.create(getUserLogData(req, 'tasks', fromDB?.id, 'atualizar'));
 
@@ -346,7 +398,6 @@ export class PropositionService extends DatabaseService {
 			const [id] = await this.db('tasks').insert(convertDataValues({ ...data, propositionId }));
 			onLog('save task', id);
 			existsOrError(Number(id), { message: 'Internal error', error: id, status: INTERNAL_SERVER_ERROR });
-			await this.setThemesTasks(themes, Number(id));
 
 			await this.userLogService.create(getUserLogData(req, 'tasks', id, 'salvar'));
 		} catch (err) {

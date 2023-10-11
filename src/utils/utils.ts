@@ -64,6 +64,6 @@ export const setValueNumberToDadaBase = (value?: number) => {
 };
 
 export const setValueNumberToView = (value?: number) => {
-	if (!value) return undefined;
-	return Number.isInteger(value) ? value / 100 : value;
+	if (!value) return 0;
+	return Number.isInteger(value) ? Number(value) / 100 : value;
 };

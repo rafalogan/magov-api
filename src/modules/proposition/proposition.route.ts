@@ -5,7 +5,11 @@ import { RouteOptions } from 'src/repositories/types';
 import { PropositionController } from 'src/modules/proposition';
 
 export class PropositionRoute extends Routes {
-	constructor(options: RouteOptions, private propositionController: PropositionController, private upload: Multer) {
+	constructor(
+		options: RouteOptions,
+		private propositionController: PropositionController,
+		private upload: Multer
+	) {
 		super(options.app, options.auth);
 	}
 
@@ -27,6 +31,12 @@ export class PropositionRoute extends Routes {
 			.route('/propositions/add-url/:id')
 			.all(this.auth?.exec().authenticate())
 			.put(this.propositionController.addUrl.bind(this.propositionController))
+			.all(methodNotAllowed);
+		this.app
+			.route('/propositions/text-editor/:id')
+			.all(this.auth?.exec().authenticate())
+			.get(this.propositionController.getTextEditor.bind(this.propositionController))
+			.put(this.propositionController.addTextEditorData.bind(this.propositionController))
 			.all(methodNotAllowed);
 
 		this.app

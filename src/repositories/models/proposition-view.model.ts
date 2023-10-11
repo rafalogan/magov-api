@@ -1,6 +1,6 @@
 import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
 import { FileEntity, Keyword, Theme } from '../entities';
-import { IBudgetProposition, IDemandPoprosition, IPropositionViewModel, ISubProposition, ITaskProposition } from '../types';
+import { IDemandPoprosition, IGExpenseBudget, IPropositionViewModel, ISubProposition, ITaskProposition } from '../types';
 
 export class PropositionViewModel {
 	id?: number;
@@ -15,12 +15,13 @@ export class PropositionViewModel {
 	propositionUrl?: string;
 	file?: FileEntity;
 	tenancyId: number;
-	budgets?: IBudgetProposition[];
+	budgets?: IGExpenseBudget[];
 	keywords: Keyword[];
 	themes: Theme[];
 	demands?: IDemandPoprosition[];
 	propositions?: ISubProposition[];
 	tasks?: ITaskProposition[];
+	textEditor?: string;
 
 	constructor(data: IPropositionViewModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -41,27 +42,25 @@ export class PropositionViewModel {
 		this.demands = this.setDemands(data.demands);
 		this.propositions = this.setSubPropositions(data.propositions);
 		this.tasks = this.setTasks(data.tasks);
+		this.textEditor = convertBlobToString(data.textEditor);
 	}
 
-	private setBudgets(value?: IBudgetProposition[]) {
-		return !value
-			? undefined
-			: value.map(
-					item =>
-						({
-							id: Number(item.id),
-							revenue: item.revenue.trim(),
-							value: setValueNumberToView(item.value),
-						} as IBudgetProposition)
-			  );
+	private setBudgets(value?: IGExpenseBudget[]): IGExpenseBudget[] {
+		if (!value) return [];
+
+		return value.map(i => ({
+			id: Number(i.id),
+			revenue: i.revenue?.trim(),
+			value: setValueNumberToView(i.value),
+		}));
 	}
 
 	private setDemands(value?: IDemandPoprosition[]) {
-		return !value ? undefined : value.map(i => ({ id: Number(i.id), name: i.name.trim() } as IDemandPoprosition));
+		return !value ? undefined : value.map(i => ({ id: Number(i.id), name: i.name.trim() }) as IDemandPoprosition);
 	}
 
 	private setSubPropositions(value?: ISubProposition[]) {
-		return !value ? undefined : value.map(i => ({ id: Number(i.id), title: i.title.trim() } as ISubProposition));
+		return !value ? undefined : value.map(i => ({ id: Number(i.id), title: i.title.trim() }) as ISubProposition);
 	}
 
 	private setTasks(value?: ITaskProposition[]) {
@@ -76,7 +75,7 @@ export class PropositionViewModel {
 							level: Number(i.level),
 							userId: Number(i.userId),
 							responsible: i.responsible?.trim() || undefined,
-						} as ITaskProposition)
+						}) as ITaskProposition
 			  );
 	}
 }

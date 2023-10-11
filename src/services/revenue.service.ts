@@ -1,11 +1,19 @@
 import { Request } from 'express';
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
-import { getUserLogData, onLog } from 'src/core/handlers';
+import { getUserLogData, onError, onLog } from 'src/core/handlers';
 import { Revenue, Origin } from 'src/repositories/entities';
 import { ReadOptionsModel, RevenueModel } from 'src/repositories/models';
 import { IRevenueModel, IServiceOptions } from 'src/repositories/types';
-import { convertDataValues, deleteFile, equalsOrError, existsOrError, isRequired, notExistisOrError } from 'src/utils';
+import {
+	convertDataValues,
+	deleteFile,
+	equalsOrError,
+	existsOrError,
+	isRequired,
+	notExistisOrError,
+	setValueNumberToView,
+} from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 
 export class RevenueService extends DatabaseService {
@@ -65,7 +73,7 @@ export class RevenueService extends DatabaseService {
 			existsOrError(tenancyId, { message: isRequired('tenancyId'), status: BAD_REQUEST });
 			if (id) return this.getRevenue(id, Number(tenancyId));
 
-			return this.db({ r: 'revenues', o: 'origins', f: 'files' })
+			const fromDB = await this.db({ r: 'revenues', o: 'origins', f: 'files' })
 				.select(
 					{ id: 'r.id', revenue: 'r.revenue', active: 'r.active', value: 'r.value' },
 					{ origin: 'o.origin' },
@@ -73,22 +81,25 @@ export class RevenueService extends DatabaseService {
 				)
 				.where('r.tenancy_id', tenancyId)
 				.andWhereRaw('o.id = r.origin_id')
-				.andWhereRaw('f.revenue_id = r.id')
-				.then(res => {
-					existsOrError(Array.isArray(res), { message: 'Internal error', error: res, status: INTERNAL_SERVER_ERROR });
+				.andWhereRaw('f.revenue_id = r.id');
 
-					return res.map(i => {
-						i.value = i.value / 100;
-						return convertDataValues(i, 'camel');
-					});
-				})
-				.catch(err => err);
+			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+			const res: any = [];
+
+			for (const item of fromDB) {
+				const balance = setValueNumberToView(await this.getBalance(Number(item.id), Number(item.value)));
+				const value = setValueNumberToView(item.value);
+
+				res.push(convertDataValues({ ...item, value, balance }));
+			}
+
+			return res;
 		} catch (err) {
 			return err;
 		}
 	}
 
-	async getRevenue(value: number | string, tenancyId: number) {
+	async getRevenue(filter: number | string, tenancyId: number) {
 		try {
 			const fromDB = await this.db({ r: 'revenues', o: 'origins', f: 'files', u: 'units' })
 				.select(
@@ -115,22 +126,26 @@ export class RevenueService extends DatabaseService {
 						url: 'f.url',
 					}
 				)
-				.where('r.id', value)
+				.where('r.id', filter)
 				.andWhere('r.tenancy_id', tenancyId)
 				.andWhereRaw('o.id = r.origin_id')
 				.andWhereRaw('f.revenue_id = r.id')
 				.andWhereRaw('u.id = r.unit_id')
-				.orWhere('r.revenue', value)
+				.orWhere('r.revenue', filter)
 				.first();
 
 			existsOrError(fromDB.id, { message: 'Revenue not found', status: NOT_FOUND });
+			const balance = setValueNumberToView(await this.getBalance(Number(fromDB?.id), Number(fromDB?.value)));
+			const value = setValueNumberToView(fromDB?.value);
 
 			return new RevenueModel(
 				convertDataValues(
 					{
 						...fromDB,
+						value,
 						origin: { id: fromDB.origin_id, origin: fromDB.origin },
 						document: { ...fromDB, title: fromDB.file_title, alt: fromDB.file_alt, id: undefined },
+						balance,
 					},
 					'camel'
 				)
@@ -152,6 +167,20 @@ export class RevenueService extends DatabaseService {
 
 			return { message: 'Revenue disabled with succsess', data: toDisable };
 		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getBalance(revenueId: number, initialValue: number) {
+		try {
+			const GEPayDB = await this.db('government_expenses_payment').select('value').where('revenue_id', revenueId);
+			existsOrError(Array.isArray(GEPayDB), { message: 'Internal Errror', err: GEPayDB, status: INTERNAL_SERVER_ERROR });
+
+			const expenses = GEPayDB.map(({ value }) => Number(value)).reduce((total: number, value: number) => total + value, 0) || 0;
+
+			return initialValue - expenses;
+		} catch (err: any) {
+			onError('error to getBalance', err);
 			return err;
 		}
 	}

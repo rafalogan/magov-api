@@ -18,6 +18,7 @@ export class RevenueModel {
 	document?: FileEntity;
 	origin: Origin;
 	government: boolean;
+	balance: number;
 
 	constructor(data: IRevenueModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
@@ -28,12 +29,13 @@ export class RevenueModel {
 		this.active = !!data.active;
 		this.recurrent = !!data.recurrent;
 		this.documentUrl = data.documentUrl?.trim();
-		this.value = Number.isInteger(data.value) ? Number(data.value) : Number(data.value) * 100;
+		this.value = data.value;
 		this.unitId = Number(data.unitId);
 		this.unit = data.unit;
 		this.tenancyId = data.tenancyId;
 		this.document = data.document ? new FileEntity(data?.document as IFile) : undefined;
 		this.origin = typeof data.origin === 'string' ? new Origin({ origin: data.origin }) : new Origin(data.origin as IOrigin);
 		this.government = !!data.government;
+		this.balance = data.balance || 0;
 	}
 }

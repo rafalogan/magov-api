@@ -1,11 +1,11 @@
 import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
-import { IPropositionModel, ITask } from '../types';
+import { IGExpenseBudget, IPropositionModel, ITask } from '../types';
 import { FileEntity, Task } from 'src/repositories/entities';
 
 export class PropositionModel {
 	id?: number;
 	title: string;
-	menu: string;
+	menu?: string;
 	deadline: Date;
 	active: boolean;
 	expense?: number;
@@ -16,16 +16,17 @@ export class PropositionModel {
 	propositionUrl?: string;
 	file?: FileEntity;
 	tenancyId: number;
-	budgets?: number[];
+	budgets?: IGExpenseBudget[];
 	keywords: string[];
 	themes: string[];
 	demands?: number[];
 	tasks: Task[];
+	textEditor?: string;
 
 	constructor(data: IPropositionModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
 		this.title = data.title.trim();
-		this.menu = convertBlobToString(data.menu) as string;
+		this.menu = convertBlobToString(data.menu);
 		this.deadline = convertToDate(data.deadline);
 		this.active = !!data.active;
 		this.expense = data.expense;
@@ -36,11 +37,18 @@ export class PropositionModel {
 		this.propositionUrl = data.propositionUrl || undefined;
 		this.tenancyId = Number(data.tenancyId);
 		this.file = data.file ? new FileEntity(data?.file) : undefined;
-		this.budgets = data.budgets;
+		this.budgets = this.setBudgets(data.budgets);
 		this.keywords = data.keywords;
 		this.themes = data.themes;
 		this.demands = data.demands;
 		this.tasks = this.setTasks(data);
+		this.textEditor = convertBlobToString(data.textEditor);
+	}
+
+	private setBudgets(data?: IGExpenseBudget[]): IGExpenseBudget[] {
+		if (!data) return [];
+
+		return data.map(i => ({ ...i, id: Number(i.id), value: Number(i.value) }));
 	}
 
 	private setTasks(data: IPropositionModel) {
