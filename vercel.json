@@ -1,6 +1,5 @@
 {
 	"version": 2,
-	"buildCommand": "npm run build && npm start",
 	"builds": [
 		{
 			"src": "./dist/index.js",
