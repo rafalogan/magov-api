@@ -1,17 +1,15 @@
 {
 	"version": 2,
-	"scripts": {
-		"builds": [
-			{
-				"src": "./dist/index.js",
-				"use": "@now/node"
-			}
-		],
-		"routes": [
-			{
-				"src": "./(.*)",
-				"dest": "./dist/index.js"
-			}
-		]
-	}
+	"builds": [
+		{
+			"src": "./dist/index.js",
+			"use": "@now/node"
+		}
+	],
+	"routes": [
+		{
+			"src": "./(.*)",
+			"dest": "./dist/index.js"
+		}
+	]
 }
