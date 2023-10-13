@@ -1,0 +1,16 @@
+{
+	"version": 2,
+	"buildCommand": "npm run build && npm start",
+	"builds": [
+		{
+			"src": "./dist/index.js",
+			"use": "@now/node"
+		}
+	],
+	"routes": [
+		{
+			"src": "/(.*)",
+			"dest": "/dist/index.js"
+		}
+	]
+}
