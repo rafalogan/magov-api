@@ -4,15 +4,16 @@
 
 ### 📋 Tabela de Conteúdos
 
-* [Status do Projeto](#Status-do-Projeto)
-	* [Features](#features)
-	* [Pre Requisitos](#pré-requisitos)
-	* [Como usar](#back)
-		* [Rodando o Back end](#Rodando-o-Back-End-(servidor))
-	* [Tecnologias](#🛠-Tecnologias)
+- [Status do Projeto](#Status-do-Projeto)
+  - [Features](#features)
+  - [Pre Requisitos](#pré-requisitos)
+  - [Como usar](#back)
+    - [Rodando o Back end](<#Rodando-o-Back-End-(servidor)>)
+  - [Tecnologias](#🛠-Tecnologias)
 
 ### ⚒️ Status-do-Projeto
-	🚧  Em construção...  🚧
+
+    🚧  Em construção...  🚧
 
 ### ✔️ Features
 
@@ -38,21 +39,26 @@
 
 ### ❗ Pré-requisitos
 
-Antes de começar, você vai precisar ter instalado em sua máquina as seguintes ferramentas:  
-* [Git](https://git-scm.com); 
-* [Node.js](https://nodejs.org/en/);
-* [Typescript](https://www.typescriptlang.org);
-* [knex (ORM)](https://knexjs.org/guide/)
+Antes de começar, você vai precisar ter instalado em sua máquina as seguintes ferramentas:
+
+- [Git](https://git-scm.com);
+- [Node.js](https://nodejs.org/en/);
+- [Typescript](https://www.typescriptlang.org);
+- [knex (ORM)](https://knexjs.org/guide/)
 
 Além disto é bom ter um editor para trabalhar com o código.
 
 ### ❗Configurando ambiente local
+
 #### 🚩 Clone este repositório
- ``` shell 
- git clone https://GuilhermeBraganholo@bitbucket.org/danilomendes/ma-governance-api.git
+
+```shell
+git clone https://GuilhermeBraganholo@bitbucket.org/danilomendes/ma-governance-api.git
 ```
+
 #### 👉 Configure o .env
-``` .dotenv
+
+```.dotenv
 # VARIABLES OF ENVIROMENT
 # ENVIRONMENT
 NODE_ENV=
@@ -85,7 +91,7 @@ DB_POOL_MAX=
 DB_USE_NULL_DEFAULT= # Default true
 
 # CORS CONFIGS
-CORS_ORIGIN= 
+CORS_ORIGIN=
 CORS_METHODS=
 CORS_PREFLIGHT_CONTIME=
 CORS_OPTIONS_SUCCESS_STATUS=
@@ -119,52 +125,48 @@ MAILER_SERVICE=
 MAILER_USER=
 MAILER_PASSWORD=
 EMAIL_DEFAULT=
+
 ```
-[//]: # (DB_HOST=128.199.5.141)
 
-[//]: # (DB_USER="root"<br />)
-
-[//]: # (DB_PASS="cleanDEV123456!@#"<br />)
-
-[//]: # (DB_NAME="magovernance"<br />)
-
-[//]: # (DB_PORT="3306"<br />)
-
-[//]: # (APP_SECRET="20clean-farm-app20-devops"<br />)
-
-[//]: # (BASE_URL_FRONT="https://treineaqui.cleandev.com.br/" <br />)
-
-[//]: # (EMAIL_USER="cleandev.contato@gmail.com"<br />)
-
-[//]: # (EMAIL_PASS="facilita#2020"<br />)
-
-[//]: # (CRON_TIMER="0 0 6 * * 1-5"<br />)
-
-[//]: # (EMAIL_NOTIFICA="danilocesarmendes@gmail.com; breno14mota@gmail.com"<br />)
-
-
+[//]: # 'DB_HOST=128.199.5.141'
+[//]: # 'DB_USER="root"<br />'
+[//]: # 'DB_PASS="cleanDEV123456!@#"<br />'
+[//]: # 'DB_NAME="magovernance"<br />'
+[//]: # 'DB_PORT="3306"<br />'
+[//]: # 'APP_SECRET="20clean-farm-app20-devops"<br />'
+[//]: # 'BASE_URL_FRONT="https://treineaqui.cleandev.com.br/" <br />'
+[//]: # 'EMAIL_USER="cleandev.contato@gmail.com"<br />'
+[//]: # 'EMAIL_PASS="facilita#2020"<br />'
+[//]: # 'CRON_TIMER="0 0 6 * * 1-5"<br />'
+[//]: # 'EMAIL_NOTIFICA="danilocesarmendes@gmail.com; breno14mota@gmail.com"<br />'
 
 #### ❗ Instale as dependências
-Você pode usar o yarn com o comando ```yarn``` ou pode usar o npm com ```npm i```
+
+Você pode usar o yarn com o comando `yarn` ou pode usar o npm com `npm i`
 
 #### 🚩 Execute a aplicação em modo de desenvolvimento
+
 Se estiver usando yarn basta rodar:
-```shell 
-yarn dev 
+
+```shell
+yarn dev
 ```
-Caso use o npm basta rodar: 
+
+Caso use o npm basta rodar:
+
 ```shell
 npm run start:dev
 ```
 
-#### 🖥️ Configurações do servidor 
- Se todas as cconfigurações citadas a cima foram feitas corretamente você receberar a messagem:
+#### 🖥️ Configurações do servidor
+
+Se todas as cconfigurações citadas a cima foram feitas corretamente você receberar a messagem:
 
 ```shell
 Server is up and running on: http(s)://{{env.HOST}}:{{env.PORT}}
 ```
 
-exibindo os valores de configurados no arquivo ``.env``
+exibindo os valores de configurados no arquivo `.env`
 
 ---
 
