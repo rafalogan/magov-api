@@ -21,6 +21,8 @@ Thumbs.db
 .env.production
 .env.docker
 .env.local
+MAGov-key.pem
+**/MAGov-key.pem
 
 # FOLDERS
 # TYPESCRIPT COPILETD CODE
