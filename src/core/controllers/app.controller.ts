@@ -3,7 +3,11 @@ import { ServerController } from 'src/core/controllers/server.controller';
 import { onError } from 'src/core/handlers';
 
 export class AppController {
-	constructor(private server: ServerController, private databaseConfig: DatabaseConfig, private cacheConfig: CacheConfig) {}
+	constructor(
+		private server: ServerController,
+		private databaseConfig: DatabaseConfig,
+		private cacheConfig: CacheConfig
+	) {}
 
 	async init() {
 		return this.databaseConfig
