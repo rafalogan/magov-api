@@ -1,2 +1,1 @@
-web: npm install -f
-web:npm run stop && npx knex migrate:unlock && npm start
+web: npm install -f && npm run stop && npx knex migrate:unlock && npm start
