@@ -1,3 +1,4 @@
+import { Console } from 'console';
 import { Knex } from 'knex';
 
 import { hashString } from 'src/utils';
@@ -36,6 +37,8 @@ export async function up(knex: Knex): Promise<void> {
 		user.password = hashString(user.password, Number(process.env.SALT_ROUNDS));
 		return user;
 	});
+
+	console.log('users', users);
 
 	return knex.batchInsert('users', users);
 }
