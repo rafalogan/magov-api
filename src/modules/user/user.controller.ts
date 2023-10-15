@@ -23,7 +23,7 @@ export class UserController extends Controller {
 		onLog('Address user', address);
 		const image = setUserImage(req);
 		const tenancyId = getTenancyByToken(req) || req.body.tenancyId;
-		const userRules = this.setUserRules(req)
+		const userRules = this.setUserRules(req);
 
 		const user = new UserModel({ ...req.body, tenancyId, address, image, userRules });
 		onLog('User to save', user);
@@ -38,7 +38,7 @@ export class UserController extends Controller {
 		const { id } = req.params;
 		const address = setAddress(req);
 		const image = setUserImage(req);
-		const userRules = this.setUserRules(req)
+		const userRules = this.setUserRules(req);
 		const user = new UserModel({ ...req.body, address, image, userRules }, Number(id));
 
 		this.userService
@@ -73,14 +73,13 @@ export class UserController extends Controller {
 	private setUserRules(req: Request) {
 		const { userRules } = req.body;
 
-
 		onLog('userRules', userRules);
 		onLog('type of userRules', typeof userRules);
 
-		if (!userRules) return []
+		if (!userRules) return [];
 		if (Array.isArray(userRules)) return userRules;
 
-		return JSON.parse(userRules)
+		return JSON.parse(userRules);
 	}
 
 	private async isUserValid(req: Request) {

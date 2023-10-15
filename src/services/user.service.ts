@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
-import { getUserLogData, onLog } from 'src/core/handlers';
+import { getUserLogData, onError, onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { PaginationModel, ReadOptionsModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserRule, IUserRuleView, IUserViewModel } from 'src/repositories/types';
@@ -208,15 +208,15 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-							.select(...fields)
-							.where('u.id', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first()
+						.select(...fields)
+						.where('u.id', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first()
 					: await this.db(tables)
-							.select(...fields)
-							.where('u.email', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first();
+						.select(...fields)
+						.where('u.email', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first();
 
 			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
 			notExistisOrError(fromDb.severity === 'ERROR', {
@@ -234,13 +234,13 @@ export class UserService extends DatabaseService {
 
 			const plans = !raw.unitId
 				? await this.getValues({
-						tableIds: 'tenancies_plans',
-						fieldIds: 'plan_id',
-						whereIds: 'tenancy_id',
-						value: raw.tenancyId,
-						table: 'products',
-						fields: ['id', 'name'],
-				  })
+					tableIds: 'tenancies_plans',
+					fieldIds: 'plan_id',
+					whereIds: 'tenancy_id',
+					value: raw.tenancyId,
+					table: 'products',
+					fields: ['id', 'name'],
+				})
 				: undefined;
 
 			return new UserViewModel({
@@ -337,36 +337,24 @@ export class UserService extends DatabaseService {
 	private async setMasterUserTenancy(data: UserModel, req: Request) {
 		try {
 			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
-			let unit: any;
+			const unit = data?.unit
+				? await this.setUnit(req,
+					new UnitModel({
+						...data.unit,
+						active: true,
+						tenancyId: Number(tenancyId),
+					}))
+				: undefined;
 
 			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
 
-			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
+			const toSave = new User({ ...data, tenancyId: Number(tenancyId), unitId: Number(unit.id) || undefined });
 			const [id] = await this.db('users').insert(convertDataValues(toSave));
 
 			existsOrError(Number(id), { message: 'Internl error', err: id, status: INTERNAL_SERVER_ERROR });
 
 			if (data.userRules?.length) await this.saveUserRules(data.userRules, id);
 			if (data.image) await this.setUserImage(data.image, id);
-
-			if (data.unit) {
-				const action = (await this.unitService.create(
-					new UnitModel({
-						...data.unit,
-						active: true,
-						tenancyId: Number(tenancyId),
-					}),
-					req
-				)) as any;
-
-				existsOrError(action?.unit, {
-					message: 'Error Unit Not saved',
-					err: action,
-					status: action?.status || INTERNAL_SERVER_ERROR,
-				});
-
-				unit = action?.unit;
-			}
 
 			const address = await this.setAddress(data.address, 'userId', id);
 			await this.userLogService.create(getUserLogData(req, 'users', id, 'salvar'));
@@ -375,6 +363,21 @@ export class UserService extends DatabaseService {
 
 			return { message: 'User successful saved', user: { ...data, id, tenancyId, unit, address } };
 		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setUnit(req: Request, data?: UnitModel) {
+		try {
+			if (!data) return undefined;
+
+			const action = await this.unitService.create(data, req) as any;
+
+			existsOrError(action?.unit, action)
+
+			return action?.unit
+		} catch (err: any) {
+			onError('error to setUnit', err);
 			return err;
 		}
 	}
