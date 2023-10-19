@@ -13,6 +13,10 @@ export class UserLogService {
 
 	async create(data: IUserLog) {
 		try {
+			if (!data.tenancyId) {
+				return onLog('User us not logged');
+			}
+
 			const log = new UserLog({ ...data, logDate: new Date() });
 			const [id] = await this.conn('users_logs').insert(convertDataValues(log));
 
