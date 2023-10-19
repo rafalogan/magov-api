@@ -2,7 +2,7 @@ import { logger } from 'src/server';
 import { stringify } from 'src/utils/convert';
 import { TERMINAL_COLORS } from 'src/utils/constants';
 
-const noProd = process.env.NODE_ENV !== 'production';
+const noProd = process.env.NODE_ENV !== 'prod';
 const noHomolog = process.env.NODE_ENV !== 'homolog';
 const isDebug = process.env.DEBUG === 'true';
 

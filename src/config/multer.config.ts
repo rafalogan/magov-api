@@ -19,7 +19,7 @@ export class MulterConfig {
 
 	constructor() {
 		this.dest = resolve(__dirname, '..', '..', 'tmp', 'uploads');
-		this._upload = this.awsCon.storage === 's3' ? this.setS3Storage() : this.setLocalStorage();
+		this._upload = this.awsCon.storage.toLowerCase() === 's3' ? this.setS3Storage() : this.setLocalStorage();
 	}
 
 	get upload(): Multer {
