@@ -1,4 +1,4 @@
-import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
+import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { IGovernmentExpensesModel, IGExpenseBudget } from '../types';
 
 export class GovernmentExpensesModel {
@@ -19,7 +19,7 @@ export class GovernmentExpensesModel {
 		this.expense = data.expense.trim();
 		this.description = convertBlobToString(data?.description);
 		this.dueDate = convertToDate(data.dueDate);
-		this.value = setValueNumberToView(data.value) as number;
+		this.value = Number(data.value);
 		this.observations = convertBlobToString(data.observations);
 		this.active = !!data.active;
 		this.propositionId = Number(data.propositionId);
