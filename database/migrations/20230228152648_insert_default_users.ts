@@ -1,4 +1,3 @@
-import { Console } from 'console';
 import { Knex } from 'knex';
 
 import { hashString } from 'src/utils';
@@ -18,15 +17,15 @@ const defaultUsers = [
 		tenancy_id: null,
 	},
 	{
-		first_name: 'Test',
-		last_name: 'User',
-		office: 'test',
-		email: 'test@test.com',
-		password: '@test2023',
-		cpf: '00000000000',
-		phone: '00000000000',
+		first_name: 'Contato',
+		last_name: 'Magovernance',
+		office: 'Gerencia',
+		email: 'contato@magov.com.br',
+		password: 'Contato@2023',
+		cpf: '39734689827',
+		phone: '6199147271',
 		active: true,
-		level: 1000,
+		level: 6,
 		unit_id: null,
 		tenancy_id: null,
 	},
@@ -37,8 +36,6 @@ export async function up(knex: Knex): Promise<void> {
 		user.password = hashString(user.password, Number(process.env.SALT_ROUNDS));
 		return user;
 	});
-
-	console.log('users', users);
 
 	return knex.batchInsert('users', users);
 }
