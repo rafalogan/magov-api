@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 
-const defaultAddressUsers = [
+const defaultAddressUsers: any[] = [
 	{
 		cep: '72428245',
 		street: 'Núcleo Rural Casa Grande Módulo 8 MA - 20',
@@ -12,13 +12,13 @@ const defaultAddressUsers = [
 		user_id: 1,
 	},
 	{
-		cep: '72428245',
-		street: 'Núcleo Rural Casa Grande Módulo 8 MA - 20',
-		number: null,
+		cep: '14402000',
+		street: 'Av. presidente vargas',
+		number: 3000,
 		complement: null,
-		district: 'Ponte Alta (Gama)',
-		city: 'Brasília',
-		uf: 'DF',
+		district: 'Recanto do Itambé',
+		city: 'Franca',
+		uf: 'SP',
 		user_id: 2,
 	},
 ];
