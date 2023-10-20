@@ -208,15 +208,15 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-						.select(...fields)
-						.where('u.id', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.first()
+							.select(...fields)
+							.where('u.id', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first()
 					: await this.db(tables)
-						.select(...fields)
-						.where('u.email', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.first();
+							.select(...fields)
+							.where('u.email', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first();
 
 			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
 			notExistisOrError(fromDb.severity === 'ERROR', {
@@ -224,28 +224,19 @@ export class UserService extends DatabaseService {
 				status: INTERNAL_SERVER_ERROR,
 				err: fromDb,
 			});
+
 			const raw = convertDataValues(fromDb, 'camel');
 			const { id } = raw;
 
-			const unitAndPlan: any = await this.getUnitAndPlan(raw.unitId);
+			const unit = await this.getUnit(raw.unitId);
 			const userRules = await this.getUserRules(id);
 			const image = await this.getflie(id);
+			const plans = await this.getPlans(raw.tenancyId, raw.unitId);
 			onLog('user image', image);
-
-			const plans = !raw.unitId
-				? await this.getValues({
-					tableIds: 'tenancies_plans',
-					fieldIds: 'plan_id',
-					whereIds: 'tenancy_id',
-					value: raw.tenancyId,
-					table: 'products',
-					fields: ['id', 'name'],
-				})
-				: undefined;
 
 			return new UserViewModel({
 				...raw,
-				...unitAndPlan,
+				...unit,
 				userRules,
 				address: { ...raw },
 				image,
@@ -338,12 +329,14 @@ export class UserService extends DatabaseService {
 		try {
 			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
 			const unit = data?.unit
-				? await this.setUnit(req,
-					new UnitModel({
-						...data.unit,
-						active: true,
-						tenancyId: Number(tenancyId),
-					}))
+				? await this.setUnit(
+						req,
+						new UnitModel({
+							...data.unit,
+							active: true,
+							tenancyId: Number(tenancyId),
+						})
+				  )
 				: undefined;
 
 			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
@@ -371,11 +364,11 @@ export class UserService extends DatabaseService {
 		try {
 			if (!data) return undefined;
 
-			const action = await this.unitService.create(data, req) as any;
+			const action = (await this.unitService.create(data, req)) as any;
 
-			existsOrError(action?.unit, action)
+			existsOrError(action?.unit, action);
 
-			return action?.unit
+			return action?.unit;
 		} catch (err: any) {
 			onError('error to setUnit', err);
 			return err;
@@ -433,19 +426,15 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async getUnitAndPlan(id?: number) {
+	private async getUnit(id?: number) {
 		try {
-			if (!id) return { unit: {}, plan: {} };
+			if (!id) return {};
 
-			const fromDB = await this.db({ u: 'units', p: 'products' })
-				.select({ unit_id: 'u.id', unit_name: 'u.name' }, { plan_id: 'p.id', plan_name: 'p.name' })
-				.where('u.id', id)
-				.whereRaw('p.id = u.plan_id')
-				.first();
-			const raw = convertDataValues(fromDB, 'camel');
+			const fromDB = await this.db('units').select('id', 'name').where({ id }).first();
 
-			return { unit: { id: raw.unitId, name: raw.unitName }, plan: { id: raw.planId, name: raw.planName } };
+			return convertDataValues(fromDB, 'camel');
 		} catch (err) {
+			onError('erro on get unit', err);
 			return err;
 		}
 	}
@@ -542,6 +531,36 @@ export class UserService extends DatabaseService {
 			await this.db('files').insert(convertDataValues({ ...file, userId }));
 			return file;
 		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getPlans(tenancyId?: number, unitId?: number) {
+		try {
+			if (!unitId && !tenancyId) return [];
+
+			if (Number(unitId)) {
+				return this.getPlansByUnit(Number(unitId));
+			}
+
+			return this.getPlansBytenancy(Number(tenancyId));
+		} catch (err: any) {
+			return err;
+		}
+	}
+
+	private async getPlansByUnit(unitId: number) {
+		try {
+			const fromDB = await this.db({ up: 'units_products', p: 'products' })
+				.select({ amount: 'up.amount' }, { id: 'p.id', name: 'p.name', limit: 'p.limit' })
+				.where('up.unit_id', unitId)
+				.andWhereRaw('p.id = up.product_id');
+
+			existsOrError(Array.isArray(fromDB), fromDB);
+
+			return fromDB.map(i => convertDataValues(i, 'camel'));
+		} catch (err: any) {
+			onError('erro on get plans by unit', err);
 			return err;
 		}
 	}
