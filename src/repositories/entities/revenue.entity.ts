@@ -1,4 +1,4 @@
-import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToDadaBase } from 'src/utils';
+import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { IRevenueModel } from '../types';
 
 export class Revenue {
@@ -27,7 +27,7 @@ export class Revenue {
 		this.recurrent = !!data.recurrent;
 		this.documentUrl = 'documentUrl' in data ? data.documentUrl?.trim() : undefined;
 		this.documentNumber = 'documentNumber' in data ? data.documentNumber?.trim() : undefined;
-		this.value = setValueNumberToDadaBase(data.value) as number;
+		this.value = Number(data.value) * 100;
 		this.unitId = Number(data.unitId);
 		this.originId = Number(data.originId);
 		this.tenancyId = Number(data.tenancyId);
