@@ -127,7 +127,7 @@ export class DemandService extends DatabaseService {
 				start: data.createdAt || demand.createdAt,
 				end: data.deadLine || demand.deadLine,
 				level: data.level || demand.level,
-				status: data?.status ? Number(data?.status) : demand?.status ? Number(demand?.status) : 1,
+				status: Number(data?.status) ? Number(data?.status) : Number(demand?.status) ? Number(demand?.status) : 1,
 				userId: data.userId || demand.userId,
 				unitId: data.unitId || demand.unitId,
 				tenancyId: data.tenancyId || demand.tenancyId,
@@ -181,7 +181,7 @@ export class DemandService extends DatabaseService {
 				start: data.createdAt || demand.createdAt,
 				end: data.deadLine || demand.deadLine,
 				level: data.level || demand.level,
-				status: data?.status ? Number(data?.status) : demand?.status ? Number(demand?.status) : 1,
+				status: Number(data?.status) ? Number(data?.status) : Number(demand?.status) ? Number(demand?.status) : 1,
 				userId: data.userId || demand.userId,
 				unitId: data.unitId || demand.unitId,
 				tenancyId: data.tenancyId || demand.tenancyId,
@@ -415,8 +415,11 @@ export class DemandService extends DatabaseService {
 				return this.setTask(task, participants, themes, users);
 			}
 
+			onLog('Tasks to update', task);
+			const toUpdate = new Task({ ...convertDataValues(fromDB, 'camel'), ...task });
+
 			await this.db('tasks')
-				.update(convertDataValues(task))
+				.update(convertDataValues(toUpdate))
 				.where('id', fromDB?.id);
 
 			participants.forEach(async i => {
