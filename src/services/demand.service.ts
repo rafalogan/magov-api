@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
-import { getUserLogData, onLog } from 'src/core/handlers';
+import { getUserLogData, onError, onLog } from 'src/core/handlers';
 import { Demand, Plaintiff, Task } from 'src/repositories/entities';
 import { DemandModel, DemandViewModel, ReadOptionsModel } from 'src/repositories/models';
 import { IDemand, IPlantiff, IPlantiffModel, IPlantiffTask, IServiceOptions, ITheme } from 'src/repositories/types';
@@ -121,7 +121,26 @@ export class DemandService extends DatabaseService {
 				{ ...demand, ...data, plaintiffId: demand.plaintiff.id as number, tenancyId: demand.tenancyId },
 				id
 			);
+			const task = new Task({
+				title: data.name || demand?.name,
+				description: data.description || demand?.description,
+				start: data.createdAt || demand.createdAt,
+				end: data.deadLine || demand.deadLine,
+				level: data.level || demand.level,
+				status: data?.status ? Number(data?.status) : demand?.status ? Number(demand?.status) : 1,
+				userId: data.userId || demand.userId,
+				unitId: data.unitId || demand.unitId,
+				tenancyId: data.tenancyId || demand.tenancyId,
+				demandId: id || demand.id,
+			});
+
 			await this.db('demands').where({ id }).update(convertDataValues(demandToUpdate));
+			await this.upTask(
+				task,
+				[{ id: Number(data.plaintiff.id || demand.plaintiff.id), name: '', email: '', phone: '' }],
+				isDataInArray(data.themes) ? data.themes : demand.themes.map(i => i.name)
+			);
+
 			await this.userLogService.create(getUserLogData(req, 'demands', id, 'atualizar'));
 
 			return {
@@ -156,7 +175,25 @@ export class DemandService extends DatabaseService {
 			}
 
 			const demandToUpdate = new Demand({ ...demand, ...data, plaintiffId: data.plaintiff.id as number }, id);
+			const task = new Task({
+				title: data.name || demand?.name,
+				description: data.description || demand?.description,
+				start: data.createdAt || demand.createdAt,
+				end: data.deadLine || demand.deadLine,
+				level: data.level || demand.level,
+				status: data?.status ? Number(data?.status) : demand?.status ? Number(demand?.status) : 1,
+				userId: data.userId || demand.userId,
+				unitId: data.unitId || demand.unitId,
+				tenancyId: data.tenancyId || demand.tenancyId,
+				demandId: id || demand.id,
+			});
+
 			await this.db('demands').where({ id }).update(convertDataValues(demandToUpdate));
+			await this.upTask(
+				task,
+				[{ id: Number(data.plaintiff.id || demand.plaintiff.id), name: '', email: '', phone: '' }],
+				isDataInArray(data.themes) ? data.themes : demand.themes.map(i => i.name)
+			);
 
 			await this.userLogService.create(getUserLogData(req, 'demands', id, 'atualizar'));
 			return {
@@ -364,6 +401,61 @@ export class DemandService extends DatabaseService {
 				return res;
 			})
 			.catch(err => err);
+	}
+
+	private async upTask(task: Task, participants: IPlantiffTask[], themes: string[], users?: number[]) {
+		try {
+			const fromDB = await this.db('tasks')
+				.where('demand_id', task?.demandId)
+				.first();
+
+			notExistisOrError(fromDB?.severity === 'ERROR', fromDB);
+
+			if (!fromDB?.id) {
+				return this.setTask(task, participants, themes, users);
+			}
+
+			await this.db('tasks')
+				.update(convertDataValues(task))
+				.where('id', fromDB?.id);
+
+			participants.forEach(async i => {
+				const participantDB = await this.db('participants')
+					.where('task_id', fromDB?.id)
+					.andWhere('plaintiff_id', i.id)
+					.first();
+
+				if (!participantDB?.plaintiff_id) {
+					await this.db('participants').insert(convertDataValues({ taskId: fromDB?.id, plaintiffId: i.id }));
+				}
+			});
+
+			themes.forEach(async i => {
+				const theme = await this.db('themes').where({ name: i }).first();
+				const themesDB = await this.db('themes_tasks')
+					.where('task_id', fromDB?.id)
+					.andWhere('theme_id', theme.id)
+					.first();
+
+				if (theme?.id && !themesDB?.theme_id) {
+					await this.db('themes_tasks').insert(convertDataValues({ taskId: fromDB?.id, themeId: theme.id }));
+				}
+			});
+
+			users?.forEach(async i => {
+				const userDB = await this.db('users_tasks')
+					.where('user_id', i)
+					.andWhere('task_id', fromDB?.id)
+					.first();
+
+				if (!userDB?.user_id) {
+					await this.db('users_tasks').insert(convertDataValues({ userId: i, taskId: fromDB?.id }));
+				}
+			});
+		} catch (err: any) {
+			onError('error to update task', err);
+			return err;
+		}
 	}
 
 	private async setTask(task: Task, participants: IPlantiffTask[], themes: string[], users?: number[]) {
