@@ -35,6 +35,7 @@ export interface ITaskViewModel extends IID {
 	level: number;
 	status: number;
 	users: ITaskUsers[];
+	unitId: number;
 	unit: ITaskUnit;
 	tenancyId: number;
 	proposition?: IPropositionTask;
