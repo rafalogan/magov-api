@@ -11,7 +11,9 @@ export class PropositionViewModel {
 	expense?: number;
 	parentId?: number;
 	unitId: number;
+	unitName: string;
 	typeId: number;
+	typeName: string;
 	propositionUrl?: string;
 	file?: FileEntity;
 	tenancyId: number;
@@ -32,7 +34,9 @@ export class PropositionViewModel {
 		this.expense = setValueNumberToView(data.expense);
 		this.parentId = setInstanceId(data.parentId);
 		this.unitId = Number(data.unitId);
+		this.unitName = data.unitName;
 		this.typeId = Number(data.typeId);
+		this.typeName = data.typeName;
 		this.propositionUrl = data.propositionUrl || undefined;
 		this.file = data?.file ? new FileEntity(data.file) : undefined;
 		this.tenancyId = Number(data.tenancyId);

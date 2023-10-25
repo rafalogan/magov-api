@@ -50,7 +50,8 @@ export class PropositionController extends Controller {
 	getTextEditor(req: Request, res: Response) {
 		const { id } = req.params;
 
-		this.propositionService.getDataToEditor(Number(id))
+		this.propositionService
+			.getDataToEditor(Number(id))
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

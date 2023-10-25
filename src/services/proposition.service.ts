@@ -83,7 +83,7 @@ export class PropositionService extends DatabaseService {
 
 	async getDataToEditor(id: number) {
 		try {
-			const fromDB = await this.db('propositions').where({ id }).select('id', 'text_editor').first();
+			const fromDB = await this.db('propositions').where({ id }).select('id', 'type_id', 'text_editor').first();
 
 			existsOrError(fromDB, { message: 'Propositions not found', status: NOT_FOUND });
 			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Server Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
@@ -102,7 +102,12 @@ export class PropositionService extends DatabaseService {
 			existsOrError(fromDB, { message: 'Proposition not found', status: NOT_FOUND });
 			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 
-			const toUpdate = new Proposition({ ...convertDataValues(fromDB, 'camel'), textEditor: data.textEditor });
+			const toUpdate = new Proposition({
+				...convertDataValues(fromDB, 'camel'),
+				expense: fromDB?.expense ? fromDB.expense / 100 : undefined,
+				textEditor: data.textEditor,
+				typeId: data.typeId || fromDB.type_id,
+			});
 
 			await this.db('propositions').where('id', data.id).update(convertDataValues(toUpdate));
 			await this.userLogService.create(getUserLogData(req, 'propositions', data.id, 'atualizar'));
@@ -138,14 +143,14 @@ export class PropositionService extends DatabaseService {
 
 			const fromDB = unitId
 				? await this.db(table)
-					.select(...fields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhereRaw(`p.unit_id = ${unitId}`)
-					.andWhereRaw('t.id = p.type_id')
+						.select(...fields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw(`p.unit_id = ${unitId}`)
+						.andWhereRaw('t.id = p.type_id')
 				: await this.db(table)
-					.select(...fields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhereRaw('t.id = p.type_id');
+						.select(...fields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw('t.id = p.type_id');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
 			const raw = fromDB.map((i: any) => convertDataValues(i, 'camel'));
@@ -191,7 +196,27 @@ export class PropositionService extends DatabaseService {
 
 	async getProprosition(value: number | string, tenancyId: number) {
 		try {
-			const fromDB = await this.db('propositions').where('id', value).andWhere('tenancy_id', tenancyId).orWhere('title', value).first();
+			const fromDB = await this.db({ p: 'propositions', t: 'types', u: 'units' })
+				.select(
+					{
+						id: 'p.id',
+						title: 'p.title',
+						menu: 'p.menu',
+						deadline: 'p.deadline',
+						active: 'p.active',
+						expense: 'p.expense',
+						tenancy_id: 'p.tenancy_id',
+						parent_id: 'p.parent_id',
+					},
+					{ unit_id: 'u.id', unit_name: 'u.name' },
+					{ type_id: 't.id', type_name: 't.name' }
+				)
+				.where('p.id', value)
+				.andWhere('p.tenancy_id', tenancyId)
+				.andWhereRaw('t.id = p.type_id')
+				.andWhereRaw('u.id = p.unit_id')
+				.orWhere('title', value)
+				.first();
 
 			existsOrError(fromDB, { message: 'Not Found', status: NOT_FOUND });
 			existsOrError(fromDB.id, { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
