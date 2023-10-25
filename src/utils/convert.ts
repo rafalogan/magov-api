@@ -29,7 +29,13 @@ export const convertDataValues = (data: any, to?: string) => {
 	const keysCamel = to === 'camel' ? keys.map(snakeToCamel) : keys.map(camelToSnake);
 	const res: any = {};
 
-	keysCamel.forEach((key, i) => (res[key] = data[keys[i]]));
+	keysCamel.forEach((key, i) => {
+		res[key] = data[keys[i]];
+
+		if (!res[key]) {
+			deleteField(res, key);
+		}
+	});
 
 	return res;
 };

@@ -4,22 +4,22 @@ import { isProd } from 'src/utils';
 
 const defaultKeywords = [
 	{
-		keyword: 'simon',
+		keyword: 'Legislativo',
 	},
 	{
-		keyword: 'burch',
+		keyword: 'Execultivo',
 	},
 	{
-		keyword: 'woods',
+		keyword: 'Judiciario',
 	},
 	{
-		keyword: 'mccoy',
+		keyword: 'leg',
 	},
 	{
-		keyword: 'jordan',
+		keyword: 'prefeitura',
 	},
 	{
-		keyword: 'gutierrez',
+		keyword: 'secretaria',
 	},
 ];
 
