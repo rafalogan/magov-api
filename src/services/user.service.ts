@@ -5,7 +5,7 @@ import { getUserLogData, onError, onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { PaginationModel, ReadOptionsModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserRule, IUserRuleView, IUserViewModel } from 'src/repositories/types';
-import { convertDataValues, convertToDate, deleteField, deleteFile, existsOrError, notExistisOrError } from 'src/utils';
+import { convertDataValues, deleteField, deleteFile, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
 
@@ -339,6 +339,7 @@ export class UserService extends DatabaseService {
 						req,
 						new UnitModel({
 							...data.unit,
+							phone: data?.unit.phone || data.phone,
 							active: true,
 							tenancyId: Number(tenancyId),
 						})
