@@ -5,7 +5,7 @@ import { getUserLogData, onError, onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { PaginationModel, ReadOptionsModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserRule, IUserRuleView, IUserViewModel } from 'src/repositories/types';
-import { convertDataValues, deleteField, deleteFile, existsOrError, notExistisOrError } from 'src/utils';
+import { convertDataValues, convertToDate, deleteField, deleteFile, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
 
@@ -34,32 +34,38 @@ export class UserService extends DatabaseService {
 
 	async read(options: ReadOptionsModel, id?: number) {
 		if (id) return this.getUser(id);
-		if (options?.tenancyId) return options.unitId ? this.getUsersByUnit(options) : this.getUsers(options);
+		if (options?.tenancyId) {
+			return options.unitId ? this.getUsersByUnit(options) : this.getUsers(options);
+		}
 
-		const tables = { u: 'users', un: 'units' };
-		const fields = [
-			{
-				id: 'u.id',
-				first_name: 'u.first_name',
-				last_name: 'u.last_name',
-				office: 'u.office',
-				email: 'u.email',
-				cpf: 'u.cpf',
-				phone: 'u.phone',
-				level: 'u.level',
-				active: 'u.active',
-				tenancy_id: 'u.tenancy_id',
-			},
-			{ unit_id: 'un.id', unit_name: 'un.name' },
-		];
-
-		const fromDB = await this.db(tables)
-			.select(...fields)
-			.whereRaw('un.id = u.unit_id');
+		const fromDB = await this.db('users').select(
+			'id',
+			'first_name',
+			'last_name',
+			'office',
+			'email',
+			'cpf',
+			'phone',
+			'level',
+			'active',
+			'unit_id',
+			'tenancy_id'
+		);
 
 		existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+		const res: any[] = [];
 
-		return fromDB.map(i => convertDataValues(i, 'camel'));
+		for (const item of fromDB) {
+			let unit = undefined;
+
+			if (Number(item.unit_id)) {
+				unit = await this.db('units').select('name as unit_name').where('id', item.unit_id).first();
+			}
+
+			res.push(convertDataValues({ ...item, ...unit }, 'camel'));
+		}
+
+		return res;
 	}
 
 	async update(data: UserModel, id: number, req: Request): Promise<any> {
@@ -208,15 +214,15 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-							.select(...fields)
-							.where('u.id', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first()
+						.select(...fields)
+						.where('u.id', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first()
 					: await this.db(tables)
-							.select(...fields)
-							.where('u.email', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first();
+						.select(...fields)
+						.where('u.email', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first();
 
 			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
 			notExistisOrError(fromDb.severity === 'ERROR', {
@@ -330,13 +336,13 @@ export class UserService extends DatabaseService {
 			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
 			const unit = data?.unit
 				? await this.setUnit(
-						req,
-						new UnitModel({
-							...data.unit,
-							active: true,
-							tenancyId: Number(tenancyId),
-						})
-				  )
+					req,
+					new UnitModel({
+						...data.unit,
+						active: true,
+						tenancyId: Number(tenancyId),
+					})
+				)
 				: undefined;
 
 			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
