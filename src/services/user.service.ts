@@ -214,15 +214,15 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-						.select(...fields)
-						.where('u.id', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.first()
+							.select(...fields)
+							.where('u.id', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first()
 					: await this.db(tables)
-						.select(...fields)
-						.where('u.email', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.first();
+							.select(...fields)
+							.where('u.email', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.first();
 
 			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
 			notExistisOrError(fromDb.severity === 'ERROR', {
@@ -336,13 +336,13 @@ export class UserService extends DatabaseService {
 			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
 			const unit = data?.unit
 				? await this.setUnit(
-					req,
-					new UnitModel({
-						...data.unit,
-						active: true,
-						tenancyId: Number(tenancyId),
-					})
-				)
+						req,
+						new UnitModel({
+							...data.unit,
+							active: true,
+							tenancyId: Number(tenancyId),
+						})
+				  )
 				: undefined;
 
 			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
@@ -366,10 +366,8 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async setUnit(req: Request, data?: UnitModel) {
+	private async setUnit(req: Request, data: UnitModel) {
 		try {
-			if (!data) return undefined;
-
 			const action = (await this.unitService.create(data, req)) as any;
 
 			existsOrError(action?.unit, action);
