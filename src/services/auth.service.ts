@@ -1,12 +1,12 @@
 import jwt from 'jwt-simple';
 import { Request } from 'express';
-import httpStatus, { UNAUTHORIZED } from 'http-status';
+import httpStatus, { BAD_REQUEST, UNAUTHORIZED } from 'http-status';
 
 import { decodeToken, extractToken, getPayload, onLog } from 'src/core/handlers';
 
 import { Credentials, Payload, RecoveryModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { ICredentials, IUserModel, SendEmailOptions } from 'src/repositories/types';
-import { existsOrError, isMatch, isRequired, notExistisOrError, requiredFields } from 'src/utils';
+import { equalsOrError, existsOrError, isMatch, isRequired, notExistisOrError, requiredFields } from 'src/utils';
 import { UserService } from './user.service';
 import { MailService } from './mail.service';
 
@@ -16,7 +16,7 @@ export class AuthService {
 	constructor(
 		private userService: UserService,
 		private mailsService: MailService
-	) {}
+	) { }
 
 	validateCredentials(credentials: ICredentials) {
 		try {
@@ -90,11 +90,11 @@ export class AuthService {
 		return valid
 			? { valid, status, message: 'Token valid to use.', token }
 			: {
-					valid,
-					status,
-					message: 'Invalid token!',
-					token,
-			  };
+				valid,
+				status,
+				message: 'Invalid token!',
+				token,
+			};
 	}
 
 	async verifyEmailUser(email: string, options: SendEmailOptions) {
@@ -114,18 +114,9 @@ export class AuthService {
 
 	async recoveryPassword(data: RecoveryModel, req: Request) {
 		try {
-			const user = (await this.userService.getUser(data.email)) as UserViewModel;
+			equalsOrError(data.password, data.confirmPassword, { status: BAD_REQUEST, messsage: 'password not match.' });
 
-			existsOrError(user?.email, { status: httpStatus.NOT_FOUND, messsage: 'User not found.' });
-
-			const toSave = new UserModel({
-				...user,
-				confirmPassword: data.confirmPassword,
-				password: data.password,
-				userRules: user.userRules.map(r => ({ screenId: r.screenId, ruleId: r.ruleId })),
-			} as IUserModel);
-
-			return this.userService.update(toSave, user.id, req);
+			return this.userService.recoverPassword(data, req);
 		} catch (err) {
 			return err;
 		}

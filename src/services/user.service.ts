@@ -3,9 +3,9 @@ import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
 import { getUserLogData, onError, onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
-import { PaginationModel, ReadOptionsModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
+import { PaginationModel, ReadOptionsModel, RecoveryModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
 import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserRule, IUserRuleView, IUserViewModel } from 'src/repositories/types';
-import { convertDataValues, deleteField, deleteFile, existsOrError, notExistisOrError } from 'src/utils';
+import { convertDataValues, deleteField, deleteFile, existsOrError, hashString, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
 
@@ -89,6 +89,24 @@ export class UserService extends DatabaseService {
 			await this.userLogService.create(getUserLogData(req, 'users', id, 'atualizar'));
 
 			return { message: 'User update with success', data: res };
+		} catch (err) {
+			return err;
+		}
+	}
+
+	async recoverPassword(data: RecoveryModel, req: Request) {
+		try {
+			const fromDB = await this.db('users').where('email', data.email).first();
+
+			existsOrError(fromDB, { message: 'user not found', status: NOT_FOUND });
+			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'internal Server error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			const password = hashString(data.password);
+
+			await this.db('users').where('id', fromDB.id).update(convertDataValues({ password }));
+			await this.userLogService.create(getUserLogData(req, 'users', fromDB.id, 'atualizar'));
+
+			return { message: 'User successful recoved.' };
 		} catch (err) {
 			return err;
 		}
@@ -214,15 +232,15 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-							.select(...fields)
-							.where('u.id', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first()
+						.select(...fields)
+						.where('u.id', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first()
 					: await this.db(tables)
-							.select(...fields)
-							.where('u.email', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.first();
+						.select(...fields)
+						.where('u.email', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.first();
 
 			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
 			notExistisOrError(fromDb.severity === 'ERROR', {
@@ -336,14 +354,14 @@ export class UserService extends DatabaseService {
 			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
 			const unit = data?.unit
 				? await this.setUnit(
-						req,
-						new UnitModel({
-							...data.unit,
-							phone: data?.unit.phone || data.phone,
-							active: true,
-							tenancyId: Number(tenancyId),
-						})
-				  )
+					req,
+					new UnitModel({
+						...data.unit,
+						phone: data?.unit.phone || data.phone,
+						active: true,
+						tenancyId: Number(tenancyId),
+					})
+				)
 				: undefined;
 
 			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
