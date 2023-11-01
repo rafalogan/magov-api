@@ -474,6 +474,13 @@ const data: IPropositionsTypeViewModel[] = [
 		fileId: 67,
 	},
 	{
+		name: 'Estudo Técnico',
+		description: undefined,
+		active: true,
+		subTypes: [],
+		fileId: 68,
+	},
+	{
 		name: 'Contrato comum',
 		description: undefined,
 		active: true,
@@ -954,7 +961,7 @@ const data: IPropositionsTypeViewModel[] = [
 		description: undefined,
 		active: true,
 		subTypes: [],
-		fileId: 152,
+		FileId: 152,
 	},
 	{
 		name: 'Informação',
