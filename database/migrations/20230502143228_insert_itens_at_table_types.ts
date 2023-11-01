@@ -1168,7 +1168,7 @@ export const modelsTypes: IPropositionsTypeViewModel[] = [
 				description: undefined,
 				active: true,
 				subTypes: [],
-				FileId: 152,
+				fileId: 152,
 			},
 		],
 	},

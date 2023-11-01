@@ -961,7 +961,7 @@ const data: IPropositionsTypeViewModel[] = [
 		description: undefined,
 		active: true,
 		subTypes: [],
-		FileId: 152,
+		fileId: 152,
 	},
 	{
 		name: 'Informação',
