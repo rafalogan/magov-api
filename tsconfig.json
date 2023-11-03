@@ -5,8 +5,9 @@
 	},
 	"compilerOptions": {
 		"ignoreDeprecations": "5.0",
-		"target": "es2015",
+		"target": "ESNext",
 		"moduleResolution": "Node",
+		"removeComments": true,
 		"module": "CommonJS",
 		"lib": [
 			"es2016",
@@ -15,13 +16,13 @@
 			"dom"
 		],
 		"strict": true,
-		"baseUrl": ".",
+		"baseUrl": "./",
 		"rootDirs": [
 			"src",
 			"test",
 			"database"
 		],
-		"outDir": "dist",
+		"outDir": "./dist",
 		"paths": {
 			"migrations/*": [
 				"./database/migrations/*"
@@ -50,7 +51,6 @@
 		"strictPropertyInitialization": false,
 		"resolveJsonModule": true,
 		"alwaysStrict": true,
-		"removeComments": false,
 		"noImplicitReturns": false,
 		"noEmitOnError": true,
 		"esModuleInterop": true,

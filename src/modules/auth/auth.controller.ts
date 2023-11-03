@@ -100,7 +100,7 @@ export class AuthController {
 
 		this.authService
 			.recoveryPassword(data, req)
-			.then(data => ResponseHandle.onSuccess({ res, data, status: data.status }))
+			.then((data: any) => ResponseHandle.onSuccess({ res, data, status: data?.status }))
 			.catch(err => ResponseHandle.onError({ res, message: err.message, err }));
 	}
 

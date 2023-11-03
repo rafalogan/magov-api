@@ -5,7 +5,7 @@ import { PropositionsTypeModel } from 'src/repositories/models';
 import { IFile, IPropositionsType, IServiceOptions } from 'src/repositories/types';
 import { convertBlobToString, convertDataValues, deleteFile, existsOrError, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
-import { onLog } from 'src/core/handlers';
+import { onError } from 'src/core/handlers';
 
 export class PropositionsTypeService extends DatabaseService {
 	constructor(options: IServiceOptions) {
@@ -120,12 +120,15 @@ export class PropositionsTypeService extends DatabaseService {
 	private async getDocument(typeId: number) {
 		try {
 			const fromDB = await this.db('files').where({ type_id: typeId }).first();
-			notExistisOrError(fromDB.severity === 'ERROR', { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 
-			if (fromDB?.id) return new FileEntity(convertDataValues(fromDB, 'camel'));
+			if (fromDB?.id) {
+				return new FileEntity(convertDataValues(fromDB, 'camel'));
+			}
 
 			return undefined;
 		} catch (err) {
+			onError('Error to get document', err);
 			return err;
 		}
 	}

@@ -37,6 +37,8 @@ export interface IPropositionViewModel extends IProposition {
 	propositions?: ISubProposition[];
 	tasks?: ITaskProposition[];
 	file?: IFile;
+	typeName: string;
+	unitName: string;
 }
 
 export interface IBudgetProposition {
@@ -75,5 +77,6 @@ export interface IPropositonAddURL {
 
 export interface IPropositionTextEditor {
 	id: number;
+	typeId?: number;
 	textEditor: Blob | string;
 }
