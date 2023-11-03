@@ -4,7 +4,7 @@ import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-s
 import { GovernmentRevenueModel, GovernmentRevenueViewModel, ReadOptionsModel } from 'src/repositories/models';
 import { IPropositionExpensesGovernment, IRevenueModel, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
-import { convertDataValues, existsOrError, isRequired, notExistisOrError, setValueNumberToView } from 'src/utils';
+import { convertDataValues, existsOrError, isRequired, notExistisOrError } from 'src/utils';
 import { Revenue } from 'src/repositories/entities';
 import { getUserLogData, onError, onLog } from 'src/core/handlers';
 
@@ -125,7 +125,7 @@ export class GovernmentRevenueService extends DatabaseService {
 				const unit = { id: raw.unitId, unit: raw.unit };
 				const region = `${raw.city}-${raw.uf}`;
 				const balance = await this.getBalance(Number(item?.id), Number(item?.value));
-				const value = setValueNumberToView(item.value)
+				const value = Number(item.value);
 
 				res.push(new GovernmentRevenueViewModel({ ...raw, value, unit, expenses, region, balance }));
 			}
@@ -160,21 +160,21 @@ export class GovernmentRevenueService extends DatabaseService {
 			const fromDB =
 				typeof filter === 'number'
 					? await this.db(tables)
-						.select(...fields)
-						.where('r.id', filter)
-						.andWhere('r.tenancy_id', tenancyId)
-						.andWhereRaw('u.id = r.unit_id')
-						.andWhereRaw('o.id = r.origin_id')
-						.andWhereRaw('a.unit_id = r.unit_id')
-						.first()
+							.select(...fields)
+							.where('r.id', filter)
+							.andWhere('r.tenancy_id', tenancyId)
+							.andWhereRaw('u.id = r.unit_id')
+							.andWhereRaw('o.id = r.origin_id')
+							.andWhereRaw('a.unit_id = r.unit_id')
+							.first()
 					: await this.db(tables)
-						.select(...fields)
-						.where('r.revenue', filter)
-						.andWhere('r.tenancy_id', tenancyId)
-						.andWhereRaw('u.id = r.unit_id')
-						.andWhereRaw('o.id = r.origin_id')
-						.andWhereRaw('a.unit_id = r.unit_id')
-						.first();
+							.select(...fields)
+							.where('r.revenue', filter)
+							.andWhere('r.tenancy_id', tenancyId)
+							.andWhereRaw('u.id = r.unit_id')
+							.andWhereRaw('o.id = r.origin_id')
+							.andWhereRaw('a.unit_id = r.unit_id')
+							.first();
 
 			existsOrError(fromDB, { message: 'Revenue not found', status: NOT_FOUND });
 			notExistisOrError(fromDB.severity === 'ERROR', {
