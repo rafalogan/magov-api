@@ -73,6 +73,18 @@ export class PropositionsTypeService extends DatabaseService {
 		}
 	}
 
+	async findAllOnFile() {
+		try {
+			const fromDB = await this.db('types').whereNotNull('file_id');
+
+			existsOrError(Array.isArray(fromDB), { message: 'internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			return fromDB.map(i => convertDataValues(i, 'camel'));
+		} catch (err: any) {
+			return err;
+		}
+	}
+
 	async getPropositionsType(value: number | string) {
 		try {
 			const fromDB =
