@@ -387,6 +387,13 @@ export const modelsTypes: IPropositionsTypeViewModel[] = [
 		active: true,
 		subTypes: [
 			{
+				name: 'IMR',
+				fileId: 205,
+				description: undefined,
+				active: true,
+				subTypes: [],
+			},
+			{
 				name: 'Bens e Serv. TIC',
 				description: undefined,
 				active: true,
