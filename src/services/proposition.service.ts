@@ -19,6 +19,14 @@ export class PropositionService extends DatabaseService {
 
 	async create(data: PropositionModel, req: Request) {
 		try {
+			const unitFromDB = await this.db('units').where('id', data.unitId).andWhere('tenancy_id', data.tenancyId).first();
+			existsOrError(unitFromDB, { message: 'unit not found', status: BAD_REQUEST });
+			notExistisOrError(unitFromDB?.severity === 'ERROR', {
+				message: 'Internal server error',
+				err: unitFromDB,
+				status: INTERNAL_SERVER_ERROR,
+			});
+
 			const fromDB = (await this.getProprosition(data.title, data.tenancyId)) as PropositionViewModel;
 
 			notExistisOrError(fromDB.id, { messsage: 'Proposition alredy existis', status: FORBIDDEN });
@@ -44,6 +52,17 @@ export class PropositionService extends DatabaseService {
 
 	async update(data: PropositionModel, id: number, req: Request) {
 		try {
+
+			if (data?.unitId) {
+				const unitFromDB = await this.db('units').where('id', data.unitId).andWhere('tenancy_id', data.tenancyId).first();
+				existsOrError(unitFromDB, { message: 'unit not found', status: BAD_REQUEST });
+				notExistisOrError(unitFromDB?.severity === 'ERROR', {
+					message: 'Internal server error',
+					err: unitFromDB,
+					status: INTERNAL_SERVER_ERROR,
+				});
+			}
+
 			const fromDB = (await this.getProprosition(id, data.tenancyId)) as PropositionViewModel;
 
 			existsOrError(fromDB.id, { message: 'Not found', status: NOT_FOUND });
@@ -143,14 +162,14 @@ export class PropositionService extends DatabaseService {
 
 			const fromDB = unitId
 				? await this.db(table)
-						.select(...fields)
-						.where('p.tenancy_id', tenancyId)
-						.andWhereRaw(`p.unit_id = ${unitId}`)
-						.andWhereRaw('t.id = p.type_id')
+					.select(...fields)
+					.where('p.tenancy_id', tenancyId)
+					.andWhereRaw(`p.unit_id = ${unitId}`)
+					.andWhereRaw('t.id = p.type_id')
 				: await this.db(table)
-						.select(...fields)
-						.where('p.tenancy_id', tenancyId)
-						.andWhereRaw('t.id = p.type_id');
+					.select(...fields)
+					.where('p.tenancy_id', tenancyId)
+					.andWhereRaw('t.id = p.type_id');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
 			const raw = fromDB.map((i: any) => convertDataValues(i, 'camel'));
