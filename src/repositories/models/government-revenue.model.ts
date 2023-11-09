@@ -1,4 +1,4 @@
-import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
+import { convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { IGovernmentRevenueModel, IPropositionExpensesGovernment } from '../types';
 
 export class GovernmentRevenueModel {
@@ -21,7 +21,7 @@ export class GovernmentRevenueModel {
 		this.origin = data.origin?.trim();
 		this.revenue = data.revenue.trim();
 		this.receive = convertToDate(data.receive);
-		this.value = setValueNumberToView(data.value) as number;
+		this.value = Number(data.value);
 		this.status = data.status;
 		this.active = data.active;
 		this.recurrent = data.recurrent;

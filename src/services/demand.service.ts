@@ -72,6 +72,10 @@ export class DemandService extends DatabaseService {
 
 	async saveDemand(data: Demand, keywords: string[], themes: string[], req: Request) {
 		try {
+			const unitFromDB = await this.db('units').where('id', data.unitId).andWhere('tenancy_id', data.tenancyId).first();
+			existsOrError(unitFromDB, { message: 'units not found', status: BAD_REQUEST });
+			notExistisOrError(unitFromDB?.severity === 'ERROR', { message: 'intenal error', err: unitFromDB, status: INTERNAL_SERVER_ERROR });
+
 			const [id] = await this.db('demands').insert(convertDataValues({ ...data, active: true }));
 			existsOrError(Number(id), { messsage: 'Internal Server Error', err: id, status: INTERNAL_SERVER_ERROR });
 
@@ -102,6 +106,13 @@ export class DemandService extends DatabaseService {
 
 	async updateDemand(data: DemandModel, id: number, tenancyId: number, req: Request) {
 		try {
+			if (data?.unitId) {
+				const unitFromDB = await this.db('units').where('id', data.unitId).andWhere('tenancy_id', data.tenancyId).first();
+
+				existsOrError(unitFromDB, { message: 'units not found', status: BAD_REQUEST });
+				notExistisOrError(unitFromDB?.severity === 'ERROR', { message: 'intenal error', err: unitFromDB, status: INTERNAL_SERVER_ERROR });
+			}
+
 			const demand = (await this.getDemand(id)) as DemandViewModel;
 
 			existsOrError(demand.id, { message: 'Demand not found', status: NOT_FOUND });

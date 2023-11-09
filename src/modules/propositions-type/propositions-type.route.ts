@@ -5,7 +5,11 @@ import { RouteOptions } from 'src/repositories/types';
 import { PropositionsTypeController } from './propositions-type.controller';
 
 export class PropositionsTypeRoute extends Routes {
-	constructor(options: RouteOptions, private upload: Multer, private propositionsTypeController: PropositionsTypeController) {
+	constructor(
+		options: RouteOptions,
+		private upload: Multer,
+		private propositionsTypeController: PropositionsTypeController
+	) {
 		super(options.app, options.auth);
 	}
 
@@ -15,6 +19,12 @@ export class PropositionsTypeRoute extends Routes {
 			.all(this.auth?.exec().authenticate())
 			.get(this.propositionsTypeController.list.bind(this.propositionsTypeController))
 			.post(this.upload.single('file'), this.propositionsTypeController.save.bind(this.propositionsTypeController))
+			.all(methodNotAllowed);
+
+		this.app
+			.route('/types/propositions')
+			.all(this.auth?.exec().authenticate())
+			.get(this.propositionsTypeController.listPropsFiles.bind(this.propositionsTypeController))
 			.all(methodNotAllowed);
 
 		this.app

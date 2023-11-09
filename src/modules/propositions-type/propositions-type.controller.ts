@@ -47,6 +47,13 @@ export class PropositionsTypeController extends Controller {
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
+	listPropsFiles(req: Request, res: Response) {
+		return this.propositionsTypeService
+			.findAllOnFile()
+			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.catch(err => ResponseHandle.onError({ res, err }));
+	}
+
 	remove(req: Request, res: Response) {
 		const { id } = req.params;
 

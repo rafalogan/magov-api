@@ -320,6 +320,13 @@ const data: IPropositionsTypeViewModel[] = [
 		fileId: 45,
 	},
 	{
+		name: 'IMR',
+		fileId: 205,
+		description: undefined,
+		active: true,
+		subTypes: [],
+	},
+	{
 		name: 'Contrato Compras',
 		description: undefined,
 		active: true,

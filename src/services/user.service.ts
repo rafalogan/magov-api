@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
+import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
 import { getUserLogData, onError, onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
@@ -70,6 +70,13 @@ export class UserService extends DatabaseService {
 
 	async update(data: UserModel, id: number, req: Request): Promise<any> {
 		try {
+			if (data?.unitId || data?.unit?.id) {
+				const unitFromDB = await this.db('units').where('id', data.unitId).andWhere('tenancy_id', data.tenancyId).first();
+
+				existsOrError(unitFromDB, { message: 'units not found', status: BAD_REQUEST });
+				notExistisOrError(unitFromDB?.severity === 'ERROR', { message: 'intenal error', err: unitFromDB, status: INTERNAL_SERVER_ERROR });
+			}
+
 			const userFromDb = (await this.getUser(id)) as UserViewModel;
 
 			existsOrError(userFromDb?.id, userFromDb);
@@ -242,6 +249,8 @@ export class UserService extends DatabaseService {
 						.andWhereRaw('a.user_id = u.id')
 						.first();
 
+			onLog('user from db', fromDb);
+
 			existsOrError(fromDb, { message: 'User not found', status: NOT_FOUND });
 			notExistisOrError(fromDb.severity === 'ERROR', {
 				message: 'Internal error',
@@ -251,16 +260,18 @@ export class UserService extends DatabaseService {
 
 			const raw = convertDataValues(fromDb, 'camel');
 			const { id } = raw;
+			onLog('user raw', raw);
 
 			const unit = await this.getUnit(raw.unitId);
 			const userRules = await this.getUserRules(id);
 			const image = await this.getflie(id);
 			const plans = await this.getPlans(raw.tenancyId, raw.unitId);
 			onLog('user image', image);
+			onLog('User unit id', unit);
 
 			return new UserViewModel({
 				...raw,
-				...unit,
+				unit,
 				userRules,
 				address: { ...raw },
 				image,
@@ -402,6 +413,13 @@ export class UserService extends DatabaseService {
 		try {
 			const tenancyId = await this.setTenancy(data.tenancyId);
 			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
+
+			if (data?.unitId || data?.unit?.id) {
+				const unitFromDB = await this.db('units').where('id', data.unitId).andWhere('tenancy_id', Number(tenancyId)).first();
+
+				existsOrError(unitFromDB, { message: 'units not found', status: BAD_REQUEST });
+				notExistisOrError(unitFromDB?.severity === 'ERROR', { message: 'intenal error', err: unitFromDB, status: INTERNAL_SERVER_ERROR });
+			}
 
 			const toSave = new User({ ...data, tenancyId: Number(tenancyId) });
 			const [id] = await this.db('users').insert(convertDataValues(toSave));
