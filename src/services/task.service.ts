@@ -375,7 +375,7 @@ export class TaskService extends DatabaseService {
 			const usersIds = await this.db('users_tasks').select('user_id').where({ task_id: taskId });
 			const ids = clearDuplicateItems([userId, ...usersIds.map(i => i['user_id'])]);
 			onLog('users ids', ids);
-			const res = [];
+			const res: any[] = [];
 
 			for (const id of ids) {
 				const user = await this.db('users').where({ id }).select('id', 'first_name', 'last_name').first();

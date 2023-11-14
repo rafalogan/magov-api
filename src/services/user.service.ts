@@ -56,7 +56,7 @@ export class UserService extends DatabaseService {
 		const res: any[] = [];
 
 		for (const item of fromDB) {
-			let unit = undefined;
+			let unit = {};
 
 			if (Number(item.unit_id)) {
 				unit = await this.db('units').select('name as unit_name').where('id', item.unit_id).first();
