@@ -9,7 +9,7 @@
 		"db:up": "docker-compose down && docker-compose up",
 		"db:down": "docker-compose down",
 		"stop": "npx pm2 kill",
-		"build": "rm -rf ./dist && npx tsc",
+		"build": "rm -rf ./dist && npx tsc -p",
 		"test": "npx vitest --config vite.config.ts",
 		"test:cov": "npx vitest --coverage --config vite.config.ts",
 		"knex:migrate:make": "npx knex migrate:make --knexfile knexfile.ts -x ts",
