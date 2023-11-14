@@ -19,7 +19,12 @@ export class AppConfig {
 		optionsSuccessStatus: Number(process.env.CORS_OPTIONS_SUCCESS_STATUS) || 200,
 	};
 
-	constructor(private logger: Logger, private authConfig: AuthConfig, private services: ServicesFactory, private upload: Multer) {
+	constructor(
+		private logger: Logger,
+		private authConfig: AuthConfig,
+		private services: ServicesFactory,
+		private upload: Multer
+	) {
 		this._express = express();
 		this.modules = new ModulesFactory(this.express, this.authConfig, this.services, this.upload);
 		this.configExpress();

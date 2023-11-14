@@ -172,7 +172,7 @@ export class UnitExpenseService extends DatabaseService {
 
 	private async setPayments(data: IUnitExpensePayment[], unitExpenseId: number) {
 		try {
-			const res = [];
+			const res: any[] = [];
 			for (const item of data) {
 				onLog('payment to save', item);
 				const paymentId = Number(item.paymentId) || (await this.setPaymentForm(item.paymentForm as string));
@@ -190,11 +190,13 @@ export class UnitExpenseService extends DatabaseService {
 						.where('payment_id', paymentId as number)
 						.andWhere('unit_expense_id', unitExpenseId)
 						.update(convertDataValues(toUpdate));
+
 					res.push(toUpdate);
 				} else {
 					const toSave = new UnitExpensePayment({ ...item, unitExpenseId, paymentId: Number(paymentId) });
 					deleteField(toSave, 'paymentForm');
 					await this.db('units_expenses_payments').insert(convertDataValues(toSave));
+
 					res.push(toSave);
 				}
 			}

@@ -311,8 +311,8 @@ export class SaleService extends DatabaseService {
 			const fromDB = await this.db('sales_payments').where('sale_id', saleId).orderBy('pay_date', 'desc');
 			onLog(`payment sale: ${saleId}`, fromDB);
 			existsOrError(Array.isArray(fromDB), { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
-			const commissions = [];
-			const contract = [];
+			const commissions: any[] = [];
+			const contract: any[] = [];
 
 			for (const item of fromDB) {
 				const raw = new SalePaymentModel(convertDataValues(item, 'camel'));
