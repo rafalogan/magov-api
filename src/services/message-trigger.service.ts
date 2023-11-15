@@ -5,7 +5,8 @@ import { IReadOptions, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { MessageHistory, MessageTrigger } from 'src/repositories/entities';
 import { convertDataValues, existsOrError, notExistisOrError } from 'src/utils';
-import { getUserLogData } from 'src/core/handlers';
+import { getUserLogData, onLog } from 'src/core/handlers';
+import dayjs from 'dayjs';
 
 export class MessageTriggerService extends DatabaseService {
 	constructor(options: IServiceOptions) {
@@ -79,6 +80,19 @@ export class MessageTriggerService extends DatabaseService {
 		return fromDB.map(i => new MessageTrigger(convertDataValues(i, 'camel')));
 	}
 
+	async findHistory(tenancyId: number) {
+		try {
+			await this.deletedHistories(tenancyId);
+			const fromDB = await this.db('history_messages').where('tenancy_id', tenancyId);
+
+			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+
+			return fromDB.map(i => new MessageHistory(convertDataValues(i, 'camel')));
+		} catch (err: any) {
+			return err;
+		}
+	}
+
 	async read(options: IReadOptions) {
 		const { tenancyId } = options;
 
@@ -101,11 +115,13 @@ export class MessageTriggerService extends DatabaseService {
 		}
 	}
 
-	async deletedHistories() {
-		const today = new Date();
+	async deletedHistories(tenancyId: number) {
+		const today = dayjs(new Date()).endOf('day').toDate();
+		onLog('data limite', today);
 
 		return this.db('history_messages')
-			.where('expires_at', today)
+			.where('tenancy_id', tenancyId)
+			.whereRaw('tenancy_id <= ?', today)
 			.del()
 			.then(res => ({ message: 'histories clears', rows: res }))
 			.catch(err => ({ message: 'Internal error', err, status: INTERNAL_SERVER_ERROR }));
