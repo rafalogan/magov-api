@@ -10,4 +10,5 @@ export interface IMessageHistory {
 	tenancyId: number;
 	message: string | Blob;
 	sendDate: Date | string;
+	expiresAt?: Date | string;
 }
