@@ -101,6 +101,13 @@ export class MessageTriggerService extends DatabaseService {
 		}
 	}
 
+	async deletedHistories() {
+		const today = new Date();
 
-	async deletedHistories() { try { } catch (err: any) { return err } }
+		return this.db('history_messages')
+			.where('expires_at', today)
+			.del()
+			.then(res => ({ message: 'histories clears', rows: res }))
+			.catch(err => ({ message: 'Internal error', err, status: INTERNAL_SERVER_ERROR }));
+	}
 }
