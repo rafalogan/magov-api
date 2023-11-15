@@ -5,10 +5,10 @@ export async function up(knex: Knex): Promise<void> {
 		table.increments('id').primary();
 		table.string('name', 50).notNullable().unique();
 		table.binary('description').nullable();
-		table.boolean('plan').notNullable().defaultTo(false);
 		table.integer('limit').nullable();
 		table.integer('value').notNullable();
 		table.boolean('active').notNullable().defaultTo(true);
+		table.integer('type_id').unsigned().references('id').inTable('products_types').notNullable();
 	});
 }
 
