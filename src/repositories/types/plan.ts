@@ -1,9 +1,12 @@
 export interface IPlan {
-	id: number;
+	id?: number;
 	name: string;
-	plan?: boolean;
-	description?: Blob;
+	description?: Blob | string;
 	limit?: number;
 	value: number;
 	active: boolean;
+	typeId: number;
+	type: string;
 }
+
+export interface IProduct extends IPlan {}

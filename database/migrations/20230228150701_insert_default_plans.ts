@@ -1,18 +1,22 @@
 import { Knex } from 'knex';
+import { IProduct } from 'src/repositories/types';
+import { convertDataValues } from 'src/utils';
 
-const defaultPlans = [
+const defaultPlans: IProduct[] = [
 	{
 		name: 'Essencial',
 		description: 'Conteudo plano esseicial',
 		limit: 20,
-		plan: true,
+		type: 'plan',
+		typeId: 0,
 		value: 35000,
 		active: true,
 	},
 	{
 		name: 'Explorer',
 		description: 'Conteudo plano explorer',
-		plan: true,
+		type: 'plan',
+		typeId: 0,
 		limit: 50,
 		value: 145000,
 		active: true,
@@ -20,7 +24,8 @@ const defaultPlans = [
 	{
 		name: 'Master',
 		description: 'Conteudo plano Master',
-		plan: true,
+		type: 'plan',
+		typeId: 0,
 		limit: 50,
 		value: 258000,
 		active: true,
@@ -28,7 +33,8 @@ const defaultPlans = [
 	{
 		name: 'Crédito para 500 disparos/mês R$ 150,00',
 		description: 'Conteudo plano Master',
-		plan: false,
+		type: 'credits',
+		typeId: 0,
 		limit: 500,
 		value: 15000,
 		active: true,
@@ -36,7 +42,8 @@ const defaultPlans = [
 	{
 		name: 'Consultoria de Marketing R$ 15.000,00',
 		description: 'Conteudo plano Master',
-		plan: false,
+		type: 'consultancy',
+		typeId: 0,
 		limit: 0,
 		value: 1500000,
 		active: true,
@@ -44,7 +51,18 @@ const defaultPlans = [
 ];
 
 export async function up(knex: Knex): Promise<void> {
-	return knex.batchInsert('products', defaultPlans);
+	const toSave: any[] = [];
+
+	for (const item of defaultPlans) {
+		const { id: typeId } = await knex('products_types').select('id').where({ type: item.type }).first();
+
+		toSave.push({ ...item, typeId });
+	}
+
+	return knex.batchInsert(
+		'products',
+		toSave.map(i => convertDataValues(i))
+	);
 }
 
 export async function down(knex: Knex): Promise<void> {
