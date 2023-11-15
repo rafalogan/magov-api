@@ -6,15 +6,16 @@ export class ProductViewModel {
 	name?: string;
 	limit?: number;
 	amount: number;
-	plan: boolean;
+	typeId: number;
+	type: string;
 	value: number;
 
 	constructor(data: IProduct, id?: number) {
-		this.id = setInstanceId(id || data.productId || data.id);
+		this.id = setInstanceId(id || data?.productId || data.id);
 		this.name = data.name?.trim();
 		this.limit = setInstanceId(data.limit);
-		this.amount = Number(data.amount);
-		this.plan = !!data.plan;
+		this.amount = Number(data.amount) || 1;
+		this.typeId = Number(data.typeId);
 		this.value = setValueNumberToView(data.value) as number;
 	}
 }

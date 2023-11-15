@@ -9,4 +9,7 @@ export interface IPlan {
 	type: string;
 }
 
-export interface IProduct extends IPlan {}
+export interface IProduct extends IPlan {
+	productId?: number;
+	amount?: number;
+}

@@ -22,7 +22,7 @@ export interface ISaleModel extends IID {
 export interface ISaleProduct {
 	id: number;
 	name: string;
-	plan: boolean;
+	typeId: boolean;
 	amount: number;
 	value: number;
 }
