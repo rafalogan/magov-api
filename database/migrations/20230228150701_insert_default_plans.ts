@@ -56,6 +56,8 @@ export async function up(knex: Knex): Promise<void> {
 	for (const item of defaultPlans) {
 		const { id: typeId } = await knex('products_types').select('id').where({ type: item.type }).first();
 
+		Reflect.deleteProperty(item, 'type');
+
 		toSave.push({ ...item, typeId });
 	}
 
