@@ -98,15 +98,6 @@ export interface ISale extends IID {
 	sellerId: number;
 }
 
-export interface IProduct extends IID {
-	productId: number;
-	name?: string;
-	limit?: number;
-	amount: number;
-	plan: boolean;
-	value: number;
-}
-
 export interface ISeller extends IID {
 	seller: string;
 	cpf: string;

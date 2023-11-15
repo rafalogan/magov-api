@@ -29,3 +29,5 @@ export * from './notification.entity';
 export * from './government-reserve.entity';
 export * from './user-log.entity';
 export * from './screen.entity';
+export * from './message-history.entity';
+export * from './message-trigger.entity';
