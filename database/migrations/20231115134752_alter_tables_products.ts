@@ -1,5 +1,4 @@
 import { Knex } from 'knex';
-import { convertDataValues } from 'src/utils';
 
 export async function up(knex: Knex): Promise<void> {
 	const products = await knex('products');
