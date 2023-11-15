@@ -6,9 +6,9 @@ import { IFile, ISale, ISalePayments, ISaleProduct, ISaleUnitView, IServiceOptio
 import { DatabaseService } from './abistract-database.service';
 import { UserService } from './user.service';
 import { PaginationModel, ReadOptionsModel, SaleModel, SalePaymentModel, SaleViewModel } from 'src/repositories/models';
-import { Sale, Seller } from 'src/repositories/entities';
+import { MessageTrigger, Sale, Seller } from 'src/repositories/entities';
 import { convertDataValues, deleteField, existsOrError } from 'src/utils';
-import { getUserLogData, onLog } from 'src/core/handlers';
+import { getUserLogData, onError, onLog } from 'src/core/handlers';
 
 export class SaleService extends DatabaseService {
 	constructor(
@@ -41,10 +41,14 @@ export class SaleService extends DatabaseService {
 			onLog('new sale id', id);
 			await this.setFile(data.contract, 'saleId', id);
 
-			const plans = data.products.filter(p => !!p?.plan);
+			const plans = data.products.filter(p => p.type === 'plan');
+			const credits = data.products.filter(p => p.type === 'credits');
+
 			onLog('plans to save of tenancy', plans);
+			onLog('credit to save', credits);
 
 			if (plans?.length) await this.setPlanOnTenancy(data.tenancyId, plans);
+			if (credits?.length) await this.setCredits(credits, data.tenancyId);
 
 			await this.setUnitProducts(data.products, data.unitId);
 			await this.setProducts(data.products, id);
@@ -74,7 +78,7 @@ export class SaleService extends DatabaseService {
 			const contract = data.contract ? await this.setFile(data.contract, 'saleId', id) : undefined;
 
 			if (data.products?.length) {
-				const plans = data.products.filter(p => p.plan);
+				const plans = data.products.filter(p => p.type === 'plan');
 				if (plans.length) await this.userService.setTenancy(tenancyId, plans);
 
 				await this.setUnitProducts(data.products, unitId);
@@ -421,6 +425,31 @@ export class SaleService extends DatabaseService {
 				onLog('save products', res);
 			}
 		} catch (err) {
+			return err;
+		}
+	}
+
+	private async setCredits(credits: ISaleProduct[], tenancyId: number) {
+		try {
+			const fromBD = await this.db('message_triggers').where('tenancy_id', tenancyId).first();
+			const triggers = credits.map(i => Number(i.limit) * Number(i.amount)).reduce((total, item) => total + item, 0) || 1;
+
+			if (fromBD?.id) {
+				await this.db('message_triggers')
+					.update(convertDataValues({ triggers, dueDate: new Date() }))
+					.where({ id: fromBD.id });
+				return;
+			}
+
+			const toSave = new MessageTrigger({ tenancyId, triggers, dueDate: new Date() });
+
+			const [id] = await this.db('message_triggers').insert(convertDataValues(toSave));
+
+			existsOrError(Number(id), { message: 'internal Error', err: id, status: INTERNAL_SERVER_ERROR });
+
+			return;
+		} catch (err: any) {
+			onError('Errot to set Credits', err);
 			return err;
 		}
 	}
