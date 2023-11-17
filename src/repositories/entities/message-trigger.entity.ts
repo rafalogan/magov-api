@@ -11,6 +11,6 @@ export class MessageTrigger {
 		this.id = setInstanceId(id || data?.id);
 		this.tenancyId = Number(data.tenancyId);
 		this.triggers = Number(data.triggers);
-		this.dueDate = convertToDate(data.dueDate);
+		this.dueDate = convertToDate(data?.dueDate || new Date());
 	}
 }

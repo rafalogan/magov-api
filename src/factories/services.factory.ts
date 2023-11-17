@@ -13,6 +13,7 @@ import {
 	InstituteTypeService,
 	KeywordService,
 	MailService,
+	MessageTriggerService,
 	NotificationService,
 	OriginService,
 	PaymentFormService,
@@ -67,6 +68,7 @@ export class ServicesFactory {
 	governmentRevenueService: GovernmentRevenueService;
 	notificationService: NotificationService;
 	screenService: ScreenService;
+	messageTriggersService: MessageTriggerService;
 
 	constructor(
 		private conn: Knex,
@@ -103,6 +105,7 @@ export class ServicesFactory {
 		this.governmentRevenueService = new GovernmentRevenueService(this.setServiceOptions());
 		this.notificationService = new NotificationService(this.mailService);
 		this.screenService = new ScreenService(this.setServiceOptions());
+		this.messageTriggersService = new MessageTriggerService(this.setServiceOptions());
 	}
 
 	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client, userLogService: this.userLogService });

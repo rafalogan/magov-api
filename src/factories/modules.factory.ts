@@ -34,6 +34,7 @@ import { GovernmentRevenueModule } from 'src/modules/government-revenue';
 import { NotificationModule } from 'src/modules/notification';
 import { UserLogModule } from 'src/modules/user-log';
 import { ScreenModule } from 'src/modules/screen';
+import { MessageModule } from 'src/modules/message';
 
 export class ModulesFactory {
 	private authModule: AuthModule;
@@ -64,6 +65,7 @@ export class ModulesFactory {
 	private userLoginModule: UserLogModule;
 	private notificationModule: NotificationModule;
 	private screenModule: ScreenModule;
+	private messageModule: MessageModule;
 
 	constructor(
 		private app: Application,
@@ -101,7 +103,8 @@ export class ModulesFactory {
 		this.governmentRevenueModule = new GovernmentRevenueModule({ ...this.getRouteOptions(), service: services.governmentRevenueService });
 		this.userLoginModule = new UserLogModule({ ...this.getRouteOptions(), service: services.userLogService });
 		this.notificationModule = new NotificationModule({ ...this.getRouteOptions(), service: services.notificationService });
-		this.screenModule = new ScreenModule({ ...this.getRouteOptions(), service: services.screenService })
+		this.screenModule = new ScreenModule({ ...this.getRouteOptions(), service: services.screenService });
+		this.messageModule = new MessageModule({ ...this.getRouteOptions(), service: services.messageTriggersService });
 	}
 
 	exec() {
@@ -132,6 +135,7 @@ export class ModulesFactory {
 		this.governmentRevenueModule.exec();
 		this.notificationModule.exec();
 		this.screenModule.exec();
+		this.messageModule.exec();
 		this.userLoginModule.exec();
 		this.app.use('/media', express.static(resolve(__dirname, '../..', 'tmp', 'uploads')));
 		this.app.use(notfoundRoute);
