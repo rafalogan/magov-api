@@ -3,8 +3,8 @@ import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 
 import { IReadOptions, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
-import { MessageHistory, MessageTrigger } from 'src/repositories/entities';
-import { convertDataValues, existsOrError, notExistisOrError } from 'src/utils';
+import { MessageHistory, MessageTrigger, SetMessageTrigger } from 'src/repositories/entities';
+import { convertDataValues, existsOrError, messages } from 'src/utils';
 import { getUserLogData, onLog } from 'src/core/handlers';
 import dayjs from 'dayjs';
 
@@ -17,7 +17,9 @@ export class MessageTriggerService extends DatabaseService {
 		try {
 			const fromDB = (await this.findOne(data.tenancyId)) as MessageTrigger;
 
-			notExistisOrError(fromDB?.id, { message: 'Triger already exists', status: FORBIDDEN });
+			if (fromDB?.id) {
+				return this.update(fromDB, fromDB.id, req);
+			}
 
 			const [id] = await this.db('message_triggers').insert(convertDataValues(data));
 			existsOrError(Number(id), { message: 'Internal error', err: id, status: INTERNAL_SERVER_ERROR });
@@ -42,18 +44,50 @@ export class MessageTriggerService extends DatabaseService {
 		}
 	}
 
-	async update(data: MessageTrigger, id: number, req: Request) {
+	async update(data: MessageTrigger, tenancyId: number, req: Request) {
 		try {
-			const fromDB = (await this.findOne(id)) as MessageTrigger;
+			const fromDB = (await this.findOne(tenancyId)) as MessageTrigger;
 
 			existsOrError(fromDB?.id, fromDB);
 
-			const toUpdate = { ...fromDB, ...data };
+			const triggers = data.triggers + fromDB.triggers;
+			const dueDate = new Date();
+
+			const toUpdate = new MessageTrigger({ ...fromDB, ...data, triggers, dueDate });
 
 			await this.db('message_triggers').update(convertDataValues(toUpdate)).where('tenancy_id', fromDB.tenancyId);
-			await this.userLogService.create(getUserLogData(req, 'trriger', id, 'Atualizar'));
+			await this.userLogService.create(getUserLogData(req, 'trriger', tenancyId, 'Atualizar'));
 
 			return { message: 'Tregger Update Successful', data: toUpdate };
+		} catch (err: any) {
+			return err;
+		}
+	}
+
+	async triggerMessage(data: SetMessageTrigger) {
+		try {
+			const { tenancyId, contacts, message } = data;
+			const triggersSolicited = contacts.length;
+			const fromDB = (await this.findOne(tenancyId)) as MessageTrigger;
+
+			existsOrError(fromDB?.id, fromDB);
+			existsOrError(fromDB?.triggers >= triggersSolicited, { message: 'creditos insuficientes para enviar messagem', status: FORBIDDEN });
+
+			const triggers = fromDB?.triggers - triggersSolicited;
+
+			onLog('message to send', message);
+			await this.db('message_triggers').update(convertDataValues({ triggers })).where('tenancy_id', tenancyId);
+
+			const dataHistory = new MessageHistory({ message, tenancyId, sendDate: new Date() });
+
+			const history = await this.createHistory(dataHistory);
+
+			return {
+				message: 'messagem pode ser enviada',
+				tenancyCerdits: { ...fromDB, triggers },
+				oldCredits: fromDB.triggers,
+				history,
+			};
 		} catch (err: any) {
 			return err;
 		}

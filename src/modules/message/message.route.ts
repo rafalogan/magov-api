@@ -15,6 +15,7 @@ export class MessageRoute extends Routes {
 			.route('message-trigger')
 			.all(this.auth?.exec().authenticate())
 			.get(this.messageController.list.bind(this.messageController))
+			.post(this.messageController.sendMessage.bind(this.messageController))
 			.all(methodNotAllowed);
 
 		this.app

@@ -31,3 +31,4 @@ export * from './user-log.entity';
 export * from './screen.entity';
 export * from './message-history.entity';
 export * from './message-trigger.entity';
+export * from './set-message-trigger.entity';

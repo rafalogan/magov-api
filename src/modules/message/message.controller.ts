@@ -5,11 +5,26 @@ import { Controller } from 'src/core/controllers';
 import { MessageTriggerService } from 'src/services';
 import { existsOrError, isRequired } from 'src/utils';
 import { ResponseHandle } from 'src/core/handlers';
-import { MessageTrigger } from 'src/repositories/entities';
+import { MessageHistory, MessageTrigger } from 'src/repositories/entities';
 
 export class MessageController extends Controller {
 	constructor(private messageService: MessageTriggerService) {
 		super();
+	}
+
+	sendMessage(req: Request, res: Response) {
+		try {
+			this.validateHistory(req);
+		} catch (err) {
+			return ResponseHandle.onError({ res, err });
+		}
+
+		const mesageToSend = new MessageHistory(req.body);
+
+		this.messageService
+			.createHistory(mesageToSend)
+			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
 	save(req: Request, res: Response) {
@@ -27,22 +42,80 @@ export class MessageController extends Controller {
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
-	saveHistory(req: Request, res: Response) {}
+	saveHistory(req: Request, res: Response) {
+		try {
+			this.validateHistory(req);
+		} catch (err) {
+			return ResponseHandle.onError({ err, res });
+		}
 
-	edit(req: Request, res: Response) {}
+		const history = new MessageHistory(req.body);
 
-	list(req: Request, res: Response) {}
+		this.messageService
+			.createHistory(history)
+			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.catch(err => ResponseHandle.onError({ res, err }));
+	}
 
-	listHistory(req: Request, res: Response) {}
+	edit(req: Request, res: Response) {
+		const { tenancyId } = req.params;
 
-	remove(req: Request, res: Response) {}
+		const trigger = new MessageTrigger(req.body);
 
-	removeHistory(req: Request, res: Response) {}
+		this.messageService
+			.update(trigger, Number(tenancyId), req)
+			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.catch(err => ResponseHandle.onError({ res, err }));
+	}
+
+	list(req: Request, res: Response) {
+		const { tenancyId } = req.params;
+
+		this.messageService
+			.read({ tenancyId: Number(tenancyId) })
+			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.catch(err => ResponseHandle.onError({ res, err }));
+	}
+
+	listHistory(req: Request, res: Response) {
+		const { tenancyId } = req.params;
+
+		this.messageService
+			.findHistory(Number(tenancyId))
+			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.catch(err => ResponseHandle.onError({ res, err }));
+	}
+
+	remove(req: Request, res: Response) {
+		const { tenancyId } = req.params;
+
+		this.messageService
+			.delete(Number(tenancyId))
+			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.catch(err => ResponseHandle.onError({ res, err }));
+	}
+
+	removeHistory(req: Request, res: Response) {
+		const { tenancyId } = req.params;
+
+		this.messageService
+			.deletedHistories(Number(tenancyId))
+			.then(data => ResponseHandle.onSuccess({ res, data }))
+			.catch(err => ResponseHandle.onError({ res, err }));
+	}
 
 	validate(req: Request) {
 		const required = ['tenancyId', 'triggers', 'dueDate'];
 
 		for (const item of required) {
+			existsOrError(req.body[item], { message: isRequired(item), status: BAD_REQUEST });
+		}
+	}
+
+	validateHistory(req: Request) {
+		const required = ['tenancyId', 'message', 'sendDate'];
+
+		for (const item in required) {
 			existsOrError(req.body[item], { message: isRequired(item), status: BAD_REQUEST });
 		}
 	}
