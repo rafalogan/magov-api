@@ -12,27 +12,27 @@ export class MessageRoute extends Routes {
 
 	exec() {
 		this.app
-			.route('message-trigger')
+			.route('/message-trigger')
 			.all(this.auth?.exec().authenticate())
 			.get(this.messageController.list.bind(this.messageController))
 			.post(this.messageController.sendMessage.bind(this.messageController))
 			.all(methodNotAllowed);
 
 		this.app
-			.route('message-trigger/history')
+			.route('/message-trigger/history')
 			.all(this.auth?.exec().authenticate())
 			.post(this.messageController.saveHistory.bind(this.messageController))
 			.all(methodNotAllowed);
 
 		this.app
-			.route('message-trigger/history/:tenancyId')
+			.route('/message-trigger/history/:tenancyId')
 			.all(this.auth?.exec().authenticate())
 			.get(this.messageController.listHistory.bind(this.messageController))
 			.delete(this.messageController.removeHistory.bind(this.messageController))
 			.all(methodNotAllowed);
 
 		this.app
-			.route('message-trigger/:tenancyId')
+			.route('/message-trigger/:tenancyId')
 			.all(this.auth?.exec().authenticate())
 			.get(this.messageController.list.bind(this.messageController))
 			.post(this.messageController.save.bind(this.messageController))

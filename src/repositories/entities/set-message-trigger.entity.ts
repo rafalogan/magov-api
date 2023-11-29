@@ -1,4 +1,3 @@
-import { convertBlobToString } from 'src/utils';
 import { IContactMessage, ISendMessage } from '../types';
 
 export class SetMessageTrigger {
@@ -9,6 +8,6 @@ export class SetMessageTrigger {
 	constructor(data: ISendMessage) {
 		this.contacts = data.contacts;
 		this.tenancyId = Number(data.tenancyId);
-		this.message = convertBlobToString(data.message) as string;
+		this.message = data.message.toString();
 	}
 }

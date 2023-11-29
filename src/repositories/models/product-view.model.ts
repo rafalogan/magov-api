@@ -16,6 +16,7 @@ export class ProductViewModel {
 		this.limit = setInstanceId(data.limit);
 		this.amount = Number(data.amount) || 1;
 		this.typeId = Number(data.typeId);
+		this.type = data.type;
 		this.value = setValueNumberToView(data.value) as number;
 	}
 }

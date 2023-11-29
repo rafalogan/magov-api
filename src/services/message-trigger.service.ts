@@ -4,7 +4,7 @@ import { FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { IReadOptions, IServiceOptions } from 'src/repositories/types';
 import { DatabaseService } from './abistract-database.service';
 import { MessageHistory, MessageTrigger, SetMessageTrigger } from 'src/repositories/entities';
-import { convertDataValues, existsOrError, messages } from 'src/utils';
+import { convertDataValues, existsOrError } from 'src/utils';
 import { getUserLogData, onLog } from 'src/core/handlers';
 import dayjs from 'dayjs';
 

@@ -44,17 +44,16 @@ export class ProductService extends DatabaseService {
 		onLog('Products opitons', options);
 		if (id) return this.getProduct(id);
 
-		return this.db('products')
-			.then(res => {
-				try {
-					existsOrError(Array.isArray(res), { message: 'internal error', err: res, status: INTERNAL_SERVER_ERROR });
-				} catch (err) {
-					return err;
-				}
+		try {
+			const fromDB = await this.db({ p: 'products', pt: 'products_types' })
+				.select('p.*', { type: 'pt.type' })
+				.whereRaw('pt.id = p.type_id');
+			existsOrError(Array.isArray(fromDB), { message: 'internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 
-				return res.map((p: any) => new ProductViewModel(convertDataValues(p, 'camel')));
-			})
-			.catch(err => err);
+			return fromDB.map((i: any) => new ProductViewModel(convertDataValues(i, 'camel')));
+		} catch (err) {
+			return err;
+		}
 	}
 
 	async getProduct(filter: string | number) {
