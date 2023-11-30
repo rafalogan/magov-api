@@ -1,8 +1,7 @@
 import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
 import { FileEntity } from '../entities';
-import { ISaleUnitView, ISaleUserView, ISeller, ISaleViewModel, IProduct, IFile, ISalePayments, ISaleProduct } from '../types';
+import { ISaleUnitView, ISaleUserView, ISeller, ISaleViewModel, IFile, ISalePayments, ISaleProduct } from '../types';
 import { SalePaymentModel } from './sale-payment.model';
-import { onLog } from 'src/core/handlers';
 
 export class SaleViewModel {
 	id?: number;
@@ -44,18 +43,19 @@ export class SaleViewModel {
 	}
 
 	private setPayments(data: ISalePayments): ISalePayments {
-		const contract = data.contract?.map(i => (i instanceof SalePaymentModel ? i : new SalePaymentModel(i)));
-		const commissions = data.commissions?.map(i => (i instanceof SalePaymentModel ? i : new SalePaymentModel(i)));
+		const contract = data.contract?.map((i: any) => (i instanceof SalePaymentModel ? i : new SalePaymentModel(i)));
+		const commissions = data.commissions?.map((i: any) => (i instanceof SalePaymentModel ? i : new SalePaymentModel(i)));
 
 		return { contract, commissions };
 	}
 
-	private setProducts(data: ISaleProduct[]) {
+	private setProducts(data: ISaleProduct[]): ISaleProduct[] {
 		return data?.map(i => ({
+			...i,
 			id: Number(i.id),
 			name: i.name?.trim(),
-			plan: !!i.plan,
 			amount: Number(i.amount),
+			typeId: Number(i.typeId),
 			value: setValueNumberToView(i.value) as number,
 		}));
 	}
