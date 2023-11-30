@@ -30,3 +30,4 @@ export * from './government-revenue.service';
 export * from './notification.service';
 export * from './user-log.service';
 export * from './screen.service';
+export * from './message-trigger.service';
