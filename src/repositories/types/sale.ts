@@ -1,5 +1,6 @@
 import { SalePaymentModel } from '../models';
 import { IFile } from './file';
+import { IProduct } from './plan';
 import { IID } from './shared';
 
 export interface ISaleModel extends IID {
@@ -19,10 +20,8 @@ export interface ISaleModel extends IID {
 	description: Blob | string;
 }
 
-export interface ISaleProduct {
+export interface ISaleProduct extends IProduct {
 	id: number;
-	name: string;
-	plan: boolean;
 	amount: number;
 	value: number;
 }
@@ -96,15 +95,6 @@ export interface ISale extends IID {
 	tenancyId: number;
 	userId: number;
 	sellerId: number;
-}
-
-export interface IProduct extends IID {
-	productId: number;
-	name?: string;
-	limit?: number;
-	amount: number;
-	plan: boolean;
-	value: number;
 }
 
 export interface ISeller extends IID {

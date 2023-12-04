@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { NotificationController } from './notification.controller';
 
 export class NotificationRoute extends Routes {
-	constructor(options: RouteOptions, private notificationController: NotificationController) {
+	constructor(
+		options: RouteOptions,
+		private notificationController: NotificationController
+	) {
 		super(options.app, options.auth);
 	}
 

@@ -52,7 +52,6 @@ export class PropositionService extends DatabaseService {
 
 	async update(data: PropositionModel, id: number, req: Request) {
 		try {
-
 			if (data?.unitId) {
 				const unitFromDB = await this.db('units').where('id', data.unitId).andWhere('tenancy_id', data.tenancyId).first();
 				existsOrError(unitFromDB, { message: 'unit not found', status: BAD_REQUEST });
@@ -162,14 +161,14 @@ export class PropositionService extends DatabaseService {
 
 			const fromDB = unitId
 				? await this.db(table)
-					.select(...fields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhereRaw(`p.unit_id = ${unitId}`)
-					.andWhereRaw('t.id = p.type_id')
+						.select(...fields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw(`p.unit_id = ${unitId}`)
+						.andWhereRaw('t.id = p.type_id')
 				: await this.db(table)
-					.select(...fields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhereRaw('t.id = p.type_id');
+						.select(...fields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw('t.id = p.type_id');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
 			const raw = fromDB.map((i: any) => convertDataValues(i, 'camel'));
@@ -177,24 +176,10 @@ export class PropositionService extends DatabaseService {
 			const res: any[] = [];
 
 			for (const item of raw) {
-				const themesRaw = (await this.getValues({
-					value: item.id,
-					tableIds: 'propositions_themes',
-					fieldIds: 'theme_id',
-					whereIds: 'proposition_id',
-					table: 'themes',
-					fields: ['id', 'name'],
-				})) as any;
-				const keywordsRaw = (await this.getValues({
-					value: item.id,
-					tableIds: 'propositions_keywords',
-					fieldIds: 'keyword_id',
-					whereIds: 'proposition_id',
-					table: 'keywords',
-					fields: ['id', 'keyword'],
-				})) as any;
-
-				const budgets = await this.getBudgets(item.id);
+				const { id } = item;
+				const themesRaw = await this.getThemes(id);
+				const keywordsRaw = await this.getKeywords(id);
+				const budgets = await this.getBudgets(id);
 
 				const favorite = !!item.favorite;
 				const active = !!item.active;
@@ -206,6 +191,8 @@ export class PropositionService extends DatabaseService {
 
 				res.push({ ...item, favorite, active, expense, themes, keywords, menu, budgets, textEditor });
 			}
+
+			onLog('res ponse propositions', res);
 
 			return res;
 		} catch (err) {
@@ -226,6 +213,7 @@ export class PropositionService extends DatabaseService {
 						expense: 'p.expense',
 						tenancy_id: 'p.tenancy_id',
 						parent_id: 'p.parent_id',
+						text_editor: 'p.text_editor',
 					},
 					{ unit_id: 'u.id', unit_name: 'u.name' },
 					{ type_id: 't.id', type_name: 't.name' }
@@ -250,25 +238,8 @@ export class PropositionService extends DatabaseService {
 			});
 
 			const budgets = await this.getBudgets(fromDB.id);
-
-			const keywords = await this.getValues({
-				value: fromDB.id,
-				tableIds: 'propositions_keywords',
-				fieldIds: 'keyword_id',
-				whereIds: 'proposition_id',
-				table: 'keywords',
-				fields: ['id', 'keyword'],
-			});
-
-			const themes = await this.getValues({
-				value: fromDB.id,
-				tableIds: 'propositions_themes',
-				fieldIds: 'theme_id',
-				whereIds: 'proposition_id',
-				table: 'themes',
-				fields: ['id', 'name'],
-			});
-
+			const keywords = await this.getKeywords(fromDB.id);
+			const themes = await this.getThemes(fromDB?.id);
 			const tasks = await this.getTasksProposition(fromDB.id);
 			const file = await this.getFile(fromDB.id);
 
@@ -540,5 +511,26 @@ export class PropositionService extends DatabaseService {
 		} catch (err) {
 			return err;
 		}
+	}
+
+	private async getThemes(propositionId: number) {
+		const fromDB = await this.db({ pt: 'propositions_themes', t: 'themes' })
+			.select({ id: 't.id', name: 't.name' })
+			.where('pt.proposition_id', propositionId)
+			.andWhereRaw('t.id = pt.theme_id');
+
+		return fromDB.map(i => convertDataValues(i, 'camel'));
+	}
+
+	private async getKeywords(propositionId: number) {
+		onLog('propositionId keyword', propositionId);
+		const fromDB = await this.db({ pk: 'propositions_keywords', k: 'keywords' })
+			.select({ id: 'k.id', keyword: 'k.keyword' })
+			.where('pk.proposition_id', propositionId)
+			.andWhereRaw('k.id = pk.keyword_id');
+
+		onLog('keyword raw', fromDB);
+
+		return fromDB.map(i => convertDataValues(i, 'camel'));
 	}
 }
