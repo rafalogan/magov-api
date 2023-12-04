@@ -482,11 +482,11 @@ export class UserService extends DatabaseService {
 
 	private async getPlansBytenancy(tenancyId: number) {
 		try {
-			const fromDB = await this.db({ tp: 'tenancies_plans', p: 'products' })
-				.select({ amount: 'tp.amount' }, { id: 'p.id', name: 'p.name', limit: 'p.limit' })
+			const fromDB = await this.db({ tp: 'tenancies_plans', p: 'products', pt: 'products_types' })
+				.select({ amount: 'tp.amount' }, { id: 'p.id', name: 'p.name', limit: 'p.limit' }, { type_id: 'pt.id', type: 'pt.type' })
 				.where('tp.tenancy_id', tenancyId)
 				.andWhereRaw('p.id = tp.plan_id')
-				.andWhereRaw('p.plan = 1');
+				.andWhereRaw('pt.id = p.type_id');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
 
