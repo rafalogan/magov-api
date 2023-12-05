@@ -377,7 +377,7 @@ export class UserService extends DatabaseService {
 
 			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
 
-			const toSave = new User({ ...data, tenancyId: Number(tenancyId), unitId: Number(unit.id) || undefined });
+			const toSave = new User({ ...data, tenancyId: Number(tenancyId), unitId: undefined });
 			const [id] = await this.db('users').insert(convertDataValues(toSave));
 
 			existsOrError(Number(id), { message: 'Internl error', err: id, status: INTERNAL_SERVER_ERROR });
