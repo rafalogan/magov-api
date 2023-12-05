@@ -16,7 +16,7 @@ export class AuthService {
 	constructor(
 		private userService: UserService,
 		private mailsService: MailService
-	) { }
+	) {}
 
 	validateCredentials(credentials: ICredentials) {
 		try {
@@ -90,11 +90,11 @@ export class AuthService {
 		return valid
 			? { valid, status, message: 'Token valid to use.', token }
 			: {
-				valid,
-				status,
-				message: 'Invalid token!',
-				token,
-			};
+					valid,
+					status,
+					message: 'Invalid token!',
+					token,
+			  };
 	}
 
 	async verifyEmailUser(email: string, options: SendEmailOptions) {
