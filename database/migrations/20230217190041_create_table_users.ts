@@ -11,7 +11,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.string('cpf', 20).notNullable();
 		table.string('phone', 50).notNullable();
 		table.boolean('active').notNullable().defaultTo(true);
-		table.integer('level').notNullable();
+		table.integer('level').unsigned().references('id').inTable('profiles').notNullable();
 		table.integer('unit_id').unsigned().references('id').inTable('units').nullable();
 		table.integer('tenancy_id').unsigned().references('id').inTable('tenancies').nullable();
 	});
