@@ -29,14 +29,8 @@ const profiles: IProfile[] = [
 	},
 	{
 		name: 'Master Tenancy',
-		code: 'MTEN',
+		code: 'MTENANCY',
 		description: 'Perfil de administrador',
-		active: true,
-	},
-	{
-		name: 'Assistente',
-		code: 'ASSIST',
-		description: 'Perfil de assistente',
 		active: true,
 	},
 	{
@@ -79,6 +73,12 @@ const profiles: IProfile[] = [
 		name: 'Assessor comum',
 		code: 'ASSCOM',
 		description: 'Perfil de assessor comum',
+		active: true,
+	},
+	{
+		name: 'Assistente',
+		code: 'ASSIST',
+		description: 'Perfil de assistente',
 		active: true,
 	},
 ];

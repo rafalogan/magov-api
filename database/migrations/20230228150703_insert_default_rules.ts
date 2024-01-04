@@ -95,13 +95,18 @@ const rules: IRule[] = [
 	},
 	{
 		name: 'Criar Unidades e Usuários',
-		code: 'CREATEUNITUSER',
+		code: 'CREATEUNITUSERTENANCY',
 		description: 'Pode criar unidades e cadastras usuários; (pode cadastrar de outras unidades)',
 	},
 	{
 		name: 'Pode editar Unidades e Usuários',
-		code: 'EDITUNITUSER',
+		code: 'EDITUNITUSERTENANCY',
 		description: 'Pode editar unidades e cadastras usuários; (pode editar de outras unidades)',
+	},
+	{
+		name: 'Criar Usuários da Unidade',
+		code: 'CREATEUNITUSER',
+		description: 'Pode criar usuários da unidade',
 	},
 	{
 		name: 'Radar de Projetos',
@@ -112,6 +117,11 @@ const rules: IRule[] = [
 		name: 'Geomapeamento',
 		code: 'GEOMAP',
 		description: 'Pode ver geomapeamento',
+	},
+	{
+		name: 'Financeiro da unidade',
+		code: 'FINANCEUNIT',
+		description: 'Pode ver financeiro da unidade',
 	},
 	{
 		name: 'Gestão de documentos',
@@ -149,6 +159,11 @@ const rules: IRule[] = [
 		description: 'Pode ver relatório de metas',
 	},
 	{
+		name: 'Relatórios Resultado Eleições',
+		code: 'REPORTELECTIONRESULT',
+		description: 'Pode ver relatório resultado das eleições',
+	},
+	{
 		name: 'Relatórios Perfil do Eleitorado',
 		code: 'REPORTVOTERPROFILE',
 		description: 'Pode ver relatório perfil do eleitorado',
@@ -162,6 +177,16 @@ const rules: IRule[] = [
 		name: 'Processos Jridicos',
 		code: 'LEGALPROCESSES',
 		description: 'Pode ver processos jurídicos',
+	},
+	{
+		name: 'Acesso total as Vendas',
+		code: 'SALESACCESS',
+		description: 'cadastrar vendas e dar baixa',
+	},
+	{
+		name: 'Acesso de Master Admin',
+		code: 'MASTERADMIN',
+		description: 'pode acessar tudo (editar temas, editar keywords, criar regras, buscar proposições em todos so tenancy)',
 	},
 ];
 
