@@ -32,3 +32,4 @@ export * from './types-recipes';
 export * from './user-log';
 export * from './screen';
 export * from './message';
+export * from './profile';
