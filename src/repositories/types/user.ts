@@ -1,5 +1,6 @@
 import { IAddress } from './address';
 import { IFile } from './file';
+import { IProfileView } from './profile';
 import { IID } from './shared';
 import { IUnitModel } from './unit';
 
@@ -50,6 +51,7 @@ export interface IUserPlan {
 }
 
 export interface IUserViewModel extends IUser {
+	profile: IProfileView;
 	userRules: IUserRuleView[];
 	address: IAddress;
 	unit: IUserUnit;

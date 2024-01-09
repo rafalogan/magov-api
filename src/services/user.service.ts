@@ -4,7 +4,18 @@ import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-s
 import { getUserLogData, onError, onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { PaginationModel, ReadOptionsModel, RecoveryModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
-import { IAddress, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserRule, IUserRuleView, IUserViewModel } from 'src/repositories/types';
+import {
+	IAddress,
+	IProfile,
+	IProfileView,
+	IServiceOptions,
+	ITenancy,
+	IUnitProduct,
+	IUser,
+	IUserRule,
+	IUserRuleView,
+	IUserViewModel,
+} from 'src/repositories/types';
 import { convertDataValues, deleteField, deleteFile, existsOrError, hashString, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
@@ -38,19 +49,24 @@ export class UserService extends DatabaseService {
 			return options.unitId ? this.getUsersByUnit(options) : this.getUsers(options);
 		}
 
-		const fromDB = await this.db('users').select(
-			'id',
-			'first_name',
-			'last_name',
-			'office',
-			'email',
-			'cpf',
-			'phone',
-			'level',
-			'active',
-			'unit_id',
-			'tenancy_id'
-		);
+		const fromDB = await this.db({ u: 'users', p: 'profiles' })
+			.select(
+				{
+					id: 'u.id',
+					first_name: 'u.first_name',
+					last_name: 'u.last_name',
+					office: 'u.office',
+					email: 'u.email',
+					cpf: 'u.cpf',
+					phone: 'u.phone',
+					level: 'u.level',
+					active: 'u.active',
+					unit_id: 'u.unit_id',
+					tenancy_id: 'u.tenancy_id',
+				},
+				{ profile: 'p.name' }
+			)
+			.whereRaw('p.id = u.level');
 
 		existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 		const res: any[] = [];
@@ -123,7 +139,7 @@ export class UserService extends DatabaseService {
 		try {
 			const { page, limit, unitId, tenancyId, orderBy, order } = options;
 			const total = await this.getCount('users', tenancyId);
-			const tables = { u: 'users', un: 'units' };
+			const tables = { u: 'users', un: 'units', p: 'profiles' };
 			const fields = [
 				{
 					id: 'u.id',
@@ -138,6 +154,7 @@ export class UserService extends DatabaseService {
 					tenancy_id: 'u.tenancy_id',
 				},
 				{ unit_id: 'un.id', unit_name: 'un.name' },
+				{ profile: 'p.name' },
 			];
 
 			if (page) {
@@ -147,6 +164,7 @@ export class UserService extends DatabaseService {
 					.where('u.unit_id', unitId)
 					.andWhere('u.tenancy_id', tenancyId)
 					.andWhereRaw('un.id = u.unit_id')
+					.andWhereRaw('p.id = u.level')
 					.limit(limit)
 					.offset(page * limit - limit)
 					.orderBy(orderBy || 'id', order || 'asc');
@@ -166,6 +184,7 @@ export class UserService extends DatabaseService {
 				.where('u.unit_id', unitId)
 				.andWhere('u.tenancy_id', tenancyId)
 				.andWhereRaw('un.id = u.unit_id')
+				.andWhereRaw('p.id = u.level')
 				.orderBy(orderBy || 'id', order || 'asc');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
@@ -178,7 +197,7 @@ export class UserService extends DatabaseService {
 
 	async getUsers(options: ReadOptionsModel) {
 		try {
-			const tables = { u: 'users', un: 'units' };
+			const tables = { u: 'users', un: 'units', p: 'profiles' };
 			const fields = [
 				{
 					id: 'u.id',
@@ -193,12 +212,14 @@ export class UserService extends DatabaseService {
 					tenancy_id: 'u.tenancy_id',
 				},
 				{ unit_id: 'un.id', unit_name: 'un.name' },
+				{ profile: 'p.name' },
 			];
 
 			const fromDB = await this.db(tables)
 				.select(...fields)
 				.andWhere('u.tenancy_id', options.tenancyId)
-				.andWhereRaw('un.id = u.unit_id');
+				.andWhereRaw('un.id = u.unit_id')
+				.andWhereRaw('p.id = u.level');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', err: fromDB, status: INTERNAL_SERVER_ERROR });
 
@@ -234,19 +255,28 @@ export class UserService extends DatabaseService {
 					city: 'a.city',
 					uf: 'a.uf',
 				},
+				{
+					profile_id: 'p.id',
+					profile_name: 'p.name',
+					profile_code: 'p.code',
+					profile_description: 'p.description',
+					profile_active: 'p.active',
+				},
 			];
-			const tables = { u: 'users', a: 'adresses' };
+			const tables = { u: 'users', a: 'adresses', p: 'profiles' };
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
 						.select(...fields)
 						.where('u.id', filter)
 						.andWhereRaw('a.user_id = u.id')
+						.andWhereRaw('p.id = u.level')
 						.first()
 					: await this.db(tables)
 						.select(...fields)
 						.where('u.email', filter)
 						.andWhereRaw('a.user_id = u.id')
+						.andWhereRaw('p.id = u.level')
 						.first();
 
 			onLog('user from db', fromDb);
@@ -266,6 +296,13 @@ export class UserService extends DatabaseService {
 			const userRules = await this.getUserRules(id);
 			const image = await this.getflie(id);
 			const plans = await this.getPlans(raw.tenancyId, raw.unitId);
+			const profile = await this.getProfile({
+				id: raw.profileId,
+				name: raw.profileName,
+				code: raw.profileCode,
+				description: raw.profileDescription,
+				active: raw.profileActive,
+			});
 			onLog('user image', image);
 			onLog('User unit id', unit);
 
@@ -273,6 +310,7 @@ export class UserService extends DatabaseService {
 				...raw,
 				unit,
 				userRules,
+				profile,
 				address: { ...raw },
 				image,
 				plans,
@@ -571,6 +609,21 @@ export class UserService extends DatabaseService {
 
 			await this.db('files').insert(convertDataValues({ ...file, userId }));
 			return file;
+		} catch (err) {
+			return err;
+		}
+	}
+
+	private async getProfile(data: IProfile) {
+		try {
+			const rules = await this.db({ pr: 'profiles_rules', r: 'rules' })
+				.select({ id: 'r.id', name: 'r.name', code: 'r.code', description: 'r.description' })
+				.where('pr.profile_id', data.id)
+				.andWhereRaw('r.id = pr.rule_id');
+
+			existsOrError(Array.isArray(rules), { message: 'Internal error', err: rules, status: INTERNAL_SERVER_ERROR });
+
+			return { ...data, rules };
 		} catch (err) {
 			return err;
 		}
