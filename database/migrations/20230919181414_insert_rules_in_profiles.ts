@@ -185,11 +185,11 @@ export async function up(knex: Knex): Promise<void> {
 				};
 			});
 
-			await knex.batchInsert('rules_profiles', rulesProfiles);
+			await knex.batchInsert('profiles_rules', rulesProfiles);
 		}
 	}
 }
 
 export async function down(knex: Knex): Promise<void> {
-	return knex('rules_profiles').del();
+	return knex('profiles_rules').del();
 }

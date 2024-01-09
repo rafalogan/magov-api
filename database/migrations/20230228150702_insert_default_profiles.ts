@@ -5,7 +5,7 @@ import { IProfile } from 'src/repositories/types';
 const profiles: IProfile[] = [
 	{
 		name: 'Dev Root',
-		code: 'DVROOT',
+		code: 'ROOT',
 		description: 'Perfil de desenvolvedor root',
 		active: true,
 	},
