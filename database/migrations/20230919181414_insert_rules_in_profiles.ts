@@ -2,7 +2,7 @@ import { Knex } from 'knex';
 
 const rulesProfiles: { profileCode: string; rules: string[] }[] = [
 	{
-		profileCode: 'DVROOT',
+		profileCode: 'ROOT',
 		rules: ['ROOT'],
 	},
 	{
