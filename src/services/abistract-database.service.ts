@@ -95,6 +95,19 @@ export abstract class DatabaseService extends CacheService {
 		}
 	}
 
+	protected async verifyUnit(unitId: number, tenancyId: number) {
+		try {
+			const fromDb = await this.db('units').where({ id: unitId }).andWhere('tenancy_id', tenancyId).first();
+
+			if (!fromDb) return false;
+			if (fromDb?.tenancy_id !== tenancyId) return false;
+
+			return true;
+		} catch (err) {
+			return err;
+		}
+	}
+
 	protected async setPlanOnTenancy(tenancyId: number, plans: ISaleProduct[]) {
 		try {
 			for (const plan of plans) {
