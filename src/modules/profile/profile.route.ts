@@ -21,7 +21,7 @@ export class ProfileRoute extends Routes {
 		this.app
 			.route('/profiles/disable/:filter')
 			.all(this.auth?.exec().authenticate())
-			.put(this.profileController.disable.bind(this.profileController))
+			.get(this.profileController.disable.bind(this.profileController))
 			.all(methodNotAllowed);
 
 		this.app
