@@ -35,6 +35,7 @@ import { NotificationModule } from 'src/modules/notification';
 import { UserLogModule } from 'src/modules/user-log';
 import { ScreenModule } from 'src/modules/screen';
 import { MessageModule } from 'src/modules/message';
+import { ProfileModule } from 'src/modules/profile';
 
 export class ModulesFactory {
 	private authModule: AuthModule;
@@ -65,6 +66,7 @@ export class ModulesFactory {
 	private userLoginModule: UserLogModule;
 	private notificationModule: NotificationModule;
 	private screenModule: ScreenModule;
+	private profileModule: ProfileModule;
 	private messageModule: MessageModule;
 
 	constructor(
@@ -104,6 +106,7 @@ export class ModulesFactory {
 		this.userLoginModule = new UserLogModule({ ...this.getRouteOptions(), service: services.userLogService });
 		this.notificationModule = new NotificationModule({ ...this.getRouteOptions(), service: services.notificationService });
 		this.screenModule = new ScreenModule({ ...this.getRouteOptions(), service: services.screenService });
+		this.profileModule = new ProfileModule({ ...this.getRouteOptions(), service: services.profileService });
 		this.messageModule = new MessageModule({ ...this.getRouteOptions(), service: services.messageTriggersService });
 	}
 
@@ -136,6 +139,7 @@ export class ModulesFactory {
 		this.notificationModule.exec();
 		this.screenModule.exec();
 		this.messageModule.exec();
+		this.profileModule.exec();
 		this.userLoginModule.exec();
 		this.app.use('/media', express.static(resolve(__dirname, '../..', 'tmp', 'uploads')));
 		this.app.use(notfoundRoute);
