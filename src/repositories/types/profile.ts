@@ -11,3 +11,7 @@ export interface IProfile {
 export interface IProfileView extends IProfile {
 	rules: IRule[];
 }
+
+export interface IProfileModel extends IProfile {
+	rules: Array<number | string>;
+}

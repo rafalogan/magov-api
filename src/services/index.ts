@@ -31,3 +31,4 @@ export * from './notification.service';
 export * from './user-log.service';
 export * from './screen.service';
 export * from './message-trigger.service';
+export * from './profile.service';
