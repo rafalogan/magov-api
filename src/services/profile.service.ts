@@ -74,7 +74,7 @@ export class ProfileService extends DatabaseService {
 			.catch(err => ({ message: err.message, status: INTERNAL_SERVER_ERROR }));
 	}
 
-	async desactivate(filter: number | string) {
+	async desactivate(filter: number | string, req: Request) {
 		const fromDB =
 			typeof filter === 'number'
 				? await this.db('profiles').where({ id: filter }).first()
@@ -87,6 +87,8 @@ export class ProfileService extends DatabaseService {
 		await this.db('profiles')
 			.where(convertDataValues({ id: profile.id }))
 			.update(convertDataValues(profile));
+
+		await this.userLogService.create(getUserLogData(req, 'desactivate', Number(profile.id), 'profiles'));
 
 		return { message: 'Profile desactivated successfully', data: profile };
 	}
