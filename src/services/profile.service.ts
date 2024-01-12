@@ -6,7 +6,7 @@ import { DatabaseService } from './abistract-database.service';
 import { ProfileModel } from 'src/repositories/models';
 import { convertDataValues, existsOrError, notExistisOrError } from 'src/utils';
 import { Profile, ProfileView } from 'src/repositories/entities';
-import { getUserLogData } from 'src/core/handlers';
+import { getUserLogData, onLog } from 'src/core/handlers';
 
 export class ProfileService extends DatabaseService {
 	constructor(options: IServiceOptions) {
@@ -34,7 +34,7 @@ export class ProfileService extends DatabaseService {
 
 		existsOrError(fromDB, { message: 'Profile not found', status: NOT_FOUND });
 
-		const profile = new Profile({ ...fromDB, ...data }, fromDB.id);
+		const profile = new Profile({ ...fromDB, ...data, active: !!data.active || !!fromDB.active }, fromDB.id);
 
 		await this.db('profiles')
 			.where(convertDataValues({ id: profile.id }))
@@ -56,10 +56,13 @@ export class ProfileService extends DatabaseService {
 	}
 
 	async findOne(filter: number | string) {
-		const fromDB =
-			typeof filter === 'number'
-				? await this.db('profiles').where({ id: filter }).first()
-				: await this.db('profiles').where({ code: filter.toUpperCase() }).first();
+		const fromDB = Number(filter)
+			? await this.db('profiles').where({ id: filter }).first()
+			: await this.db('profiles')
+					.where({ code: String(filter).toUpperCase() })
+					.first();
+
+		onLog('profile from db:', fromDB);
 
 		existsOrError(fromDB, { message: 'Profile not found', status: NOT_FOUND });
 
@@ -75,10 +78,11 @@ export class ProfileService extends DatabaseService {
 	}
 
 	async desactivate(filter: number | string, req: Request) {
-		const fromDB =
-			typeof filter === 'number'
-				? await this.db('profiles').where({ id: filter }).first()
-				: await this.db('profiles').where({ code: filter.toUpperCase() }).first();
+		const fromDB = Number(filter)
+			? await this.db('profiles').where({ id: filter }).first()
+			: await this.db('profiles')
+					.where({ code: String(filter).toUpperCase() })
+					.first();
 
 		existsOrError(fromDB, { message: 'Profile not found', status: NOT_FOUND });
 
@@ -94,10 +98,11 @@ export class ProfileService extends DatabaseService {
 	}
 
 	async delete(filter: number | string, req: Request) {
-		const fromDB =
-			typeof filter === 'number'
-				? await this.db('profiles').where({ id: filter }).first()
-				: await this.db('profiles').where({ code: filter.toUpperCase() }).first();
+		const fromDB = Number(filter)
+			? await this.db('profiles').where({ id: filter }).first()
+			: await this.db('profiles')
+					.where({ code: String(filter).toUpperCase() })
+					.first();
 		existsOrError(fromDB, { message: 'Profile already deleted', status: FORBIDDEN });
 
 		const usersProfiles = await this.db('users').where({ level: fromDB.id });
