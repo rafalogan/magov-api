@@ -27,10 +27,11 @@ export class ProfileService extends DatabaseService {
 	}
 
 	async update(data: ProfileModel, filter: number | string, req: Request) {
-		const fromDB =
-			typeof filter === 'number'
-				? await this.db('profiles').where({ id: filter }).first()
-				: await this.db('profiles').where({ code: filter.toUpperCase() }).first();
+		const fromDB = Number(filter)
+			? await this.db('profiles').where({ id: filter }).first()
+			: await this.db('profiles')
+					.where({ code: String(filter).toUpperCase() })
+					.first();
 
 		existsOrError(fromDB, { message: 'Profile not found', status: NOT_FOUND });
 
@@ -141,10 +142,11 @@ export class ProfileService extends DatabaseService {
 		await this.db('profiles_rules').where(convertDataValues({ profileId })).delete();
 
 		for (const filter of rules) {
-			const rule =
-				typeof filter === 'number'
-					? await this.db('rules').where({ id: filter }).first()
-					: await this.db('rules').where({ code: filter.toUpperCase() }).first();
+			const rule = Number(filter)
+				? await this.db('rules').where({ id: filter }).first()
+				: await this.db('rules')
+						.where({ code: String(filter).toUpperCase() })
+						.first();
 
 			if (rule) {
 				profilesRules.push({ profile_id: profileId, rule_id: rule.id });
