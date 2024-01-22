@@ -32,13 +32,14 @@ export class RuleService extends DatabaseService {
 			const rule = new Rule({ ...fromDB, ...data });
 
 			await this.db('rules').where({ id }).update(convertDataValues(rule));
+
 			return { message: 'Rule updated successfully', data: rule };
 		} catch (err) {
 			return err;
 		}
 	}
 
-	async read(id?: number) {
+	async read(id?: number | string) {
 		if (id) return this.getRule(id);
 
 		return this.db('rules')
@@ -48,10 +49,9 @@ export class RuleService extends DatabaseService {
 
 	async getRule(value: number | string) {
 		try {
-			const fromDB =
-				typeof value === 'number'
-					? await this.db('rules').where({ id: value }).first()
-					: await this.db('rules').where({ name: value }).first();
+			const fromDB = Number(value)
+				? await this.db('rules').where({ id: value }).first()
+				: await this.db('rules').where({ name: value }).first();
 
 			if (!fromDB?.id) throw { message: 'Rule not found', status: NOT_FOUND };
 
@@ -61,7 +61,7 @@ export class RuleService extends DatabaseService {
 		}
 	}
 
-	async delete(id: number) {
+	async delete(id: number | string) {
 		try {
 			const fromDB = (await this.getRule(id)) as Rule;
 

@@ -47,10 +47,10 @@ export class UserViewModel {
 		if (!data) return [];
 
 		return data.map(i => ({
-			screenId: Number(i.screenId),
-			screenName: i.screenName?.trim(),
-			ruleId: Number(i.ruleId),
-			ruleName: i.ruleName?.trim(),
+			id: Number(i.id),
+			name: i.name?.trim(),
+			code: i.code?.trim(),
+			description: convertBlobToString(i?.description),
 		}));
 	}
 

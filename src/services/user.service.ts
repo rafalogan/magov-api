@@ -4,18 +4,7 @@ import { BAD_REQUEST, FORBIDDEN, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-s
 import { getUserLogData, onError, onLog } from 'src/core/handlers';
 import { Address, FileEntity, Tenancy, User } from 'src/repositories/entities';
 import { PaginationModel, ReadOptionsModel, RecoveryModel, UnitModel, UserModel, UserViewModel } from 'src/repositories/models';
-import {
-	IAddress,
-	IProfile,
-	IProfileView,
-	IServiceOptions,
-	ITenancy,
-	IUnitProduct,
-	IUser,
-	IUserRule,
-	IUserRuleView,
-	IUserViewModel,
-} from 'src/repositories/types';
+import { IAddress, IProfile, IServiceOptions, ITenancy, IUnitProduct, IUser, IUserViewModel } from 'src/repositories/types';
 import { convertDataValues, deleteField, deleteFile, existsOrError, hashString, notExistisOrError } from 'src/utils';
 import { DatabaseService } from './abistract-database.service';
 import { UnitService } from './unit.service';
@@ -98,7 +87,7 @@ export class UserService extends DatabaseService {
 			existsOrError(userFromDb?.id, userFromDb);
 			const user = new User({ ...userFromDb, ...data, tenancyId: userFromDb.tenancyId } as IUser);
 
-			if (data.userRules) await this.userRulesUpdate(data.userRules, id);
+			if (data.userRules) await this.setRules(id, data.userRules);
 			const image = data.image ? await this.setUserImage(data.image, id) : undefined;
 			if (data.address) await this.saveAddress(data.address, id);
 
@@ -267,17 +256,17 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-						.select(...fields)
-						.where('u.id', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.andWhereRaw('p.id = u.level')
-						.first()
+							.select(...fields)
+							.where('u.id', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.andWhereRaw('p.id = u.level')
+							.first()
 					: await this.db(tables)
-						.select(...fields)
-						.where('u.email', filter)
-						.andWhereRaw('a.user_id = u.id')
-						.andWhereRaw('p.id = u.level')
-						.first();
+							.select(...fields)
+							.where('u.email', filter)
+							.andWhereRaw('a.user_id = u.id')
+							.andWhereRaw('p.id = u.level')
+							.first();
 
 			onLog('user from db', fromDb);
 
@@ -377,40 +366,19 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async getUserRules(userId: number) {
-		try {
-			const rulesUsersDB = await this.db('users_rules').where('user_id', userId);
-			const res: IUserRuleView[] = [];
-
-			for (const item of rulesUsersDB) {
-				const fromDB = await this.db({ s: 'app_screens', r: 'rules' })
-					.select({ screen_id: 's.id', screen_name: 's.name' }, { rule_id: 'r.id', rule_name: 'r.name' })
-					.where('s.id', item.screen_id)
-					.andWhere('r.id', item.rule_id)
-					.first();
-
-				if (fromDB?.screen_id) res.push(convertDataValues(fromDB, 'camel'));
-			}
-
-			return res;
-		} catch (err) {
-			return err;
-		}
-	}
-
 	private async setMasterUserTenancy(data: UserModel, req: Request) {
 		try {
 			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
 			const unit = data?.unit
 				? await this.setUnit(
-					req,
-					new UnitModel({
-						...data.unit,
-						phone: data?.unit.phone || data.phone,
-						active: true,
-						tenancyId: Number(tenancyId),
-					})
-				)
+						req,
+						new UnitModel({
+							...data.unit,
+							phone: data?.unit.phone || data.phone,
+							active: true,
+							tenancyId: Number(tenancyId),
+						})
+					)
 				: undefined;
 
 			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
@@ -420,7 +388,7 @@ export class UserService extends DatabaseService {
 
 			existsOrError(Number(id), { message: 'Internl error', err: id, status: INTERNAL_SERVER_ERROR });
 
-			if (data.userRules?.length) await this.saveUserRules(data.userRules, id);
+			if (data.userRules?.length) await this.setRules(id, data.userRules);
 			if (data.image) await this.setUserImage(data.image, id);
 
 			const address = await this.setAddress(data.address, 'userId', id);
@@ -464,7 +432,7 @@ export class UserService extends DatabaseService {
 
 			existsOrError(Number(id), { message: 'internl error', err: id, status: INTERNAL_SERVER_ERROR });
 
-			if (data?.userRules.length) await this.saveUserRules(data.userRules, id);
+			if (data?.userRules.length) await this.setRules(id, data.userRules);
 			if (data?.image) await this.setUserImage(data.image, id);
 			const address = await this.setAddress(data.address, 'userId', id);
 
@@ -483,7 +451,7 @@ export class UserService extends DatabaseService {
 			const toSave = new User({ ...data, tenancyId: undefined });
 			const [id] = await this.db('users').insert(convertDataValues(toSave));
 
-			if (data.userRules?.length) await this.saveUserRules(data.userRules, id);
+			if (data.userRules?.length) await this.setRules(id, data.userRules);
 			if (data.image) await this.setUserImage(data.image, id);
 
 			deleteField(data, 'password');
@@ -574,14 +542,15 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async saveUserRules(data: IUserRule[], userId: number) {
+	private async setRules(userId: number, rules: Array<string | number>) {
 		try {
-			for (const item of data) {
-				const screenDB = await this.db('rules').where('id', item.screenId).first();
-				const rule = await this.db('rules').where('id', item.ruleId).first();
+			await this.db('users_rules').where('user_id', userId).del();
 
-				if (rule?.id && screenDB?.id) {
-					await this.db('users_rules').insert(convertDataValues({ ...item, userId }));
+			for (const item of rules) {
+				const rule = Number(item) ? await this.db('rules').where('id', item).first() : await this.db('rules').where('code', item).first();
+
+				if (rule?.id) {
+					await this.db('users_rules').insert(convertDataValues({ userId, ruleId: rule.id }));
 				}
 			}
 		} catch (err) {
@@ -589,10 +558,18 @@ export class UserService extends DatabaseService {
 		}
 	}
 
-	private async userRulesUpdate(data: IUserRule[], userId: number) {
+	private async getUserRules(userId: number) {
 		try {
-			await this.db('users_rules').where({ user_id: userId }).delete();
-			await this.saveUserRules(data, userId);
+			const userRulesDB = await this.db({ ur: 'users_rules', r: 'rules' })
+				.where('ur.user_id', userId)
+				.andWhereRaw('r.id = ur.rule_id')
+				.select({ id: 'r.di', name: 'r.name', code: 'r.code', description: 'r.description' });
+
+			existsOrError(Array.isArray(userRulesDB), { message: 'Internal error', err: userRulesDB, status: INTERNAL_SERVER_ERROR });
+
+			if (!userRulesDB.length) return [];
+
+			return userRulesDB.map(i => convertDataValues(i, 'camel'));
 		} catch (err) {
 			return err;
 		}

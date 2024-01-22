@@ -1,6 +1,7 @@
 import { IAddress } from './address';
 import { IFile } from './file';
 import { IProfileView } from './profile';
+import { IRule } from './rule';
 import { IID } from './shared';
 import { IUnitModel } from './unit';
 
@@ -19,17 +20,7 @@ export interface IUser extends IID {
 	tenancyId?: number;
 }
 
-export interface IUserRule {
-	screenId: number;
-	ruleId: number;
-}
-
-export interface IUserRuleView {
-	screenId: number;
-	screenName: string;
-	ruleId: number;
-	ruleName: string;
-}
+export interface IUserRuleView extends IRule {}
 
 export interface IUserUnit {
 	id: number;
@@ -37,7 +28,7 @@ export interface IUserUnit {
 }
 
 export interface IUserModel extends IUser {
-	userRules: IUserRule[];
+	userRules: Array<string | number>;
 	address: IAddress;
 	plans: IUserPlan[];
 	unit?: IUnitModel;
