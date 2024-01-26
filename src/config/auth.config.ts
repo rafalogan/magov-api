@@ -1,4 +1,4 @@
-import { ExtractJwt, Strategy, StrategyOptions, VerifiedCallback } from 'passport-jwt';
+import { ExtractJwt, Strategy, StrategyOptionsWithoutRequest, VerifiedCallback } from 'passport-jwt';
 import passport from 'passport';
 
 import { deleteField } from 'src/utils';
@@ -9,7 +9,7 @@ import { Payload, UserViewModel } from 'src/repositories/models';
 export class AuthConfig {
 	auth: IAuthConfig;
 
-	private readonly params: StrategyOptions;
+	private readonly params: StrategyOptionsWithoutRequest;
 	private authSecret: string = process.env.AUTHSECRET || '';
 
 	constructor(private userService: UserService) {
@@ -40,10 +40,10 @@ export class AuthConfig {
 		return user;
 	}
 
-	private setStrategyOptions(): StrategyOptions {
+	private setStrategyOptions(): StrategyOptionsWithoutRequest {
 		const secretOrKey = this.authSecret;
 		const jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken();
 
-		return { secretOrKey, jwtFromRequest };
+		return { secretOrKey, jwtFromRequest, passReqToCallback: false };
 	}
 }
