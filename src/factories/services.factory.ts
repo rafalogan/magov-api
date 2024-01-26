@@ -20,6 +20,7 @@ import {
 	PlaintiffService,
 	PlanService,
 	ProductService,
+	ProfileService,
 	PropositionService,
 	PropositionsTypeService,
 	RevenueService,
@@ -69,6 +70,7 @@ export class ServicesFactory {
 	notificationService: NotificationService;
 	screenService: ScreenService;
 	messageTriggersService: MessageTriggerService;
+	profileService: ProfileService;
 
 	constructor(
 		private conn: Knex,
@@ -105,6 +107,7 @@ export class ServicesFactory {
 		this.governmentRevenueService = new GovernmentRevenueService(this.setServiceOptions());
 		this.notificationService = new NotificationService(this.mailService);
 		this.screenService = new ScreenService(this.setServiceOptions());
+		this.profileService = new ProfileService(this.setServiceOptions());
 		this.messageTriggersService = new MessageTriggerService(this.setServiceOptions());
 	}
 
