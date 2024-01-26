@@ -256,17 +256,17 @@ export class UserService extends DatabaseService {
 			const fromDb =
 				typeof filter === 'number'
 					? await this.db(tables)
-							.select(...fields)
-							.where('u.id', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.andWhereRaw('p.id = u.level')
-							.first()
+						.select(...fields)
+						.where('u.id', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.andWhereRaw('p.id = u.level')
+						.first()
 					: await this.db(tables)
-							.select(...fields)
-							.where('u.email', filter)
-							.andWhereRaw('a.user_id = u.id')
-							.andWhereRaw('p.id = u.level')
-							.first();
+						.select(...fields)
+						.where('u.email', filter)
+						.andWhereRaw('a.user_id = u.id')
+						.andWhereRaw('p.id = u.level')
+						.first();
 
 			onLog('user from db', fromDb);
 
@@ -371,14 +371,14 @@ export class UserService extends DatabaseService {
 			const tenancyId = await this.setTenancy(data?.tenancyId, data?.plans);
 			const unit = data?.unit
 				? await this.setUnit(
-						req,
-						new UnitModel({
-							...data.unit,
-							phone: data?.unit.phone || data.phone,
-							active: true,
-							tenancyId: Number(tenancyId),
-						})
-					)
+					req,
+					new UnitModel({
+						...data.unit,
+						phone: data?.unit.phone || data.phone,
+						active: true,
+						tenancyId: Number(tenancyId),
+					})
+				)
 				: undefined;
 
 			existsOrError(Number(tenancyId), { message: 'Internl error', err: tenancyId, status: INTERNAL_SERVER_ERROR });
@@ -563,13 +563,11 @@ export class UserService extends DatabaseService {
 			const userRulesDB = await this.db({ ur: 'users_rules', r: 'rules' })
 				.where('ur.user_id', userId)
 				.andWhereRaw('r.id = ur.rule_id')
-				.select({ id: 'r.di', name: 'r.name', code: 'r.code', description: 'r.description' });
+				.select({ id: 'r.id', name: 'r.name', code: 'r.code', description: 'r.description' });
 
 			existsOrError(Array.isArray(userRulesDB), { message: 'Internal error', err: userRulesDB, status: INTERNAL_SERVER_ERROR });
 
-			if (!userRulesDB.length) return [];
-
-			return userRulesDB.map(i => convertDataValues(i, 'camel'));
+			return userRulesDB?.map(i => convertDataValues(i, 'camel'));
 		} catch (err) {
 			return err;
 		}

@@ -1,5 +1,5 @@
 import { Address, FileEntity } from '../entities';
-import { IFile, IPayload, IProfileView, IUserPlan, IUserRule, IUserUnit } from '../types';
+import { IFile, IPayload, IProfileView, IUserPlan, IUserRuleView, IUserUnit } from '../types';
 import { UserViewModel } from './user-view.model';
 
 export class Payload {
@@ -14,7 +14,7 @@ export class Payload {
 	level: number;
 	profile: IProfileView;
 	address?: Address;
-	userRules: IUserRule[];
+	userRules: IUserRuleView[];
 	tenancyId?: number | null;
 	unit?: IUserUnit;
 	plans?: IUserPlan[];
