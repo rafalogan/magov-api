@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { ThemeController } from './theme.controller';
 
 export class ThemeRoute extends Routes {
-	constructor(options: RouteOptions, private themeController: ThemeController) {
+	constructor(
+		options: RouteOptions,
+		private themeController: ThemeController
+	) {
 		super(options.app, options.auth);
 	}
 

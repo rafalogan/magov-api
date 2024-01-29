@@ -4,7 +4,11 @@ import { SaleController } from './sale.controller';
 import { Multer } from 'multer';
 
 export class SaleRoute extends Routes {
-	constructor(options: RouteOptions, private saleController: SaleController, private upload: Multer) {
+	constructor(
+		options: RouteOptions,
+		private saleController: SaleController,
+		private upload: Multer
+	) {
 		super(options.app, options.auth);
 	}
 

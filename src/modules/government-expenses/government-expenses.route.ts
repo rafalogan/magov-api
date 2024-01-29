@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { GovernmentExpensesController } from './government-expenses.controller';
 
 export class GovernmentExpensesRoute extends Routes {
-	constructor(options: RouteOptions, private governmentExpensesController: GovernmentExpensesController) {
+	constructor(
+		options: RouteOptions,
+		private governmentExpensesController: GovernmentExpensesController
+	) {
 		super(options.app, options.auth);
 	}
 

@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { OriginController } from './origin.controller';
 
 export class OriginRoute extends Routes {
-	constructor(options: RouteOptions, private originController: OriginController) {
+	constructor(
+		options: RouteOptions,
+		private originController: OriginController
+	) {
 		super(options.app, options.auth);
 	}
 

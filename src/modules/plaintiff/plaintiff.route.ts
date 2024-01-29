@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { PlaintiffController } from './plaintiff.controller';
 
 export class PlaintiffRoute extends Routes {
-	constructor(options: RouteOptions, private plaintiffController: PlaintiffController) {
+	constructor(
+		options: RouteOptions,
+		private plaintiffController: PlaintiffController
+	) {
 		super(options.app, options.auth);
 	}
 

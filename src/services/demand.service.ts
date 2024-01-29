@@ -416,9 +416,7 @@ export class DemandService extends DatabaseService {
 
 	private async upTask(task: Task, participants: IPlantiffTask[], themes: string[], users?: number[]) {
 		try {
-			const fromDB = await this.db('tasks')
-				.where('demand_id', task?.demandId)
-				.first();
+			const fromDB = await this.db('tasks').where('demand_id', task?.demandId).first();
 
 			notExistisOrError(fromDB?.severity === 'ERROR', fromDB);
 
@@ -429,15 +427,10 @@ export class DemandService extends DatabaseService {
 			onLog('Tasks to update', task);
 			const toUpdate = new Task({ ...convertDataValues(fromDB, 'camel'), ...task });
 
-			await this.db('tasks')
-				.update(convertDataValues(toUpdate))
-				.where('id', fromDB?.id);
+			await this.db('tasks').update(convertDataValues(toUpdate)).where('id', fromDB?.id);
 
 			participants.forEach(async i => {
-				const participantDB = await this.db('participants')
-					.where('task_id', fromDB?.id)
-					.andWhere('plaintiff_id', i.id)
-					.first();
+				const participantDB = await this.db('participants').where('task_id', fromDB?.id).andWhere('plaintiff_id', i.id).first();
 
 				if (!participantDB?.plaintiff_id) {
 					await this.db('participants').insert(convertDataValues({ taskId: fromDB?.id, plaintiffId: i.id }));
@@ -446,10 +439,7 @@ export class DemandService extends DatabaseService {
 
 			themes.forEach(async i => {
 				const theme = await this.db('themes').where({ name: i }).first();
-				const themesDB = await this.db('themes_tasks')
-					.where('task_id', fromDB?.id)
-					.andWhere('theme_id', theme.id)
-					.first();
+				const themesDB = await this.db('themes_tasks').where('task_id', fromDB?.id).andWhere('theme_id', theme.id).first();
 
 				if (theme?.id && !themesDB?.theme_id) {
 					await this.db('themes_tasks').insert(convertDataValues({ taskId: fromDB?.id, themeId: theme.id }));
@@ -457,10 +447,7 @@ export class DemandService extends DatabaseService {
 			});
 
 			users?.forEach(async i => {
-				const userDB = await this.db('users_tasks')
-					.where('user_id', i)
-					.andWhere('task_id', fromDB?.id)
-					.first();
+				const userDB = await this.db('users_tasks').where('user_id', i).andWhere('task_id', fromDB?.id).first();
 
 				if (!userDB?.user_id) {
 					await this.db('users_tasks').insert(convertDataValues({ userId: i, taskId: fromDB?.id }));

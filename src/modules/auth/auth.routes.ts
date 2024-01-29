@@ -4,7 +4,11 @@ import { RouteOptions } from 'src/repositories/types';
 import { AuthController } from './auth.controller';
 
 export class AuthRoutes extends Routes {
-	constructor(options: RouteOptions, private upload: Multer, private authController: AuthController) {
+	constructor(
+		options: RouteOptions,
+		private upload: Multer,
+		private authController: AuthController
+	) {
 		super(options.app, options.auth);
 	}
 

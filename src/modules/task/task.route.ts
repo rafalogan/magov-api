@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { TaskController } from './task.controller';
 
 export class TaskRoute extends Routes {
-	constructor(options: RouteOptions, private taskController: TaskController) {
+	constructor(
+		options: RouteOptions,
+		private taskController: TaskController
+	) {
 		super(options.app, options.auth);
 	}
 
