@@ -9,14 +9,21 @@ describe('#sale-payment Entity tests', () => {
 	const mockSalePayment: ISalePayment = {
 		id: faker.number.int(10),
 		payDate: faker.date.past(),
-		value: number;
-		installment: number;
-		type: string;
-		commission: boolean;
-		saleId: number;
+		value: faker.number.float({ min: 10, max: 100, multipleOf: 0.02 }),
+		installment: faker.number.int(10),
+		type: 'CREDIT',
+		commission: faker.datatype.boolean(),
+		saleId: faker.number.int(10),
 	};
+
 	beforeEach(() => {
 		vitest.resetAllMocks();
 		vitest.clearAllMocks();
+
+		salePayment = new SalePayment(mockSalePayment);
+	});
+
+	it('should create a new SalePayment instance', () => {
+		expect(salePayment).toBeInstanceOf(SalePayment);
 	});
 });

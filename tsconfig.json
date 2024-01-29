@@ -1,7 +1,7 @@
 {
 	"compileOnSave": false,
 	"ts-node": {
-		"transpileOnly": true
+		"transpileOnly": true,
 	},
 	"compilerOptions": {
 		"ignoreDeprecations": "5.0",
@@ -9,40 +9,19 @@
 		"moduleResolution": "Node",
 		"removeComments": true,
 		"module": "CommonJS",
-		"lib": [
-			"es2016",
-			"es2018",
-			"es2020",
-			"dom"
-		],
+		"lib": ["es2016", "es2018", "es2020", "dom"],
 		"strict": true,
 		"baseUrl": "./",
-		"rootDirs": [
-			"src",
-			"test",
-			"database"
-		],
+		"rootDirs": ["src", "test", "database"],
 		"outDir": "./dist",
 		"paths": {
-			"migrations/*": [
-				"./database/migrations/*"
-			],
-			"src/*": [
-				"./src/*"
-			],
-			"test/*": [
-				"./test/*"
-			],
-			"database/*": [
-				"./database/*"
-			]
+			"migrations/*": ["./database/migrations/*"],
+			"src/*": ["./src/*"],
+			"test/*": ["./test/*"],
+			"database/*": ["./database/*"],
 		},
-		"typeRoots": [
-			"./node_modules/@types"
-		],
-		"types": [
-			"node"
-		],
+		"typeRoots": ["./node_modules/@types"],
+		"types": ["node"],
 		"incremental": true,
 		"noImplicitAny": false,
 		"strictNullChecks": true,
@@ -63,7 +42,7 @@
 		"noFallthroughCasesInSwitch": false,
 		"importHelpers": true,
 		"skipLibCheck": true,
-		"suppressImplicitAnyIndexErrors": true
+		"suppressImplicitAnyIndexErrors": true,
 	},
 	"include": [
 		"database/migrations/**/*",
@@ -72,15 +51,7 @@
 		"test/**/*",
 		"knexfile.ts",
 		"node_modules/pg-protocol/dist/connection.d.ts",
-		"index.ts"
+		"index.ts",
 	],
-	"exclude": [
-		"node_modules",
-		"dist",
-		"**/*.spec.ts",
-		"**/*.spec.tsx",
-		"**/*.test.ts",
-		"**/*.test.tsx",
-		"__tests__"
-	]
+	"exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx", "__tests__"],
 }
