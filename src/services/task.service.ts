@@ -49,15 +49,11 @@ export class TaskService extends DatabaseService {
 
 	async create(data: TaskModel, req: Request) {
 		try {
-			onLog('data to save', data);
 			const fromDB = (await this.getTask(data.title, data.tenancyId)) as TaskViewModel;
-			const unitFromDB = await this.db('units').where('id', data.unitId).andWhere('tenancy_id', data.tenancyId).first();
-
-			onLog('response getTask', fromDB);
+			const unitFromDB = await this.verifyUnit(data.unitId, data.tenancyId);
 
 			notExistisOrError(fromDB?.id, { message: 'Task already existis', status: FORBIDDEN });
 			existsOrError(unitFromDB, { message: 'unit not found', status: BAD_REQUEST });
-			notExistisOrError(unitFromDB?.severity === 'ERROR', { message: 'internal error', err: unitFromDB, status: INTERNAL_SERVER_ERROR });
 
 			const toSave = new Task({ ...data });
 			onLog('task to save', toSave);
@@ -113,14 +109,13 @@ export class TaskService extends DatabaseService {
 
 	async update(data: TaskModel, id: number, req: Request) {
 		try {
-			const fromDB = (await this.getTask(id, data.tenancyId)) as TaskViewModel;
-
-			existsOrError(fromDB?.id, fromDB);
-			if (data.unitId) {
-				const unitFromDB = await this.db('units').where('id', data.unitId).andWhere('tenancy_id', data.tenancyId).first();
+			if (data?.unitId) {
+				const unitFromDB = await this.verifyUnit(data.unitId, data.tenancyId);
 				existsOrError(unitFromDB, { message: 'unit not found', status: BAD_REQUEST });
-				notExistisOrError(unitFromDB?.severity === 'ERROR', { message: 'internal error', err: unitFromDB, status: INTERNAL_SERVER_ERROR });
 			}
+
+			const fromDB = (await this.getTask(id, data.tenancyId)) as TaskViewModel;
+			existsOrError(fromDB?.id, fromDB);
 
 			const toUpdate = new Task({ ...fromDB, ...data, tenancyId: fromDB.tenancyId });
 

@@ -12,7 +12,8 @@ const defaultUsers = [
 		cpf: '00000000000',
 		phone: '00000000000',
 		active: true,
-		level: 1000,
+		level: 0,
+		profileCode: 'ROOT',
 		unit_id: null,
 		tenancy_id: null,
 	},
@@ -24,18 +25,26 @@ const defaultUsers = [
 		password: 'Contato@2023',
 		cpf: '39734689827',
 		phone: '6199147271',
+		profileCode: 'MADMIN',
 		active: true,
-		level: 6,
+		level: 0,
 		unit_id: null,
 		tenancy_id: null,
 	},
 ];
 
 export async function up(knex: Knex): Promise<void> {
-	const users = defaultUsers.map((user: any) => {
+	const users: any[] = [];
+
+	for (const user of defaultUsers) {
+		const profile = await knex('profiles').where({ code: user.profileCode }).select('id').first();
+
+		user.level = Number(profile.id);
 		user.password = hashString(user.password, Number(process.env.SALT_ROUNDS));
-		return user;
-	});
+		Reflect.deleteProperty(user, 'profileCode');
+
+		users.push(user);
+	}
 
 	return knex.batchInsert('users', users);
 }

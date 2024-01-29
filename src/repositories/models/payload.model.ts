@@ -1,5 +1,5 @@
 import { Address, FileEntity } from '../entities';
-import { IPayload, IUserPlan, IUserRule, IUserUnit } from '../types';
+import { IFile, IPayload, IProfileView, IUserPlan, IUserRuleView, IUserUnit } from '../types';
 import { UserViewModel } from './user-view.model';
 
 export class Payload {
@@ -12,8 +12,9 @@ export class Payload {
 	office: string;
 	active: boolean;
 	level: number;
+	profile: IProfileView;
 	address?: Address;
-	userRules: IUserRule[];
+	userRules: IUserRuleView[];
 	tenancyId?: number | null;
 	unit?: IUserUnit;
 	plans?: IUserPlan[];
@@ -31,12 +32,13 @@ export class Payload {
 		this.office = data.office;
 		this.active = !!data.active;
 		this.level = Number(data.level);
+		this.profile = data.profile;
 		this.address = data.address as Address;
 		this.userRules = data.userRules;
 		this.tenancyId = data.tenancyId || null;
 		this.unit = data.unit;
 		this.plans = data?.plans;
-		this.image = data?.image;
+		this.image = data.image ? new FileEntity(data.image as IFile) : undefined;
 		this.iat = 'iat' in data ? data.iat : this.now();
 		this.exp = 'exp' in data ? data.exp : this.expires();
 	}

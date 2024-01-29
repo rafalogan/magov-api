@@ -1,5 +1,6 @@
+import { convertBlobToString } from 'src/utils';
 import { Address, FileEntity } from '../entities';
-import { IUserPlan, IUserRuleView, IUserUnit, IUserViewModel } from '../types';
+import { IProfileView, IUserPlan, IUserRuleView, IUserUnit, IUserViewModel } from '../types';
 
 export class UserViewModel {
 	id: number;
@@ -12,6 +13,7 @@ export class UserViewModel {
 	office: string;
 	active: boolean;
 	level: number;
+	profile: IProfileView;
 	userRules: IUserRuleView[];
 	tenancyId?: number;
 	address?: Address;
@@ -32,6 +34,7 @@ export class UserViewModel {
 		this.active = !!data.active;
 		this.level = data.level;
 		this.userRules = this.setUserRules(data.userRules);
+		this.profile = this.setProfile(data.profile);
 		this.tenancyId = Number(data.tenancyId) || undefined;
 		this.address = data.address ? new Address(data.address) : undefined;
 		this.unit = data.unit;
@@ -44,10 +47,26 @@ export class UserViewModel {
 		if (!data) return [];
 
 		return data.map(i => ({
-			screenId: Number(i.screenId),
-			screenName: i.screenName?.trim(),
-			ruleId: Number(i.ruleId),
-			ruleName: i.ruleName?.trim(),
+			id: Number(i.id),
+			name: i.name?.trim(),
+			code: i.code?.trim(),
+			description: convertBlobToString(i?.description),
 		}));
+	}
+
+	private setProfile(data: IProfileView): IProfileView {
+		return {
+			id: Number(data.id),
+			name: data.name?.trim(),
+			code: data.code?.trim(),
+			description: convertBlobToString(data?.description),
+			active: !!data.active,
+			rules: data.rules.map(i => ({
+				id: Number(i.id),
+				name: i.name?.trim(),
+				code: i.code?.trim(),
+				description: convertBlobToString(i?.description),
+			})),
+		};
 	}
 }

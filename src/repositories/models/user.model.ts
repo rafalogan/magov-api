@@ -1,6 +1,6 @@
 import { clearString, hashString, setInstanceId } from 'src/utils';
 
-import { IUnitModel, IUserModel, IUserPlan, IUserRule } from '../types';
+import { IUnitModel, IUserModel, IUserPlan } from '../types';
 import { Address, FileEntity } from 'src/repositories/entities';
 import { UnitModel } from './unit.model';
 
@@ -17,7 +17,7 @@ export class UserModel {
 	level: number;
 	unitId?: number;
 	tenancyId?: number;
-	userRules: IUserRule[];
+	userRules: Array<string | number>;
 	address: Address;
 	plans?: IUserPlan[];
 	unit?: UnitModel;
@@ -45,10 +45,10 @@ export class UserModel {
 		this.newTenancy = !!data.newTenancy;
 	}
 
-	private setUserRules(data?: IUserRule[]): IUserRule[] {
+	private setUserRules(data?: Array<string | number>): Array<string | number> {
 		if (!data) return [];
 
-		return data.map(i => ({ screenId: i.screenId, ruleId: i.ruleId }));
+		return data.map(i => (Number(i) ? Number(i) : String(i)));
 	}
 
 	private setUserPlans(plans?: IUserPlan[]) {
@@ -61,7 +61,7 @@ export class UserModel {
 							id: Number(i.id),
 							amount: Number(i.amount) || 1,
 						}) as IUserPlan
-			  );
+				);
 	}
 
 	private setUserUit(unit?: IUnitModel, plans?: IUserPlan[]) {

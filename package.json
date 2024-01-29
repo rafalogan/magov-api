@@ -1,6 +1,6 @@
 {
 	"name": "ma-governance-api",
-	"version": "1.21.3",
+	"version": "1.23.0",
 	"description": "Project of api in Ma Governance API",
 	"main": "index.js",
 	"scripts": {
@@ -100,10 +100,10 @@
 		"@types/node": "^20.9.0",
 		"@types/nodemailer": "^6.4.7",
 		"@types/passport": "^1.0.12",
-		"@types/passport-jwt": "^3.0.8",
+		"@types/passport-jwt": "^4.0.1",
 		"@types/pg": "^8.6.6",
 		"@types/redis": "^4.0.11",
-		"@types/supertest": "^2.0.12",
+		"@types/supertest": "^6.0.2",
 		"@types/uuid": "^9.0.1",
 		"@typescript-eslint/eslint-plugin": "^6.2.1",
 		"@typescript-eslint/parser": "^6.2.1",
@@ -122,10 +122,10 @@
 		"tsx": "^4.1.2",
 		"typescript": "^5.0.2",
 		"vite-tsconfig-paths": "^4.0.7",
-		"vitest": "^0.34.6"
+		"vitest": "^1.1.1"
 	},
 	"engines": {
-		"node": "v20.9.0",
-		"npm": "10.2.4"
+		"node": "v20.11.0",
+		"npm": "10.4.0"
 	}
 }

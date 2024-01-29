@@ -1,10 +1,9 @@
 import { Multer } from 'multer';
 
 import { Credentials, UserViewModel } from 'src/repositories/models';
-import { FileEntity, User } from 'src/repositories/entities';
-import { IUserPlan, IUserRule, IUserUnit } from './user';
+import { User } from 'src/repositories/entities';
+import { IUserViewModel } from './user';
 import { ModuleOptions } from './module';
-import { Address } from 'aws-sdk/clients/ses';
 
 export interface ICredentials {
 	email: string;
@@ -21,22 +20,7 @@ export interface IAuthConfig {
 	authenticate(): any;
 }
 
-export interface IPayload {
-	id: number;
-	firstName: string;
-	lastName: string;
-	email: string;
-	cpf: string;
-	phone: string;
-	office: string;
-	active: boolean;
-	level: number;
-	address?: Address;
-	userRules: IUserRule[];
-	tenancyId?: number;
-	unit: IUserUnit;
-	plans?: IUserPlan[];
-	image?: FileEntity;
+export interface IPayload extends IUserViewModel {
 	iat: number;
 	exp: number;
 }
