@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { ContactController } from './contact.controller';
 
 export class ContactRoute extends Routes {
-	constructor(options: RouteOptions, private contactController: ContactController) {
+	constructor(
+		options: RouteOptions,
+		private contactController: ContactController
+	) {
 		super(options.app, options.auth);
 	}
 

@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { SupplierController } from './supplier.controller';
 
 export class SupplierRoute extends Routes {
-	constructor(options: RouteOptions, private supplierController: SupplierController) {
+	constructor(
+		options: RouteOptions,
+		private supplierController: SupplierController
+	) {
 		super(options.app, options.auth);
 	}
 

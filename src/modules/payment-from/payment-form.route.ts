@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { PaymentFormController } from './payment-form.controller';
 
 export class PaymentFormRoute extends Routes {
-	constructor(options: RouteOptions, private paymentFormController: PaymentFormController) {
+	constructor(
+		options: RouteOptions,
+		private paymentFormController: PaymentFormController
+	) {
 		super(options.app, options.auth);
 	}
 

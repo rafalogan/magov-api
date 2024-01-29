@@ -5,7 +5,11 @@ import { RouteOptions } from 'src/repositories/types';
 import { UnitExpenseController } from './unit-expense.controller';
 
 export class UnitExpenseRoute extends Routes {
-	constructor(options: RouteOptions, private unitExpenseController: UnitExpenseController, private upload: Multer) {
+	constructor(
+		options: RouteOptions,
+		private unitExpenseController: UnitExpenseController,
+		private upload: Multer
+	) {
 		super(options.app, options.auth);
 	}
 

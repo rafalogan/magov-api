@@ -5,7 +5,11 @@ import { RouteOptions } from 'src/repositories/types';
 import { RevenueController } from './revenue.controller';
 
 export class RevenueRoute extends Routes {
-	constructor(options: RouteOptions, private upload: Multer, private revenueController: RevenueController) {
+	constructor(
+		options: RouteOptions,
+		private upload: Multer,
+		private revenueController: RevenueController
+	) {
 		super(options.app, options.auth);
 	}
 

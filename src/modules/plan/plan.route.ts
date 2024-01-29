@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { PlanController } from './plan.controller';
 
 export class PlanRoute extends Routes {
-	constructor(options: RouteOptions, private planController: PlanController) {
+	constructor(
+		options: RouteOptions,
+		private planController: PlanController
+	) {
 		super(options.app, options.auth);
 	}
 

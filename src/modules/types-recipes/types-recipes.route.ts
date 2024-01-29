@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { TypesRecipesController } from './types-recipes.controller';
 
 export class TypesRecipesRoute extends Routes {
-	constructor(options: RouteOptions, private typesRecipesController: TypesRecipesController) {
+	constructor(
+		options: RouteOptions,
+		private typesRecipesController: TypesRecipesController
+	) {
 		super(options.app, options.auth);
 	}
 

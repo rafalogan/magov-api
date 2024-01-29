@@ -21,24 +21,27 @@ export class ScreenController extends Controller {
 
 		const screen = new AppScreen({ ...req.body, active: true });
 
-		this.screenService.save(screen, req)
+		this.screenService
+			.save(screen, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
-			.catch(err => ResponseHandle.onError({ res, err }))
+			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
 	edit(req: Request, res: Response) {
 		const { id } = req.params;
 		const screen = new AppScreen({ ...req.body }, Number(id));
 
-		this.screenService.save(screen, req)
+		this.screenService
+			.save(screen, req)
 			.then(data => ResponseHandle.onSuccess({ res, data }))
-			.catch(err => ResponseHandle.onError({ res, err }))
+			.catch(err => ResponseHandle.onError({ res, err }));
 	}
 
 	list(req: Request, res: Response) {
 		const { id } = req.params;
 
-		this.screenService.read(Number(id))
+		this.screenService
+			.read(Number(id))
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}
@@ -46,7 +49,8 @@ export class ScreenController extends Controller {
 	remove(req: Request, res: Response) {
 		const { id } = req.params;
 
-		this.screenService.delete(Number(id))
+		this.screenService
+			.delete(Number(id))
 			.then(data => ResponseHandle.onSuccess({ res, data }))
 			.catch(err => ResponseHandle.onError({ res, err }));
 	}

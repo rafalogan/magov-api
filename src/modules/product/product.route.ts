@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { ProductController } from './product.controller';
 
 export class ProductRoute extends Routes {
-	constructor(options: RouteOptions, private productController: ProductController) {
+	constructor(
+		options: RouteOptions,
+		private productController: ProductController
+	) {
 		super(options.app, options.auth);
 	}
 

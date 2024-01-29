@@ -94,7 +94,7 @@ export class AuthService {
 					status,
 					message: 'Invalid token!',
 					token,
-			  };
+				};
 	}
 
 	async verifyEmailUser(email: string, options: SendEmailOptions) {

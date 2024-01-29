@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { InstituteTypeController } from './institute-type.controller';
 
 export class InstituteTypeRoute extends Routes {
-	constructor(options: RouteOptions, private instituteTypeController: InstituteTypeController) {
+	constructor(
+		options: RouteOptions,
+		private instituteTypeController: InstituteTypeController
+	) {
 		super(options.app, options.auth);
 	}
 

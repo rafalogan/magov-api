@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { KeywordController } from './keyword.controller';
 
 export class KeywordRoute extends Routes {
-	constructor(options: RouteOptions, private keywordController: KeywordController) {
+	constructor(
+		options: RouteOptions,
+		private keywordController: KeywordController
+	) {
 		super(options.app, options.auth);
 	}
 

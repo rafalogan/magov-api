@@ -65,7 +65,7 @@ export class LoggerConfig {
 					new transports.File({ filename: 'logs/all.log', ...this.filesConfig }),
 					new transports.File({ filename: 'logs/error.log', level: 'error', ...this.filesConfig }),
 					new transports.Console({ level: 'debug', format: this.format }),
-			  ]
+				]
 			: [new transports.Console({ level: 'debug', format: this.format })];
 	}
 

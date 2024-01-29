@@ -6,11 +6,14 @@ import { Plan } from './plan.entity';
 
 describe('#Plan Entity tests', () => {
 	const mockPlan: IPlan = {
-		id: 10,
-		name: faker.name.fullName(),
-		description: new Blob([faker.lorem.paragraphs(5)]),
-		usersLimit: 100,
-		unitaryValue: 250,
+		id: faker.number.int(10),
+		name: faker.string.sample(20),
+		description: undefined,
+		limit: faker.number.int(1000),
+		value: faker.number.float({ min: 10, max: 100, multipleOf: 0.02 }),
+		active: faker.datatype.boolean(0.9),
+		typeId: faker.number.int(10),
+		type: faker.string.sample(20),
 	};
 
 	beforeEach(() => {

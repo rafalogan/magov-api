@@ -12,7 +12,7 @@ export class ServerController {
 	private port = Number(process.env.PORT) || 3000;
 	private httpsEnable = process.env.ENABLE_HTTPS?.toLowerCase() === 'true';
 
-	constructor(private express: Application) { }
+	constructor(private express: Application) {}
 
 	exec() {
 		return this.httpsEnable ? this.createHttpsServer() : this.createHttpServer();

@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { CommentController } from './comment.controller';
 
 export class CommentRoute extends Routes {
-	constructor(options: RouteOptions, private commentController: CommentController) {
+	constructor(
+		options: RouteOptions,
+		private commentController: CommentController
+	) {
 		super(options.app, options.auth);
 	}
 
