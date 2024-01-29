@@ -152,14 +152,14 @@ export class PropositionService extends DatabaseService {
 
 			const fromDB = unitId
 				? await this.db(table)
-					.select(...fields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhereRaw(`p.unit_id = ${unitId}`)
-					.andWhereRaw('t.id = p.type_id')
+						.select(...fields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw(`p.unit_id = ${unitId}`)
+						.andWhereRaw('t.id = p.type_id')
 				: await this.db(table)
-					.select(...fields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhereRaw('t.id = p.type_id');
+						.select(...fields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhereRaw('t.id = p.type_id');
 
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', status: INTERNAL_SERVER_ERROR, err: fromDB });
 			const raw = fromDB.map((i: any) => convertDataValues(i, 'camel'));

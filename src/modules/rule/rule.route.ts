@@ -3,7 +3,10 @@ import { RouteOptions } from 'src/repositories/types';
 import { RuleController } from './rule.controller';
 
 export class RuleRoute extends Routes {
-	constructor(options: RouteOptions, private ruleController: RuleController) {
+	constructor(
+		options: RouteOptions,
+		private ruleController: RuleController
+	) {
 		super(options.app, options.auth);
 	}
 

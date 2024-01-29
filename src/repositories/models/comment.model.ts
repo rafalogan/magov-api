@@ -26,7 +26,7 @@ export class CommentModel {
 		if ('name' in user) return user;
 
 		const id = 'userId' in user ? Number(user?.userId) : 0;
-		const { firstName, lastName, email } = user;
+		const { email } = user;
 		return {
 			id,
 			name: `${user.firstName} ${user.lastName}`,

@@ -80,6 +80,6 @@ export class PropositionViewModel {
 							userId: Number(i.userId),
 							responsible: i.responsible?.trim() || undefined,
 						}) as ITaskProposition
-			  );
+				);
 	}
 }

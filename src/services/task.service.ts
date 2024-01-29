@@ -66,34 +66,34 @@ export class TaskService extends DatabaseService {
 			const governmentExpense =
 				data.cost && !data.unitExpense
 					? await this.governmentExpenseService.create(
-						new GovernmentExpensesModel({
-							expense: data.title,
-							tenancyId: data.tenancyId,
-							dueDate: data.end,
-							value: data.cost,
-							task: { id, title: data.title },
-							active: true,
-							propositionId: Number(data.propositionId),
-						} as IGovernmentExpensesModel),
-						req
-					)
+							new GovernmentExpensesModel({
+								expense: data.title,
+								tenancyId: data.tenancyId,
+								dueDate: data.end,
+								value: data.cost,
+								task: { id, title: data.title },
+								active: true,
+								propositionId: Number(data.propositionId),
+							} as IGovernmentExpensesModel),
+							req
+						)
 					: undefined;
 
 			const unitExpense =
 				data.cost && data.unitExpense
 					? await this.unitExpenseService.create(
-						new UnitExpenseModel({
-							expense: data.title,
-							tenancyId: data.tenancyId,
-							dueDate: data.end,
-							taskId: id,
-							unitId: data.unitId,
-							amount: 1,
-							active: true,
-							payments: [{ paymentForm: 'boleto', installments: 1, value: data.cost }],
-						} as IUnitExpenseModel),
-						req
-					)
+							new UnitExpenseModel({
+								expense: data.title,
+								tenancyId: data.tenancyId,
+								dueDate: data.end,
+								taskId: id,
+								unitId: data.unitId,
+								amount: 1,
+								active: true,
+								payments: [{ paymentForm: 'boleto', installments: 1, value: data.cost }],
+							} as IUnitExpenseModel),
+							req
+						)
 					: undefined;
 
 			await this.userLogService.create(getUserLogData(req, 'tasks', id, 'salvar'));
@@ -151,16 +151,16 @@ export class TaskService extends DatabaseService {
 			const res: any = [];
 			const fromDB = unitId
 				? await this.db(this.tablesToList)
-					.select(...this.fieldsToList)
-					.where('t.tenancy_id', tenancyId)
-					.andWhere('t.unit_id', unitId)
-					.andWhereRaw('u.id = t.user_id')
-					.andWhereRaw('un.id = t.unit_id')
+						.select(...this.fieldsToList)
+						.where('t.tenancy_id', tenancyId)
+						.andWhere('t.unit_id', unitId)
+						.andWhereRaw('u.id = t.user_id')
+						.andWhereRaw('un.id = t.unit_id')
 				: await this.db(this.tablesToList)
-					.select(...this.fieldsToList)
-					.where('t.tenancy_id', tenancyId)
-					.andWhereRaw('u.id = t.user_id')
-					.andWhereRaw('un.id = t.unit_id');
+						.select(...this.fieldsToList)
+						.where('t.tenancy_id', tenancyId)
+						.andWhereRaw('u.id = t.user_id')
+						.andWhereRaw('un.id = t.unit_id');
 
 			onLog('tasks from db: ', fromDB);
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
@@ -230,17 +230,17 @@ export class TaskService extends DatabaseService {
 			const fromDB =
 				typeof value === 'number'
 					? await this.db(tables)
-						.select(...fields)
-						.where('t.id', value)
-						.andWhere('t.tenancy_id', tenancyId)
-						.andWhereRaw('u.id = t.unit_id')
-						.first()
+							.select(...fields)
+							.where('t.id', value)
+							.andWhere('t.tenancy_id', tenancyId)
+							.andWhereRaw('u.id = t.unit_id')
+							.first()
 					: await this.db(tables)
-						.select(...fields)
-						.where('t.title', value)
-						.andWhere('t.tenancy_id', tenancyId)
-						.andWhereRaw('u.id = t.unit_id')
-						.first();
+							.select(...fields)
+							.where('t.title', value)
+							.andWhere('t.tenancy_id', tenancyId)
+							.andWhereRaw('u.id = t.unit_id')
+							.first();
 
 			existsOrError(fromDB?.id, { message: 'Not found', status: NOT_FOUND });
 			const raw = convertDataValues(fromDB, 'camel');
