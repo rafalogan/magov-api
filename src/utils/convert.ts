@@ -4,6 +4,7 @@ import { CustomFile, IAddress, IFile } from 'src/repositories/types';
 import { baseUrl } from 'src/utils/validate';
 import { upperCaseFirstLetter } from './convert-date';
 import isEmpty from 'is-empty';
+import { onLog } from 'src/core/handlers';
 
 export const snakeToCamel = (field: string): string => {
 	let toArray = field.split('_');
@@ -56,9 +57,7 @@ export const convertToJson = (data: string) => JSON.parse(data);
 
 export const setParamsOrder = (req: Request) => {
 	const value = Number(req.params.id);
-	let where;
-	if (req.originalUrl.includes('user')) where = 'userId';
-	if (req.originalUrl.includes('place')) where = 'placeId';
+	const where = req.originalUrl.includes('user') ? 'userId' : req.originalUrl.includes('place') ? 'placeId' : '';
 
 	return { where, value: value };
 };
@@ -137,7 +136,12 @@ export const setFileToSave = (req: Request) => {
 };
 
 export const setAddress = (req: Request): IAddress => {
-	if (req.body.address) return req.body.address;
+	if (req.body.address) {
+		deleteField(req.body.address, 'id');
+
+		return req.body.address;
+	}
+
 	const { cep, street, number, complement, district, city, uf } = req.body;
 
 	return { cep, street, number, complement, district, city, uf };

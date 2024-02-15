@@ -6,6 +6,7 @@ import { deleteField, equalsOrError, notExistisOrError, requiredFields, setAddre
 import { UserService } from 'src/services';
 import { getTenancyByToken, onLog, ResponseHandle } from 'src/core/handlers';
 import { ReadOptionsModel, UserModel } from 'src/repositories/models';
+import { IUserModel } from 'src/repositories/types';
 
 export class UserController extends Controller {
 	constructor(private userService: UserService) {
@@ -36,10 +37,33 @@ export class UserController extends Controller {
 
 	edit(req: Request, res: Response) {
 		const { id } = req.params;
+		const { firstName, lastName, email, cpf, phone, office, active, level, tenancyId, unitId, unit, plans } = req.body;
+
 		const address = setAddress(req);
+
+		onLog('Address user to edit', address);
+
 		const image = setUserImage(req);
 		const userRules = this.setUserRules(req);
-		const user = new UserModel({ ...req.body, address, image, userRules }, Number(id));
+
+		const data: IUserModel = {
+			firstName,
+			lastName,
+			email,
+			password: '',
+			cpf,
+			phone,
+			office,
+			active,
+			level,
+			tenancyId,
+			unitId: unitId ? Number(unitId) : unit?.id ? Number(unit.id) : undefined,
+			address,
+			image,
+			userRules,
+			plans,
+		};
+		const user = new UserModel(data, Number(id));
 
 		this.userService
 			.save(user, req)

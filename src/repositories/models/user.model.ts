@@ -3,6 +3,7 @@ import { clearString, hashString, setInstanceId } from 'src/utils';
 import { IUnitModel, IUserModel, IUserPlan } from '../types';
 import { Address, FileEntity } from 'src/repositories/entities';
 import { UnitModel } from './unit.model';
+import { onLog } from 'src/core/handlers';
 
 export class UserModel {
 	id?: number;
