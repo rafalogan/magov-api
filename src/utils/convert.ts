@@ -4,7 +4,6 @@ import { CustomFile, IAddress, IFile } from 'src/repositories/types';
 import { baseUrl } from 'src/utils/validate';
 import { upperCaseFirstLetter } from './convert-date';
 import isEmpty from 'is-empty';
-import { onLog } from 'src/core/handlers';
 
 export const snakeToCamel = (field: string): string => {
 	let toArray = field.split('_');
