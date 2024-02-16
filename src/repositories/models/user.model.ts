@@ -56,12 +56,12 @@ export class UserModel {
 		return !plans?.length
 			? undefined
 			: plans.map(
-				i =>
-					({
-						id: Number(i.id),
-						amount: Number(i.amount) || 1,
-					}) as IUserPlan
-			);
+					i =>
+						({
+							id: Number(i.id),
+							amount: Number(i.amount) || 1,
+						}) as IUserPlan
+				);
 	}
 
 	private setUserUit(unit?: IUnitModel, plans?: IUserPlan[]) {
