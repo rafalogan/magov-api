@@ -26,13 +26,13 @@ export class UserModel {
 
 	constructor(data: IUserModel, id?: number) {
 		this.id = setInstanceId(id || data.id);
-		this.firstName = data.firstName.trim();
-		this.lastName = data.lastName.trim();
-		this.email = data.email.toLowerCase();
+		this.firstName = data.firstName?.trim();
+		this.lastName = data.lastName?.trim();
+		this.email = data.email?.toLowerCase();
 		this.password = data.confirmPassword ? hashString(data.password) : data.password;
 		this.cpf = clearString(data.cpf);
 		this.phone = clearString(data.phone);
-		this.office = data.office.trim();
+		this.office = data.office?.trim();
 		this.active = !!data.active;
 		this.level = Number(data.level);
 		this.unitId = setInstanceId(data.unitId);
@@ -56,12 +56,12 @@ export class UserModel {
 		return !plans?.length
 			? undefined
 			: plans.map(
-					i =>
-						({
-							id: Number(i.id),
-							amount: Number(i.amount) || 1,
-						}) as IUserPlan
-				);
+				i =>
+					({
+						id: Number(i.id),
+						amount: Number(i.amount) || 1,
+					}) as IUserPlan
+			);
 	}
 
 	private setUserUit(unit?: IUnitModel, plans?: IUserPlan[]) {
