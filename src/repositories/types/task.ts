@@ -9,7 +9,7 @@ export interface ITask extends IID {
 	start: Date | string;
 	end: Date | string;
 	level: number;
-	status: number;
+	statusId: number;
 	userId: number;
 	unitId: number;
 	tenancyId: number;
@@ -33,7 +33,7 @@ export interface ITaskViewModel extends IID {
 	start: Date | string;
 	end: Date | string;
 	level: number;
-	status: number;
+	status: ITaskStatus;
 	users: ITaskUsers[];
 	unitId: number;
 	unit: ITaskUnit;
@@ -43,6 +43,12 @@ export interface ITaskViewModel extends IID {
 	participants: IPlantiffTask[];
 	comments?: ICommentTask[];
 	themes: IThemeTask[];
+}
+
+export interface ITaskStatus {
+	id: number;
+	status: string;
+	description?: Blob | string;
 }
 
 export interface IThemeTask {

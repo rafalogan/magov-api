@@ -35,9 +35,10 @@ export class TaskService extends DatabaseService {
 		},
 		{ user_id: 'u.id', user_first_name: 'u.first_name', user_last_name: 'u.last_name' },
 		{ unit_id: 'un.id', unit: 'un.name' },
+		{ status_id: 's.id', status: 's.status' },
 	];
 
-	tablesToList = { t: 'tasks', u: 'users', un: 'units' };
+	tablesToList = { t: 'tasks', u: 'users', un: 'units', s: 'tasks_status' };
 
 	constructor(
 		options: IServiceOptions,
@@ -66,34 +67,34 @@ export class TaskService extends DatabaseService {
 			const governmentExpense =
 				data.cost && !data.unitExpense
 					? await this.governmentExpenseService.create(
-							new GovernmentExpensesModel({
-								expense: data.title,
-								tenancyId: data.tenancyId,
-								dueDate: data.end,
-								value: data.cost,
-								task: { id, title: data.title },
-								active: true,
-								propositionId: Number(data.propositionId),
-							} as IGovernmentExpensesModel),
-							req
-						)
+						new GovernmentExpensesModel({
+							expense: data.title,
+							tenancyId: data.tenancyId,
+							dueDate: data.end,
+							value: data.cost,
+							task: { id, title: data.title },
+							active: true,
+							propositionId: Number(data.propositionId),
+						} as IGovernmentExpensesModel),
+						req
+					)
 					: undefined;
 
 			const unitExpense =
 				data.cost && data.unitExpense
 					? await this.unitExpenseService.create(
-							new UnitExpenseModel({
-								expense: data.title,
-								tenancyId: data.tenancyId,
-								dueDate: data.end,
-								taskId: id,
-								unitId: data.unitId,
-								amount: 1,
-								active: true,
-								payments: [{ paymentForm: 'boleto', installments: 1, value: data.cost }],
-							} as IUnitExpenseModel),
-							req
-						)
+						new UnitExpenseModel({
+							expense: data.title,
+							tenancyId: data.tenancyId,
+							dueDate: data.end,
+							taskId: id,
+							unitId: data.unitId,
+							amount: 1,
+							active: true,
+							payments: [{ paymentForm: 'boleto', installments: 1, value: data.cost }],
+						} as IUnitExpenseModel),
+						req
+					)
 					: undefined;
 
 			await this.userLogService.create(getUserLogData(req, 'tasks', id, 'salvar'));
@@ -151,16 +152,18 @@ export class TaskService extends DatabaseService {
 			const res: any = [];
 			const fromDB = unitId
 				? await this.db(this.tablesToList)
-						.select(...this.fieldsToList)
-						.where('t.tenancy_id', tenancyId)
-						.andWhere('t.unit_id', unitId)
-						.andWhereRaw('u.id = t.user_id')
-						.andWhereRaw('un.id = t.unit_id')
+					.select(...this.fieldsToList)
+					.where('t.tenancy_id', tenancyId)
+					.andWhere('t.unit_id', unitId)
+					.andWhereRaw('u.id = t.user_id')
+					.andWhereRaw('un.id = t.unit_id')
+					.andWhereRaw('s.id = t.status_id')
 				: await this.db(this.tablesToList)
-						.select(...this.fieldsToList)
-						.where('t.tenancy_id', tenancyId)
-						.andWhereRaw('u.id = t.user_id')
-						.andWhereRaw('un.id = t.unit_id');
+					.select(...this.fieldsToList)
+					.where('t.tenancy_id', tenancyId)
+					.andWhereRaw('u.id = t.user_id')
+					.andWhereRaw('un.id = t.unit_id')
+					.andWhereRaw('s.id = t.status_id');
 
 			onLog('tasks from db: ', fromDB);
 			existsOrError(Array.isArray(fromDB), { message: 'Internal error', error: fromDB, status: INTERNAL_SERVER_ERROR });
@@ -216,7 +219,6 @@ export class TaskService extends DatabaseService {
 					start: 't.start',
 					end: 't.end',
 					level: 't.level',
-					status: 't.status',
 					user_id: 't.user_id',
 					unit_id: 't.unit_id',
 					tenancy_id: 't.tenancy_id',
@@ -224,23 +226,26 @@ export class TaskService extends DatabaseService {
 					demand_id: 't.demand_id',
 				},
 				{ unit: 'u.name' },
+				{ status_id: 's.id', status_name: 's.status', status_description: 's.description' },
 			];
-			const tables = { t: 'tasks', u: 'units' };
+			const tables = { t: 'tasks', u: 'units', s: 'tasks_status' };
 
 			const fromDB =
 				typeof value === 'number'
 					? await this.db(tables)
-							.select(...fields)
-							.where('t.id', value)
-							.andWhere('t.tenancy_id', tenancyId)
-							.andWhereRaw('u.id = t.unit_id')
-							.first()
+						.select(...fields)
+						.where('t.id', value)
+						.andWhere('t.tenancy_id', tenancyId)
+						.andWhereRaw('u.id = t.unit_id')
+						.andWhereRaw('s.id = t.status_id')
+						.first()
 					: await this.db(tables)
-							.select(...fields)
-							.where('t.title', value)
-							.andWhere('t.tenancy_id', tenancyId)
-							.andWhereRaw('u.id = t.unit_id')
-							.first();
+						.select(...fields)
+						.where('t.title', value)
+						.andWhere('t.tenancy_id', tenancyId)
+						.andWhereRaw('u.id = t.unit_id')
+						.andWhereRaw('s.id = t.status_id')
+						.first();
 
 			existsOrError(fromDB?.id, { message: 'Not found', status: NOT_FOUND });
 			const raw = convertDataValues(fromDB, 'camel');
@@ -261,8 +266,9 @@ export class TaskService extends DatabaseService {
 			onLog('comments', comments);
 
 			const themes = await this.getThemes(raw.id);
+			const status = { id: raw.statusId, name: raw.statusName, description: raw.statusDescription };
 
-			return new TaskViewModel({ ...raw, proposition, demand, participants, comments, users, themes });
+			return new TaskViewModel({ ...raw, proposition, demand, participants, comments, users, themes, status });
 		} catch (err) {
 			return err;
 		}

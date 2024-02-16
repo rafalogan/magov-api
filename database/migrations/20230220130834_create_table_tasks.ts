@@ -9,7 +9,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.timestamp('start').notNullable();
 		table.timestamp('end').notNullable();
 		table.integer('level').notNullable();
-		table.integer('status').notNullable();
+		table.integer('status_id').unique().unsigned().references('id').inTable('tasks_status').notNullable();
 		table.integer('user_id').unsigned().references('id').inTable('users').notNullable();
 		table.integer('unit_id').unsigned().references('id').inTable('units').notNullable();
 		table.integer('proposition_id').unsigned().references('id').inTable('propositions').nullable();
