@@ -139,21 +139,21 @@ export class PlaintiffService extends DatabaseService {
 
 			const fromBD = Number(value)
 				? await this.db({ p: 'plaintiffs', c: 'contacts', a: 'adresses', it: 'institutes_types' })
-					.select(plaintiffFields, contactFields, addressFields, institutesTypesFields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhere('p.id', value)
-					.andWhere('c.plaintiff_id', 'p.id')
-					.andWhere('a.plaintiff_id', 'p.id')
-					.andWhereRaw('it.id = p.institute_type_id')
-					.first()
+						.select(plaintiffFields, contactFields, addressFields, institutesTypesFields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhere('p.id', value)
+						.andWhere('c.plaintiff_id', 'p.id')
+						.andWhere('a.plaintiff_id', 'p.id')
+						.andWhereRaw('it.id = p.institute_type_id')
+						.first()
 				: await this.db({ p: 'plaintiffs', c: 'contacts', a: 'adresses', it: 'institutes_types' })
-					.select(plaintiffFields, contactFields, addressFields, institutesTypesFields)
-					.where('p.tenancy_id', tenancyId)
-					.andWhere('p.cpf_cnpj', value)
-					.andWhere('c.plaintiff_id', 'p.id')
-					.andWhere('a.plaintiff_id', 'p.id')
-					.andWhereRaw('it.id = p.institute_type_id')
-					.first();
+						.select(plaintiffFields, contactFields, addressFields, institutesTypesFields)
+						.where('p.tenancy_id', tenancyId)
+						.andWhere('p.cpf_cnpj', value)
+						.andWhere('c.plaintiff_id', 'p.id')
+						.andWhere('a.plaintiff_id', 'p.id')
+						.andWhereRaw('it.id = p.institute_type_id')
+						.first();
 
 			onLog('find DB', fromBD);
 			existsOrError(fromBD?.id, { message: 'Plaintiffs not found', status: NOT_FOUND });
