@@ -46,7 +46,7 @@ export interface ITaskViewModel extends IID {
 }
 
 export interface ITaskStatus {
-	id: number;
+	id?: number;
 	status: string;
 	description?: Blob | string;
 }
