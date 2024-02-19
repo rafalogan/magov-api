@@ -1,4 +1,3 @@
-import { onLog } from 'src/core/handlers';
 import { clearString, convertBlobToString, convertToDate, setInstanceId } from 'src/utils';
 import { Address } from '../entities';
 import { IPlantiffModel } from '../types';
@@ -23,7 +22,6 @@ export class PlaintiffModel {
 	address: Address;
 
 	constructor(data: IPlantiffModel, id?: number) {
-		onLog('plantiff, data raw', data);
 		this.id = setInstanceId(id || data?.id);
 		this.name = data.name.trim();
 		this.birthday = convertToDate(data.birthday);

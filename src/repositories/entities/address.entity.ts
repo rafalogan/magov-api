@@ -1,6 +1,5 @@
 import { clearString, setInstanceId } from 'src/utils';
 import { IAddress } from '../types';
-import { onLog } from 'src/core/handlers';
 
 export class Address {
 	id?: number;
@@ -13,7 +12,6 @@ export class Address {
 	uf: string;
 
 	constructor(data: IAddress, id?: number) {
-		onLog('data to save address', data);
 		this.id = setInstanceId(id || data?.id);
 		this.cep = clearString(data.cep);
 		this.street = data.street?.trim();

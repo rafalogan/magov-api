@@ -16,7 +16,7 @@ export class PlaintiffService extends DatabaseService {
 
 	async create(data: PlaintiffModel, req: Request) {
 		try {
-			const fromBD = await this.getPlaintiff(`${data.cpfCnpj}`, data.tenancyId as number);
+			const fromBD = await this.getPlaintiff(data.cpfCnpj, data.tenancyId as number);
 
 			notExistisOrError(fromBD?.id, { message: 'Plaintiff already exists', status: FORBIDDEN });
 
@@ -137,23 +137,24 @@ export class PlaintiffService extends DatabaseService {
 			};
 			const institutesTypesFields = { institute_type: 'it.name' };
 
-			const fromBD = Number(value)
-				? await this.db({ p: 'plaintiffs', c: 'contacts', a: 'adresses', it: 'institutes_types' })
-						.select(plaintiffFields, contactFields, addressFields, institutesTypesFields)
-						.where('p.tenancy_id', tenancyId)
-						.andWhere('p.id', value)
-						.andWhere('c.plaintiff_id', 'p.id')
-						.andWhere('a.plaintiff_id', 'p.id')
-						.andWhereRaw('it.id = p.institute_type_id')
-						.first()
-				: await this.db({ p: 'plaintiffs', c: 'contacts', a: 'adresses', it: 'institutes_types' })
-						.select(plaintiffFields, contactFields, addressFields, institutesTypesFields)
-						.where('p.tenancy_id', tenancyId)
-						.andWhere('p.cpf_cnpj', value)
-						.andWhere('c.plaintiff_id', 'p.id')
-						.andWhere('a.plaintiff_id', 'p.id')
-						.andWhereRaw('it.id = p.institute_type_id')
-						.first();
+			const fromBD =
+				String(value).length >= 11
+					? await this.db({ p: 'plaintiffs', c: 'contacts', a: 'adresses', it: 'institutes_types' })
+							.select(plaintiffFields, contactFields, addressFields, institutesTypesFields)
+							.where('p.cpf_cnpj', value)
+							.andWhere('p.tenancy_id', tenancyId)
+							.andWhereRaw('c.plaintiff_id = p.id')
+							.andWhereRaw('a.plaintiff_id = p.id')
+							.andWhereRaw('it.id = p.institute_type_id')
+							.first()
+					: await this.db({ p: 'plaintiffs', c: 'contacts', a: 'adresses', it: 'institutes_types' })
+							.select(plaintiffFields, contactFields, addressFields, institutesTypesFields)
+							.where('p.id', value)
+							.andWhere('p.tenancy_id', tenancyId)
+							.andWhereRaw('c.plaintiff_id = p.id')
+							.andWhereRaw('a.plaintiff_id = p.id')
+							.andWhereRaw('it.id = p.institute_type_id')
+							.first();
 
 			onLog('find DB', fromBD);
 			existsOrError(fromBD?.id, { message: 'Plaintiffs not found', status: NOT_FOUND });
