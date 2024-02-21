@@ -30,6 +30,7 @@ import {
 	ScreenService,
 	SupplierService,
 	TaskService,
+	TaskStatusService,
 	ThemeService,
 	TypesRecipesService,
 	UnitExpenseService,
@@ -71,6 +72,7 @@ export class ServicesFactory {
 	screenService: ScreenService;
 	messageTriggersService: MessageTriggerService;
 	profileService: ProfileService;
+	taskStatusService: TaskStatusService;
 
 	constructor(
 		private conn: Knex,
@@ -109,6 +111,7 @@ export class ServicesFactory {
 		this.screenService = new ScreenService(this.setServiceOptions());
 		this.profileService = new ProfileService(this.setServiceOptions());
 		this.messageTriggersService = new MessageTriggerService(this.setServiceOptions());
+		this.taskStatusService = new TaskStatusService(this.setServiceOptions());
 	}
 
 	private setServiceOptions = (): IServiceOptions => ({ conn: this.conn, cacheClient: this.client, userLogService: this.userLogService });
