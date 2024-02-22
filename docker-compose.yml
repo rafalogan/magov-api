@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: !root@100
+      POSTGRES_DB: 'magov_db'
+    volumes:
+      - ./database/postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+  redis:
+    image: redis
+    restart: always
+    volumes:
+      - ./database/redis:/usr/local/etc/redis
+    ports:
+      - 6379:6379
+    depends_on:
+      - postgres
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 9090:8080
+    depends_on:
+      - postgres
