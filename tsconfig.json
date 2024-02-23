@@ -16,6 +16,17 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
+    "noFallthroughCasesInSwitch": false,
+    "preserveSymlinks": true,
+    "rootDirs": [
+        "src",
+        "test",
+      "database"
+    ],
+    "paths": {
+      "src/*": ["src/*"],
+      "test/*": ["test/*"],
+      "database/*": ["database/*"]
+    },
   }
 }
