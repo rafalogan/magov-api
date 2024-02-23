@@ -8,6 +8,7 @@ import { IDemand, IPlantiff, IPlantiffModel, IPlantiffTask, IServiceOptions, ITh
 import {
 	convertBlobToString,
 	convertDataValues,
+	deleteField,
 	equalsOrError,
 	existsOrError,
 	isDataInArray,
@@ -55,7 +56,11 @@ export class DemandService extends DatabaseService {
 
 	async createDemandAndPlantiff(data: DemandModel, req: Request) {
 		try {
-			const plaintiffId = await this.setPlaintiff({ ...data.plaintiff, tenancyId: data.tenancyId, active: data.active });
+			const plaintiffId = await this.setPlaintiff({
+				...data.plaintiff,
+				tenancyId: data.tenancyId,
+				active: data.active,
+			});
 			existsOrError(Number(plaintiffId), { messsage: 'Error plaintiff not found', status: INTERNAL_SERVER_ERROR });
 
 			await this.userLogService.create(getUserLogData(req, 'plantiffs', Number(plaintiffId), 'salvar/editar'));
@@ -74,7 +79,11 @@ export class DemandService extends DatabaseService {
 		try {
 			const unitFromDB = await this.db('units').where('id', data.unitId).andWhere('tenancy_id', data.tenancyId).first();
 			existsOrError(unitFromDB, { message: 'units not found', status: BAD_REQUEST });
-			notExistisOrError(unitFromDB?.severity === 'ERROR', { message: 'intenal error', err: unitFromDB, status: INTERNAL_SERVER_ERROR });
+			notExistisOrError(unitFromDB?.severity === 'ERROR', {
+				message: 'intenal error',
+				err: unitFromDB,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
 			const [id] = await this.db('demands').insert(convertDataValues({ ...data, active: true }));
 			existsOrError(Number(id), { messsage: 'Internal Server Error', err: id, status: INTERNAL_SERVER_ERROR });
@@ -88,7 +97,7 @@ export class DemandService extends DatabaseService {
 				start: data.createdAt,
 				end: data.deadLine,
 				level: data.level,
-				status: Number(data?.status) || 1,
+				statusId: 0,
 				userId: data.userId,
 				unitId: data.unitId,
 				tenancyId: data.tenancyId,
@@ -110,7 +119,11 @@ export class DemandService extends DatabaseService {
 				const unitFromDB = await this.db('units').where('id', data.unitId).andWhere('tenancy_id', data.tenancyId).first();
 
 				existsOrError(unitFromDB, { message: 'units not found', status: BAD_REQUEST });
-				notExistisOrError(unitFromDB?.severity === 'ERROR', { message: 'intenal error', err: unitFromDB, status: INTERNAL_SERVER_ERROR });
+				notExistisOrError(unitFromDB?.severity === 'ERROR', {
+					message: 'intenal error',
+					err: unitFromDB,
+					status: INTERNAL_SERVER_ERROR,
+				});
 			}
 
 			const demand = (await this.getDemand(id)) as DemandViewModel;
@@ -138,7 +151,7 @@ export class DemandService extends DatabaseService {
 				start: data.createdAt || demand.createdAt,
 				end: data.deadLine || demand.deadLine,
 				level: data.level || demand.level,
-				status: Number(data?.status) ? Number(data?.status) : Number(demand?.status) ? Number(demand?.status) : 1,
+				statusId: 0,
 				userId: data.userId || demand.userId,
 				unitId: data.unitId || demand.unitId,
 				tenancyId: data.tenancyId || demand.tenancyId,
@@ -192,7 +205,7 @@ export class DemandService extends DatabaseService {
 				start: data.createdAt || demand.createdAt,
 				end: data.deadLine || demand.deadLine,
 				level: data.level || demand.level,
-				status: Number(data?.status) ? Number(data?.status) : Number(demand?.status) ? Number(demand?.status) : 1,
+				statusId: 0,
 				userId: data.userId || demand.userId,
 				unitId: data.unitId || demand.unitId,
 				tenancyId: data.tenancyId || demand.tenancyId,
@@ -425,6 +438,7 @@ export class DemandService extends DatabaseService {
 			}
 
 			onLog('Tasks to update', task);
+			deleteField(task, 'statusId');
 			const toUpdate = new Task({ ...convertDataValues(fromDB, 'camel'), ...task });
 
 			await this.db('tasks').update(convertDataValues(toUpdate)).where('id', fromDB?.id);
@@ -461,6 +475,10 @@ export class DemandService extends DatabaseService {
 
 	private async setTask(task: Task, participants: IPlantiffTask[], themes: string[], users?: number[]) {
 		try {
+			const satusPending = await this.db('tasks_status').where('status', 'Pendente').first();
+			existsOrError(satusPending?.id, { message: 'Internal error', err: satusPending, status: INTERNAL_SERVER_ERROR });
+			task.statusId = satusPending.id;
+
 			const [id] = await this.db('tasks').insert(convertDataValues(task));
 
 			participants.forEach(async i => {

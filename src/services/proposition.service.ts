@@ -95,7 +95,11 @@ export class PropositionService extends DatabaseService {
 			const fromDB = await this.db('propositions').where({ id }).select('id', 'type_id', 'text_editor').first();
 
 			existsOrError(fromDB, { message: 'Propositions not found', status: NOT_FOUND });
-			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Server Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+			notExistisOrError(fromDB?.severity === 'ERROR', {
+				message: 'Internal Server Error',
+				err: fromDB,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
 			const data = convertDataValues(fromDB, 'camel');
 			return { ...data, id: Number(data.id), textEditor: convertBlobToString(data.textEditor) };
@@ -109,7 +113,11 @@ export class PropositionService extends DatabaseService {
 			const fromDB = await this.db('propositions').where('id', data.id).first();
 
 			existsOrError(fromDB, { message: 'Proposition not found', status: NOT_FOUND });
-			notExistisOrError(fromDB?.severity === 'ERROR', { message: 'Internal Error', err: fromDB, status: INTERNAL_SERVER_ERROR });
+			notExistisOrError(fromDB?.severity === 'ERROR', {
+				message: 'Internal Error',
+				err: fromDB,
+				status: INTERNAL_SERVER_ERROR,
+			});
 
 			const toUpdate = new Proposition({
 				...convertDataValues(fromDB, 'camel'),
@@ -390,8 +398,24 @@ export class PropositionService extends DatabaseService {
 
 			onLog('task from db', fromDB);
 
+			if (data.statusId === 0) {
+				const statusPendente = await this.db('tasks_status').where('status', 'Pendente').first();
+
+				existsOrError(statusPendente?.id, {
+					message: 'Internal Error',
+					error: statusPendente,
+					status: INTERNAL_SERVER_ERROR,
+				});
+				data.statusId = Number(statusPendente?.id);
+			}
+
 			if (fromDB?.id) {
-				const toUpdate = new Task({ ...convertDataValues(fromDB, 'camel'), ...data, propositionId, tenancyId: Number(fromDB.tenancy_id) });
+				const toUpdate = new Task({
+					...convertDataValues(fromDB, 'camel'),
+					...data,
+					propositionId,
+					tenancyId: Number(fromDB.tenancy_id),
+				});
 
 				await this.db('tasks').where({ id: fromDB.id }).andWhere({ tenancy_id: data.tenancyId }).update(convertDataValues(toUpdate));
 				await this.setThemesTasks(themes, Number(fromDB));

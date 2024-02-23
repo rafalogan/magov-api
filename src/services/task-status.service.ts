@@ -1,4 +1,3 @@
-import { notExistisOrError } from './../utils/validate';
 import { Request } from 'express';
 
 import { DatabaseService } from './abistract-database.service';
