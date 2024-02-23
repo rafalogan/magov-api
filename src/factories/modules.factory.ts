@@ -1,3 +1,4 @@
+import { TaskStatusModule } from './../modules/task-status/task-status.module';
 import { resolve } from 'node:path';
 import express, { Application } from 'express';
 import { Multer } from 'multer';
@@ -68,6 +69,7 @@ export class ModulesFactory {
 	private screenModule: ScreenModule;
 	private profileModule: ProfileModule;
 	private messageModule: MessageModule;
+	private taskStatusModule: TaskStatusModule;
 
 	constructor(
 		private app: Application,
@@ -108,6 +110,7 @@ export class ModulesFactory {
 		this.screenModule = new ScreenModule({ ...this.getRouteOptions(), service: services.screenService });
 		this.profileModule = new ProfileModule({ ...this.getRouteOptions(), service: services.profileService });
 		this.messageModule = new MessageModule({ ...this.getRouteOptions(), service: services.messageTriggersService });
+		this.taskStatusModule = new TaskStatusModule({ ...this.getRouteOptions(), service: services.taskStatusService });
 	}
 
 	exec() {
@@ -126,6 +129,7 @@ export class ModulesFactory {
 		this.originModule.exec();
 		this.revenueModule.exec();
 		this.propositionModule.exec();
+		this.taskStatusModule.exec();
 		this.taskModule.exec();
 		this.commentModule.exec();
 		this.unitExpenseModule.exec();

@@ -10,7 +10,7 @@ export class TaskModel {
 	start: Date | string;
 	end: Date | string;
 	level: number;
-	status: number;
+	statusId: number;
 	userId: number;
 	unitId: number;
 	tenancyId: number;
@@ -30,7 +30,7 @@ export class TaskModel {
 		this.start = convertToDate(data.start);
 		this.end = convertToDate(data.end);
 		this.level = Number(data.level);
-		this.status = Number(data.status) || 0;
+		this.statusId = Number(data.statusId);
 		this.unitId = Number(data.unitId);
 		this.tenancyId = Number(data.tenancyId);
 		this.propositionId = setInstanceId(data.propositionId);

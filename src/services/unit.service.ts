@@ -1,3 +1,4 @@
+import { onError } from './../core/handlers/log.handler';
 import { Request } from 'express';
 import { BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND } from 'http-status';
 import { getUserLogData, onLog } from 'src/core/handlers';
@@ -64,6 +65,7 @@ export class UnitService extends DatabaseService {
 		try {
 			existsOrError(tenancyId, { message: tenancyId, status: BAD_REQUEST });
 		} catch (err) {
+			onError('unit error', err);
 			return err;
 		}
 

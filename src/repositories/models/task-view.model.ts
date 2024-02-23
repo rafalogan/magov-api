@@ -1,5 +1,15 @@
 import { convertBlobToString, convertToDate, setInstanceId, setValueNumberToView } from 'src/utils';
-import { ICommentTask, IDemandTask, IPlantiffTask, IPropositionTask, ITaskUnit, ITaskUsers, ITaskViewModel, IThemeTask } from '../types';
+import {
+	ICommentTask,
+	IDemandTask,
+	IPlantiffTask,
+	IPropositionTask,
+	ITaskStatus,
+	ITaskUnit,
+	ITaskUsers,
+	ITaskViewModel,
+	IThemeTask,
+} from '../types';
 
 export class TaskViewModel {
 	id?: number;
@@ -11,7 +21,7 @@ export class TaskViewModel {
 	level: number;
 	resposibleId: number;
 	responsible: string;
-	status: number;
+	status: ITaskStatus;
 	users: ITaskUsers[];
 	unitId: number;
 	unit: ITaskUnit;
@@ -30,7 +40,7 @@ export class TaskViewModel {
 		this.start = convertToDate(data.start);
 		this.end = convertToDate(data.end);
 		this.level = Number(data.level);
-		this.status = Number(data.status);
+		this.status = this.setStatus(data.status);
 		this.users = this.setUsers(data.users);
 		this.resposibleId = this.users[0].id;
 		this.responsible = this.users[0].name;
@@ -73,5 +83,9 @@ export class TaskViewModel {
 
 	private setUsers(value: ITaskUsers[]) {
 		return value.map(i => ({ id: Number(i.id), name: i.name.trim() }));
+	}
+
+	private setStatus(value: ITaskStatus): ITaskStatus {
+		return { id: Number(value.id), status: value.status?.trim(), description: convertBlobToString(value.description) };
 	}
 }

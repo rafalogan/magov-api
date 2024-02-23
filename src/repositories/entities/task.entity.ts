@@ -9,7 +9,7 @@ export class Task {
 	start: Date;
 	end: Date;
 	level: number;
-	status: number;
+	statusId: number;
 	userId: number;
 	unitId: number;
 	tenancyId: number;
@@ -25,7 +25,7 @@ export class Task {
 		this.start = convertToDate(data.start);
 		this.end = convertToDate(data.end);
 		this.level = Number(data.level);
-		this.status = Number(data.status);
+		this.statusId = Number(data.statusId);
 		this.userId = Number(data.userId);
 		this.unitId = Number(data.unitId);
 		this.tenancyId = Number(data.tenancyId);
