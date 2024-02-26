@@ -20,4 +20,3 @@ const auth = new AuthConfig(services.userService);
 const express = new AppConfig(logger, auth, services, multer.upload).express;
 
 export const app = new AppModule(express, databaseConfig, cacheConfig);
-
